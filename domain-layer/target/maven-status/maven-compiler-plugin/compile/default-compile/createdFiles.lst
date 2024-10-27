@@ -1,0 +1,4 @@
+net\krusher\datalinks\model\page\Page.class
+net\krusher\datalinks\model\configlet\Configlet.class
+net\krusher\datalinks\model\configlet\Configlet$ConfigletBuilder.class
+net\krusher\datalinks\model\page\Page$PageBuilder.class

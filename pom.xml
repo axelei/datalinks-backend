@@ -19,6 +19,8 @@
     <modules>
         <module>web-layer</module>
         <module>domain-layer</module>
+        <module>application-layer</module>
+        <module>engineering-layer</module>
     </modules>
 
     <dependencyManagement>
@@ -27,6 +29,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>domain-layer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>application-layer</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -57,6 +64,18 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>dev</id>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+    </profiles>
+
     <build>
         <pluginManagement>
             <plugins>
@@ -83,6 +102,10 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+
+        <plugins>
+        </plugins>
+
     </build>
 
 </project>
