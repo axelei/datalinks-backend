@@ -6,12 +6,16 @@
 		<groupId>net.krusher</groupId>
 		<artifactId>datalinks-backend-parent</artifactId>
 		<version>0.1.0</version>
-		<relativePath>../pom.xml</relativePath>
+		<relativePath />
 	</parent>
 	
 	<artifactId>web-layer</artifactId>
 	
 	<packaging>jar</packaging>
+
+	<properties>
+		<start-class>net.krusher.datalinks.Datalinks</start-class>
+	</properties>
 	
 	<dependencies>
 		<!-- internal -->
@@ -38,12 +42,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.18.34</version>
-			<scope>provided</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -52,6 +50,17 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>net.krusher.datalinks.Datalinks</mainClass>
+					<layout>ZIP</layout>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

@@ -6,6 +6,7 @@
         <groupId>net.krusher</groupId>
         <artifactId>datalinks-backend-parent</artifactId>
         <version>0.1.0</version>
+        <relativePath />
     </parent>
 
     <artifactId>application-layer</artifactId>
