@@ -6,6 +6,6 @@ import lombok.Data;
 @Builder
 @Data
 public class Configlet {
-    private String key;
+    private ConfigletKey key;
     private String value;
 }
