@@ -1,5 +1,6 @@
 package net.krusher.datalinks.model.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,12 +15,10 @@ public class User {
     private UserLevel level;
     private String email;
     private String name;
-/*
+
     @JsonIgnore private String password;
     @JsonIgnore private String salt;
     @JsonIgnore private UUID activationToken;
     @JsonIgnore private UUID resetToken;
-
- */
 
 }

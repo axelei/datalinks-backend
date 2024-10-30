@@ -6,7 +6,7 @@
         <groupId>net.krusher</groupId>
         <artifactId>datalinks-backend-parent</artifactId>
         <version>0.1.0</version>
-        <relativePath />
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>domain-layer</artifactId>
@@ -15,6 +15,11 @@
 
     <dependencies>
         <!-- external -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
