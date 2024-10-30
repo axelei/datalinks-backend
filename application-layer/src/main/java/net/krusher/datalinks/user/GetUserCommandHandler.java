@@ -1,6 +1,6 @@
 package net.krusher.datalinks.user;
 
-import net.krusher.datalinks.engineering.user.UserRepository;
+import net.krusher.datalinks.engineering.model.domain.user.UserRepository;
 import net.krusher.datalinks.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

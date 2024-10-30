@@ -1,4 +1,4 @@
-package net.krusher.datalinks.engineering.user;
+package net.krusher.datalinks.engineering.model.domain.user;
 
 import net.krusher.datalinks.model.user.User;
 import net.krusher.datalinks.model.user.UserLevel;

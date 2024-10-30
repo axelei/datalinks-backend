@@ -1,6 +1,5 @@
-package net.krusher.datalinks.engineering.user;
+package net.krusher.datalinks.engineering.model.domain.page;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,33 +7,30 @@ import lombok.NoArgsConstructor;
 import net.krusher.datalinks.model.user.UserLevel;
 
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Data
-@Table(name = "USERS", indexes = {
-        @Index(name = "IDX_USER_USERNAME", columnList = "username")
+@Table(name = "PAGES", indexes = {
+        @Index(name = "IDX_PAGE_TITLE", columnList = "title")
 })
-public class UserEntity {
+public class PageEntity {
 
     @Id
     @Column(nullable = false)
     private UUID id;
     @Column(nullable = false)
-    private String username;
+    private String title;
     @Column(nullable = false)
+    private String content;
+    @ManyToMany
+    private Set<CategoryEntity> categories;
     @Enumerated(EnumType.STRING)
-    private UserLevel level;
-    private String email;
-    private String name;
+    private UserLevel block;
     private Instant creationDate;
-
-    private String password;
-    private String salt;
-    private UUID activationToken;
-    private UUID resetToken;
 
     @PrePersist
     protected void setDefaultsOnCreate() {

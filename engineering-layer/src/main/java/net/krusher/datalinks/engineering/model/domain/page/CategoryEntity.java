@@ -1,4 +1,4 @@
-package net.krusher.datalinks.engineering.page;
+package net.krusher.datalinks.engineering.model.domain.page;
 
 
 import jakarta.persistence.Column;
