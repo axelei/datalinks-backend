@@ -2,6 +2,7 @@ package net.krusher.datalinks.model.page;
 
 import lombok.Builder;
 import lombok.Data;
+import net.krusher.datalinks.model.user.UserLevel;
 
 import java.util.Set;
 import java.util.UUID;
@@ -13,4 +14,5 @@ public class Page {
     private String title;
     private String content;
     private Set<Category> categories;
+    private UserLevel block;
 }
