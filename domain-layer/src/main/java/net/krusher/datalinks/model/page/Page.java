@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import net.krusher.datalinks.model.user.UserLevel;
 
+import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,4 +16,5 @@ public class Page {
     private String content;
     private Set<Category> categories;
     private UserLevel block;
+    private Instant creationDate;
 }

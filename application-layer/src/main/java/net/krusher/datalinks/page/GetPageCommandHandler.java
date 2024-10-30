@@ -18,15 +18,6 @@ public class GetPageCommandHandler {
     }
 
     public Optional<Page> handler(GetPageCommand getPageCommand) {
-        Page page = pageRepository.get(getPageCommand.getTitle());
-        return Optional.empty();
-/*        return Optional.ofNullable(Page.builder()
-            .title(title)
-            .content("content")
-            .categories(Set.of(
-                Category.builder().name("category1").build(),
-                Category.builder().name("category2").build()
-            ))
-            .build());*/
+        return pageRepository.get(getPageCommand.getTitle());
     }
 }
