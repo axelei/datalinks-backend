@@ -36,6 +36,11 @@
                 <artifactId>application-layer</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>engineering-layer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- external -->
             <dependency>
@@ -51,6 +56,11 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
         </dependencies>

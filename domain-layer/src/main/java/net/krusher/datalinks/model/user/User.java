@@ -14,9 +14,12 @@ public class User {
     private UserLevel level;
     private String email;
     private String name;
+/*
+    @JsonIgnore private String password;
+    @JsonIgnore private String salt;
+    @JsonIgnore private UUID activationToken;
+    @JsonIgnore private UUID resetToken;
 
-    private String password;
-    private String salt;
-    private UUID activationToken;
+ */
 
 }

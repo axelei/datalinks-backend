@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/config")
@@ -24,11 +26,7 @@ public class ConfigController {
 
     @GetMapping("keys")
     Map<ConfigletKey, String> get() {
-        return Map.of(
-                ConfigletKey.SITE_TITLE, ConfigletKey.SITE_TITLE.getDefaultValue(),
-                ConfigletKey.SITE_DESCRIPTION, ConfigletKey.SITE_DESCRIPTION.getDefaultValue(),
-                ConfigletKey.SITE_IMAGE, ConfigletKey.SITE_IMAGE.getDefaultValue()
-        );
+        return Arrays.stream(ConfigletKey.values()).collect(Collectors.toMap(name -> name, ConfigletKey::getDefaultValue));
     }
 
 }
