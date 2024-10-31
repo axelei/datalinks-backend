@@ -7,9 +7,10 @@ import net.krusher.datalinks.model.user.UserLevel;
 @Getter
 @AllArgsConstructor
 public enum ConfigletKey {
-    DEFAULT_EDIT_LEVEL(UserLevel.GUEST.name()),
-    CREATE_LEVEL(UserLevel.GUEST.name()),
+    EDIT_LEVEL(UserLevel.USER.name()),
+    CREATE_LEVEL(UserLevel.USER.name()),
     DELETE_LEVEL(UserLevel.ADMIN.name()),
+    READ_LEVEL(UserLevel.GUEST.name()),
     TOKEN_EXPIRATION("3600"),
     ;
 

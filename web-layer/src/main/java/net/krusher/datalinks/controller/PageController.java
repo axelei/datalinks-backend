@@ -36,7 +36,7 @@ public class PageController {
     ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = "user-token", required = false) String userToken) {
         return getPageCommandHandler.handler(GetPageCommand.builder()
                         .title(title)
-                        .userToken(userToken)
+                        .loginTokenId(StringUtils.isEmpty(userToken) ? null : UUID.fromString(userToken))
                         .build())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

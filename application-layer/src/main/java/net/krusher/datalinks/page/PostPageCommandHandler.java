@@ -5,16 +5,10 @@ import net.krusher.datalinks.engineering.model.domain.configlet.ConfigService;
 import net.krusher.datalinks.engineering.model.domain.page.PageService;
 import net.krusher.datalinks.engineering.model.domain.user.LoginTokenService;
 import net.krusher.datalinks.engineering.model.domain.user.UserService;
-import net.krusher.datalinks.model.configlet.ConfigletKey;
 import net.krusher.datalinks.model.page.Page;
-import net.krusher.datalinks.model.user.LoginToken;
-import net.krusher.datalinks.model.user.User;
-import net.krusher.datalinks.model.user.UserLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 public class PostPageCommandHandler {
@@ -41,14 +35,7 @@ public class PostPageCommandHandler {
     }
 
     private void createPage(PostPageCommand postPageCommand) {
-
-        Optional<LoginToken> loginToken =  Optional.ofNullable(postPageCommand.getLoginTokenId()).flatMap(loginTokenService::getById);
-        Optional<User> user = loginToken.flatMap(token -> userService.getById(token.getUserId()));
-
-        UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.CREATE_LEVEL).getValue());
-        UserLevel userLevel = user.map(User::getLevel).orElse(UserLevel.GUEST);
-
-        if (defaultBlock.getLevel() > userLevel.getLevel()) {
+        if (!userHelper.userCanCreate(postPageCommand.getLoginTokenId())) {
             throw new RuntimeException("User can't create a page");
         }
 
@@ -60,16 +47,7 @@ public class PostPageCommandHandler {
     }
 
     private void updatePage(Page page, PostPageCommand postPageCommand) {
-
-        Optional<LoginToken> loginToken =  Optional.ofNullable(postPageCommand.getLoginTokenId()).flatMap(loginTokenService::getById);
-        Optional<User> user = loginToken.flatMap(token -> userService.getById(token.getUserId()));
-
-        UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.DEFAULT_EDIT_LEVEL).getValue());
-
-        UserLevel userLevel = user.map(User::getLevel).orElse(UserLevel.GUEST);
-        UserLevel neededLevel = Optional.ofNullable(page.getEditBlock()).orElse(defaultBlock);
-
-        if (neededLevel.getLevel() > userLevel.getLevel()) {
+        if (!userHelper.userCanEdit(page, postPageCommand.getLoginTokenId())) {
             throw new RuntimeException("User can't edit this page");
         }
 
