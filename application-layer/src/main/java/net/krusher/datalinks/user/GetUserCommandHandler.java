@@ -4,7 +4,6 @@ import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -18,7 +17,6 @@ public class GetUserCommandHandler {
         this.userService = userService;
     }
 
-    @Transactional
     public Optional<User> handler(GetUserCommand getUserCommand) {
         return userService.getByUsername(getUserCommand.getUsername());
     }

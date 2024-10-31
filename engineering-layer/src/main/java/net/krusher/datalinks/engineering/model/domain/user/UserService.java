@@ -36,6 +36,10 @@ public class UserService {
         entityManager.merge(userEntity);
     }
 
+    public Optional<User> getById(UUID id) {
+        return userRepositoryBean.findById(id).map(userMapper::toModel);
+    }
+
     public void getByActivationToken(UUID activationToken) {
         Example<UserEntity> example = Example.of(UserEntity.builder().activationToken(activationToken).build());
         List<UserEntity> result = userRepositoryBean.findAll(example);

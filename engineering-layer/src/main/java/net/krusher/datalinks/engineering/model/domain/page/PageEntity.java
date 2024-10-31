@@ -34,7 +34,9 @@ public class PageEntity {
     @ManyToMany
     private Set<CategoryEntity> categories;
     @Enumerated(EnumType.STRING)
-    private UserLevel block;
+    private UserLevel editBlock;
+    @Enumerated(EnumType.STRING)
+    private UserLevel readBlock;
     private Instant creationDate;
 
     @PrePersist

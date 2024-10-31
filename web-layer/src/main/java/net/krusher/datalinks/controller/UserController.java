@@ -26,4 +26,9 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @PostMapping("/login")
+    ResponseEntity<String> get(@RequestBody String body) {
+        return ResponseEntity.ok(body);
+    }
 }

@@ -5,9 +5,19 @@ import net.krusher.datalinks.page.GetPageCommand;
 import net.krusher.datalinks.page.GetPageCommandHandler;
 import net.krusher.datalinks.page.PostPageCommand;
 import net.krusher.datalinks.page.PostPageCommandHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/page")
@@ -23,7 +33,7 @@ public class PageController {
     }
 
     @GetMapping("{title}")
-    ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = "user-token", required = false) String userToken) throws InterruptedException {
+    ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = "user-token", required = false) String userToken) {
         return getPageCommandHandler.handler(GetPageCommand.builder()
                         .title(title)
                         .userToken(userToken)
@@ -32,12 +42,22 @@ public class PageController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("{title}")
-    void post(@PathVariable("title") String title, @RequestBody String content, @RequestHeader(value = "user-token", required = false) String userToken) throws InterruptedException {
+    @DeleteMapping("{title}")
+    void delete(@PathVariable("title") String title, @RequestHeader(value = "user-token", required = false) String userToken) {
+
+    }
+
+    @GetMapping("{title}/block")
+    void block(@PathVariable("title") String title, @RequestHeader(value = "user-token", required = false) String userToken) {
+
+    }
+
+   @PutMapping("{title}")
+    void put(@PathVariable("title") String title, @RequestBody String content, @RequestHeader(value = "user-token", required = false) String userToken) {
         postPageCommandHandler.handler(PostPageCommand.builder()
                 .title(title)
                 .content(content)
-                .userToken(userToken)
+                .loginTokenId(StringUtils.isEmpty(userToken) ? null : UUID.fromString(userToken))
                 .build());
     }
 }

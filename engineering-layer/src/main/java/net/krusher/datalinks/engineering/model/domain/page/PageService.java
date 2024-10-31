@@ -1,14 +1,7 @@
 package net.krusher.datalinks.engineering.model.domain.page;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
-import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
 import net.krusher.datalinks.model.page.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;

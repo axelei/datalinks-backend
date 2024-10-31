@@ -11,7 +11,7 @@ import java.util.UUID;
 @Data
 public class User {
 
-    private UUID id;
+    @JsonIgnore private UUID id;
     private String username;
     private UserLevel level;
     private String email;
