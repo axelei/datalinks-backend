@@ -19,6 +19,6 @@ public class GetPageCommandHandler {
     }
 
     public Optional<Page> handler(GetPageCommand getPageCommand) {
-        return Optional.ofNullable(pageService.findByTitle(getPageCommand.getTitle()));
+        return pageService.findByTitle(getPageCommand.getTitle());
     }
 }

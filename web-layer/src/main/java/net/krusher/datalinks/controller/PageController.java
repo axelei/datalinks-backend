@@ -24,7 +24,6 @@ public class PageController {
 
     @GetMapping("{title}")
     ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = "user-token", required = false) String userToken) throws InterruptedException {
-        Thread.sleep(200);
         return getPageCommandHandler.handler(GetPageCommand.builder()
                         .title(title)
                         .userToken(userToken)
@@ -35,7 +34,6 @@ public class PageController {
 
     @PostMapping("{title}")
     void post(@PathVariable("title") String title, @RequestBody String content, @RequestHeader(value = "user-token", required = false) String userToken) throws InterruptedException {
-        Thread.sleep(1000);
         postPageCommandHandler.handler(PostPageCommand.builder()
                 .title(title)
                 .content(content)

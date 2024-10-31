@@ -1,23 +1,25 @@
 package net.krusher.datalinks.user;
 
-import net.krusher.datalinks.engineering.model.domain.user.UserRepository;
+import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
 public class GetUserCommandHandler {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public GetUserCommandHandler(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public GetUserCommandHandler(UserService userService) {
+        this.userService = userService;
     }
 
+    @Transactional
     public Optional<User> handler(GetUserCommand getUserCommand) {
-        return userRepository.get(getUserCommand.getUsername());
+        return userService.getByUsername(getUserCommand.getUsername());
     }
 }

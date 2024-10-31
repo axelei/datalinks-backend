@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 public class PostPageCommandHandler {
 
@@ -20,7 +18,7 @@ public class PostPageCommandHandler {
 
     @Transactional
     public void handler(PostPageCommand postPageCommand) {
-        Optional.ofNullable(pageService.findByTitle(postPageCommand.getTitle()))
+        pageService.findByTitle(postPageCommand.getTitle())
                 .ifPresentOrElse(page -> updatePage(page, postPageCommand), () -> createPage(postPageCommand));
     }
 
@@ -33,7 +31,7 @@ public class PostPageCommandHandler {
     }
 
     private void updatePage(Page page, PostPageCommand postPageCommand) {
-        page.setTitle(postPageCommand.getTitle());
+        page.setContent(postPageCommand.getContent());
         pageService.save(page);
     }
 }

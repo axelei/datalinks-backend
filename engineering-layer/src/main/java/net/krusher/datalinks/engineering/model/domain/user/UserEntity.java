@@ -3,6 +3,7 @@ package net.krusher.datalinks.engineering.model.domain.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.krusher.datalinks.model.user.UserLevel;
@@ -14,8 +15,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Data
+@Builder
 @Table(name = "USERS", indexes = {
-        @Index(name = "IDX_USER_USERNAME", columnList = "username")
+        @Index(name = "IDX_USER_USERNAME", columnList = "username"),
+        @Index(name = "IDX_USER_EMAIL", columnList = "email"),
+        @Index(name = "IDX_USER_ACTIVATION_TOKEN", columnList = "activationToken"),
+        @Index(name = "IDX_USER_RESET_TOKEN", columnList = "resetToken")
 })
 public class UserEntity {
 
@@ -31,7 +36,9 @@ public class UserEntity {
     private String name;
     private Instant creationDate;
 
+    @Column(columnDefinition = "CHAR(64)")
     private String password;
+    @Column(columnDefinition = "CHAR(8)")
     private String salt;
     private UUID activationToken;
     private UUID resetToken;
