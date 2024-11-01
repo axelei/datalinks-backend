@@ -5,6 +5,8 @@ import net.krusher.datalinks.engineering.model.domain.configlet.ConfigService;
 import net.krusher.datalinks.engineering.model.domain.page.PageService;
 import net.krusher.datalinks.engineering.model.domain.user.LoginTokenService;
 import net.krusher.datalinks.engineering.model.domain.user.UserService;
+import net.krusher.datalinks.exception.EngineException;
+import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.model.page.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +38,7 @@ public class PostPageCommandHandler {
 
     private void createPage(PostPageCommand postPageCommand) {
         if (!userHelper.userCanCreate(postPageCommand.getLoginTokenId())) {
-            throw new RuntimeException("User can't create a page");
+            throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't create a page");
         }
 
         Page page = Page.builder()
@@ -48,7 +50,7 @@ public class PostPageCommandHandler {
 
     private void updatePage(Page page, PostPageCommand postPageCommand) {
         if (!userHelper.userCanEdit(page, postPageCommand.getLoginTokenId())) {
-            throw new RuntimeException("User can't edit this page");
+            throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't edit this page");
         }
 
         page.setContent(postPageCommand.getContent());

@@ -2,7 +2,9 @@ package net.krusher.datalinks.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vavr.control.Try;
 import net.krusher.datalinks.model.LoginModel;
+import net.krusher.datalinks.model.SignupModel;
 import net.krusher.datalinks.model.user.LoginToken;
 import net.krusher.datalinks.model.user.User;
 import net.krusher.datalinks.user.GetUserCommand;
@@ -59,5 +61,11 @@ public class UserController {
                         .build());
         return loginToken.map(token -> ResponseEntity.ok(token.getToken().toString()))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/signup")
+    ResponseEntity<String> signup(@RequestBody String body) throws JsonProcessingException {
+        SignupModel signupModel = objectMapper.readValue(body, SignupModel.class);
+        return ResponseEntity.ok("Signed up");
     }
 }
