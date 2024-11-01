@@ -1,4 +1,4 @@
-package net.krusher.datalinks.page;
+package net.krusher.datalinks.handler.page;
 
 import net.krusher.datalinks.common.UserHelper;
 import net.krusher.datalinks.engineering.model.domain.page.PageService;

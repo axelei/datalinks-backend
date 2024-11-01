@@ -1,15 +1,11 @@
-package net.krusher.datalinks.model;
+package net.krusher.datalinks.handler.user;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class SignupModel {
+public class SignupCommand {
     private String username;
     private String password;
     private String email;

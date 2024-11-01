@@ -1,4 +1,4 @@
-package net.krusher.datalinks.user;
+package net.krusher.datalinks.handler.user;
 
 import lombok.Builder;
 import lombok.Data;

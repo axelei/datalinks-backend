@@ -1,15 +1,12 @@
-package net.krusher.datalinks.user;
+package net.krusher.datalinks.handler.user;
 
-import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
 import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.model.user.LoginToken;
 import net.krusher.datalinks.model.user.User;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

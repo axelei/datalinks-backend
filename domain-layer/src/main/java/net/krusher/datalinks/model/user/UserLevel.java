@@ -8,7 +8,9 @@ import lombok.Getter;
 public enum UserLevel {
     ADMIN(10),
     USER(5),
-    GUEST(0);
+    GUEST(0),
+    BANNED(-10),
+    ;
 
     private final int level;
 }

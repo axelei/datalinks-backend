@@ -1,10 +1,10 @@
 package net.krusher.datalinks.controller;
 
 import net.krusher.datalinks.model.page.Page;
-import net.krusher.datalinks.page.GetPageCommand;
-import net.krusher.datalinks.page.GetPageCommandHandler;
-import net.krusher.datalinks.page.PostPageCommand;
-import net.krusher.datalinks.page.PostPageCommandHandler;
+import net.krusher.datalinks.handler.page.GetPageCommand;
+import net.krusher.datalinks.handler.page.GetPageCommandHandler;
+import net.krusher.datalinks.handler.page.PostPageCommand;
+import net.krusher.datalinks.handler.page.PostPageCommandHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

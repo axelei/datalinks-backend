@@ -1,4 +1,4 @@
-package net.krusher.datalinks.user;
+package net.krusher.datalinks.handler.user;
 
 import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.model.user.User;
