@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 @Builder
-public class GetUserCommand {
-    private String username;
+public class GetUserByLoginTokenCommand {
     private String loginToken;
 }

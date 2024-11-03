@@ -1,5 +1,6 @@
 package net.krusher.datalinks.handler.page;
 
+import com.github.slugify.Slugify;
 import net.krusher.datalinks.common.UserHelper;
 import net.krusher.datalinks.engineering.model.domain.configlet.ConfigService;
 import net.krusher.datalinks.engineering.model.domain.page.PageService;
@@ -21,6 +22,8 @@ public class PostPageCommandHandler {
     private final UserHelper userHelper;
     private final ConfigService configService;
 
+    private final Slugify slugify = Slugify.builder().build();
+
     @Autowired
     public PostPageCommandHandler(PageService pageService, UserService userService, LoginTokenService loginTokenService, UserHelper userHelper, ConfigService configService) {
         this.pageService = pageService;
@@ -32,7 +35,7 @@ public class PostPageCommandHandler {
 
     @Transactional
     public void handler(PostPageCommand postPageCommand) {
-        pageService.findByTitle(postPageCommand.getTitle())
+        pageService.findBySlug(slugify.slugify(postPageCommand.getTitle()))
                 .ifPresentOrElse(page -> updatePage(page, postPageCommand), () -> createPage(postPageCommand));
     }
 
@@ -44,6 +47,7 @@ public class PostPageCommandHandler {
         Page page = Page.builder()
                 .title(postPageCommand.getTitle())
                 .content(postPageCommand.getContent())
+                .slug(slugify.slugify(postPageCommand.getTitle()))
                 .build();
         pageService.save(page);
     }
@@ -53,6 +57,7 @@ public class PostPageCommandHandler {
             throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't edit this page");
         }
 
+        page.setSlug(slugify.slugify(postPageCommand.getTitle()));
         page.setContent(postPageCommand.getContent());
         pageService.save(page);
     }

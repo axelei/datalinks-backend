@@ -2,9 +2,8 @@ package net.krusher.datalinks.engineering.model.domain.user;
 
 import jakarta.persistence.EntityManager;
 import net.krusher.datalinks.engineering.mapper.UserMapper;
-import net.krusher.datalinks.model.user.LoginToken;
+import net.krusher.datalinks.engineering.model.domain.page.LoginTokenEntity;
 import net.krusher.datalinks.model.user.User;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -52,12 +51,6 @@ public class UserService {
         Example<UserEntity> example = Example.of(UserEntity.builder().resetToken(resetToken).build());
         List<UserEntity> result = userRepositoryBean.findAll(example);
         result.stream().findFirst().map(userMapper::toModel);
-    }
-
-    public Optional<User> getByUsernameAndHash(String username, String hash) {
-        Example<UserEntity> example = Example.of(UserEntity.builder().username(username).password(hash).build());
-        List<UserEntity> result = userRepositoryBean.findAll(example);
-        return result.stream().findFirst().map(userMapper::toModel);
     }
 
 }

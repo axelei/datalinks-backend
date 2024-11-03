@@ -18,13 +18,15 @@ import java.util.UUID;
 @Data
 @Builder
 @Table(name = "PAGES", indexes = {
-        @Index(name = "IDX_PAGE_TITLE", columnList = "title")
+        @Index(name = "IDX_PAGE_SLUG", columnList = "slug")
 })
 public class PageEntity {
 
     @Id
     @Column(nullable = false)
     private UUID id;
+    @Column(nullable = false)
+    private String slug;
     @Column(nullable = false)
     private String title;
     @ManyToOne

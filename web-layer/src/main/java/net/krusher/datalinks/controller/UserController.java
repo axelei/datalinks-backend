@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Try;
 import lombok.extern.java.Log;
 import net.krusher.datalinks.exception.EngineException;
+import net.krusher.datalinks.handler.user.GetUserByLoginTokenCommand;
+import net.krusher.datalinks.handler.user.GetUserByLoginTokenCommandHandler;
 import net.krusher.datalinks.mapper.SignupCommandMapper;
 import net.krusher.datalinks.model.LoginModel;
 import net.krusher.datalinks.model.SignupModel;
@@ -34,6 +36,7 @@ import java.util.UUID;
 public class UserController {
 
     private final GetUserCommandHandler getUserCommandHandler;
+    private final GetUserByLoginTokenCommandHandler getUserByLoginTokenCommandHandler;
     private final LoginCommandHandler loginCommandHandler;
     private final SignupCommandHandler signupCommandHandler;
     private final SignupCommandMapper signupCommandMapper;
@@ -44,17 +47,26 @@ public class UserController {
                           LoginCommandHandler loginCommandHandler,
                           SignupCommandHandler signupCommandHandler,
                           ObjectMapper objectMapper,
-                          SignupCommandMapper signupCommandMapper) {
+                          SignupCommandMapper signupCommandMapper,
+                          GetUserByLoginTokenCommandHandler getUserByLoginTokenCommandHandler) {
         this.getUserCommandHandler = getUserCommandHandler;
         this.loginCommandHandler = loginCommandHandler;
         this.signupCommandHandler = signupCommandHandler;
         this.objectMapper = objectMapper;
         this.signupCommandMapper = signupCommandMapper;
+        this.getUserByLoginTokenCommandHandler = getUserByLoginTokenCommandHandler;
     }
 
     @GetMapping("{name}/get")
-    ResponseEntity<User> get(@PathVariable("name") String name, @RequestHeader(value = "user-token", required = false) String userToken) {
-        return getUserCommandHandler.handler(GetUserCommand.builder().username(name).userToken(userToken).build())
+    ResponseEntity<User> get(@PathVariable("name") String name, @RequestHeader(value = "login-token", required = false) String userToken) {
+        return getUserCommandHandler.handler(GetUserCommand.builder().username(name).loginToken(userToken).build())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("{loginToken}/byLoginToken")
+    ResponseEntity<User> getByLoginToken(@PathVariable("loginToken") String loginToken) {
+        return getUserByLoginTokenCommandHandler.handler(GetUserByLoginTokenCommand.builder().loginToken(loginToken).build())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -71,24 +83,15 @@ public class UserController {
                         .username(loginModel.getUsername())
                         .password(loginModel.getPassword())
                         .build());
-        return loginToken.map(token -> ResponseEntity.ok(token.getToken()))
+        return loginToken.map(token -> ResponseEntity.ok(token.getLoginToken()))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-/*
-    @PostMapping("/signup")
-    ResponseEntity<String> signup(@RequestBody String body) throws JsonProcessingException {
-        SignupModel signupModel = objectMapper.readValue(body, SignupModel.class);
-        Try.run(() -> signupCommandHandler.handle(signupMapper.toCommand(signupModel)))
-                .onSuccess(e -> ResponseEntity.ok("User created"))
-                .onFailure(e -> ResponseEntity.badRequest().body(e.getMessage()));
-        return ResponseEntity.ok("User created");
-    }
-*/
+
     @PostMapping("/signup")
     ResponseEntity<String> signup2(@RequestBody String body) throws JsonProcessingException {
         SignupModel signupModel = objectMapper.readValue(body, SignupModel.class);
         return Try.run(() -> signupCommandHandler.handle(signupCommandMapper.toCommand(signupModel)))
-                .map(e -> ResponseEntity.ok("User created"))
+                .map(e -> ResponseEntity.ok("OK"))
                 .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
                 .get();
     }

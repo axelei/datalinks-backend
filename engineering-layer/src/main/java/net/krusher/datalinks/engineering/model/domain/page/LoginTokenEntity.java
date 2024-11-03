@@ -14,15 +14,14 @@ import java.util.UUID;
 @Entity
 @Data
 @Builder
-@Table(name = "LOGIN_TOKENS", indexes = {
-        @Index(name = "IDX_LOGIN_TOKEN_TOKEN", columnList = "token")
-})
+@Table(name = "LOGIN_TOKENS")
 public class LoginTokenEntity {
 
     @Id
     @Column(nullable = false)
+    private UUID loginToken;
+    @Column(nullable = false)
     private UUID userId;
-    private UUID token;
     private Instant creationDate;
 
     @PrePersist

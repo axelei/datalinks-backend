@@ -15,6 +15,7 @@ public class Page {
 
     @JsonIgnore
     private UUID id;
+    private String slug;
     private String title;
     private String content;
     private Set<Category> categories;

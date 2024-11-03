@@ -1,5 +1,6 @@
 package net.krusher.datalinks.controller;
 
+import com.github.slugify.Slugify;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.handler.page.GetPageCommand;
 import net.krusher.datalinks.handler.page.GetPageCommandHandler;
@@ -33,7 +34,7 @@ public class PageController {
     }
 
     @GetMapping("{title}")
-    ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = "user-token", required = false) String userToken) {
+    ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = "login-token", required = false) String userToken) {
         return getPageCommandHandler.handler(GetPageCommand.builder()
                         .title(title)
                         .loginTokenId(StringUtils.isEmpty(userToken) ? null : UUID.fromString(userToken))
@@ -43,17 +44,17 @@ public class PageController {
     }
 
     @DeleteMapping("{title}")
-    void delete(@PathVariable("title") String title, @RequestHeader(value = "user-token", required = false) String userToken) {
+    void delete(@PathVariable("title") String title, @RequestHeader(value = "login-token", required = false) String userToken) {
 
     }
 
     @GetMapping("{title}/block")
-    void block(@PathVariable("title") String title, @RequestHeader(value = "user-token", required = false) String userToken) {
+    void block(@PathVariable("title") String title, @RequestHeader(value = "login-token", required = false) String userToken) {
 
     }
 
    @PutMapping("{title}")
-    void put(@PathVariable("title") String title, @RequestBody String content, @RequestHeader(value = "user-token", required = false) String userToken) {
+    void put(@PathVariable("title") String title, @RequestBody String content, @RequestHeader(value = "login-token", required = false) String userToken) {
         postPageCommandHandler.handler(PostPageCommand.builder()
                 .title(title)
                 .content(content)
