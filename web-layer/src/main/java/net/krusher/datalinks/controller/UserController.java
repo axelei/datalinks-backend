@@ -3,7 +3,9 @@ package net.krusher.datalinks.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Try;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.java.Log;
+import net.krusher.datalinks.common.CaptchaHelper;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.handler.user.GetUserByLoginTokenCommand;
 import net.krusher.datalinks.handler.user.GetUserByLoginTokenCommandHandler;
@@ -41,6 +43,7 @@ public class UserController {
     private final SignupCommandHandler signupCommandHandler;
     private final SignupCommandMapper signupCommandMapper;
     private final ObjectMapper objectMapper;
+    private final CaptchaHelper captchaHelper;
 
     @Autowired
     public UserController(GetUserCommandHandler getUserCommandHandler,
@@ -48,13 +51,15 @@ public class UserController {
                           SignupCommandHandler signupCommandHandler,
                           ObjectMapper objectMapper,
                           SignupCommandMapper signupCommandMapper,
-                          GetUserByLoginTokenCommandHandler getUserByLoginTokenCommandHandler) {
+                          GetUserByLoginTokenCommandHandler getUserByLoginTokenCommandHandler,
+                          CaptchaHelper captchaHelper) {
         this.getUserCommandHandler = getUserCommandHandler;
         this.loginCommandHandler = loginCommandHandler;
         this.signupCommandHandler = signupCommandHandler;
         this.objectMapper = objectMapper;
         this.signupCommandMapper = signupCommandMapper;
         this.getUserByLoginTokenCommandHandler = getUserByLoginTokenCommandHandler;
+        this.captchaHelper = captchaHelper;
     }
 
     @GetMapping("{name}/get")
@@ -88,8 +93,11 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    ResponseEntity<String> signup2(@RequestBody String body) throws JsonProcessingException {
+    ResponseEntity<String> signup(@RequestBody String body, HttpServletRequest request) throws JsonProcessingException {
         SignupModel signupModel = objectMapper.readValue(body, SignupModel.class);
+        if (!captchaHelper.checkCaptcha(signupModel.getCaptcha(), request.getRemoteAddr())) {
+            return ResponseEntity.badRequest().body("Captcha is invalid");
+        }
         return Try.run(() -> signupCommandHandler.handle(signupCommandMapper.toCommand(signupModel)))
                 .map(e -> ResponseEntity.ok("OK"))
                 .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))

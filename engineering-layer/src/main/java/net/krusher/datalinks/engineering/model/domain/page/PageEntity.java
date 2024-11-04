@@ -40,6 +40,7 @@ public class PageEntity {
     @Enumerated(EnumType.STRING)
     private UserLevel readBlock;
     private Instant creationDate;
+    private UUID creatorId;
 
     @PrePersist
     protected void setDefaultsOnCreate() {

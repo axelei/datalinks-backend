@@ -9,9 +9,13 @@ import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.model.page.Page;
+import net.krusher.datalinks.model.user.LoginToken;
+import net.krusher.datalinks.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class PostPageCommandHandler {
@@ -44,10 +48,12 @@ public class PostPageCommandHandler {
             throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't create a page");
         }
 
+        Optional<User> user = userHelper.getUserFromLoginToken(postPageCommand.getLoginTokenId());
         Page page = Page.builder()
                 .title(postPageCommand.getTitle())
                 .content(postPageCommand.getContent())
                 .slug(slugify.slugify(postPageCommand.getTitle()))
+                .creatorId(user.map(User::getId).orElse(null))
                 .build();
         pageService.save(page);
     }

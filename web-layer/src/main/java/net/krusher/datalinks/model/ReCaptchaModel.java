@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SignupModel {
-    private String username;
-    private String password;
-    private String email;
-    private String name;
-    private String captcha;
+public class ReCaptchaModel {
+    private String secret;
+    private String response;
+    private String remoteIp;
 }

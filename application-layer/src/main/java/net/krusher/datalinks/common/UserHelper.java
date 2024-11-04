@@ -29,37 +29,35 @@ public class UserHelper {
         this.configService = configService;
     }
 
+    public Optional<User> getUserFromLoginToken(UUID loginTokenId) {
+        return Optional.ofNullable(loginTokenId)
+                .flatMap(loginTokenService::getById)
+                .flatMap(token -> userService.getById(token.getUserId()));
+    }
+
+    private Optional<User> getUserFromToken(UUID loginTokenId) {
+        return Optional.ofNullable(loginTokenId)
+                .flatMap(loginTokenService::getById)
+                .flatMap(token -> userService.getById(token.getUserId()));
+    }
+
     public boolean userCanRead(Page page, UUID loginTokenId) {
-        Optional<LoginToken> loginToken =  Optional.ofNullable(loginTokenId).flatMap(loginTokenService::getById);
-        Optional<User> user = loginToken.flatMap(token -> userService.getById(token.getUserId()));
-
         UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.READ_LEVEL).getValue());
-
-        UserLevel userLevel = user.map(User::getLevel).orElse(UserLevel.GUEST);
+        UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
         UserLevel neededLevel = Optional.ofNullable(page.getReadBlock()).orElse(defaultBlock);
-
         return neededLevel.getLevel() <= userLevel.getLevel();
     }
 
     public boolean userCanEdit(Page page, UUID loginTokenId) {
-        Optional<LoginToken> loginToken =  Optional.ofNullable(loginTokenId).flatMap(loginTokenService::getById);
-        Optional<User> user = loginToken.flatMap(token -> userService.getById(token.getUserId()));
-
         UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.EDIT_LEVEL).getValue());
-
-        UserLevel userLevel = user.map(User::getLevel).orElse(UserLevel.GUEST);
+        UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
         UserLevel neededLevel = Optional.ofNullable(page.getEditBlock()).orElse(defaultBlock);
-
         return neededLevel.getLevel() <= userLevel.getLevel();
     }
 
     public boolean userCanCreate(@Nullable UUID loginTokenId) {
-        Optional<LoginToken> loginToken =  Optional.ofNullable(loginTokenId).flatMap(loginTokenService::getById);
-        Optional<User> user = loginToken.flatMap(token -> userService.getById(token.getUserId()));
-
         UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.CREATE_LEVEL).getValue());
-        UserLevel userLevel = user.map(User::getLevel).orElse(UserLevel.GUEST);
-
+        UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
         return defaultBlock.getLevel() <= userLevel.getLevel();
     }
 
