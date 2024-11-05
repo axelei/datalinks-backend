@@ -17,10 +17,10 @@ public class User {
     private String email;
     private String name;
     private Instant creationDate;
+    private String language;
 
     @JsonIgnore private String password;
     @JsonIgnore private String salt;
     @JsonIgnore private UUID activationToken;
-    @JsonIgnore private UUID resetToken;
 
 }

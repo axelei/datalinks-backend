@@ -18,9 +18,7 @@ import java.util.UUID;
 @Builder
 @Table(name = "USERS", indexes = {
         @Index(name = "IDX_USER_USERNAME", columnList = "username"),
-        @Index(name = "IDX_USER_EMAIL", columnList = "email"),
-        @Index(name = "IDX_USER_ACTIVATION_TOKEN", columnList = "activationToken"),
-        @Index(name = "IDX_USER_RESET_TOKEN", columnList = "resetToken")
+        @Index(name = "IDX_USER_ACTIVATION_TOKEN", columnList = "activationToken")
 })
 public class UserEntity {
 
@@ -35,13 +33,14 @@ public class UserEntity {
     private String email;
     private String name;
     private Instant creationDate;
+    @Column(columnDefinition = "VARCHAR(5)")
+    private String language;
 
     @Column(columnDefinition = "CHAR(64)")
     private String password;
     @Column(columnDefinition = "CHAR(8)")
     private String salt;
     private UUID activationToken;
-    private UUID resetToken;
 
     @PrePersist
     protected void setDefaultsOnCreate() {

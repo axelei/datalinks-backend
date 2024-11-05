@@ -8,6 +8,7 @@ import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.user.LoginToken;
 import net.krusher.datalinks.model.user.User;
 import net.krusher.datalinks.model.user.UserLevel;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,12 @@ public class UserHelper {
         return Optional.ofNullable(loginTokenId)
                 .flatMap(loginTokenService::getById)
                 .flatMap(token -> userService.getById(token.getUserId()));
+    }
+
+    public void sanitize(User user) {
+        user.setName(StringUtils.trim(user.getName()));
+        user.setEmail(StringUtils.trim(user.getEmail()));
+        user.setUsername(StringUtils.trim(user.getUsername()));
     }
 
     private Optional<User> getUserFromToken(UUID loginTokenId) {

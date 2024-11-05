@@ -28,7 +28,7 @@ public class ActivateUserCommandHandler {
             user.get().setActivationToken(null);
             userService.save(user.get());
         } else {
-            throw new EngineException(ErrorType.USER_NOT_FOUND, "User activation token not found");
+            throw new EngineException(ErrorType.RESET_REQUEST_NOT_FOUND, "User activation token not found");
         }
     }
 }

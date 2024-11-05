@@ -1,8 +1,12 @@
 package net.krusher.datalinks.engineering.model.domain.user;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.UserMapper;
-import net.krusher.datalinks.engineering.model.domain.page.LoginTokenEntity;
 import net.krusher.datalinks.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -27,9 +31,16 @@ public class UserService {
     }
 
     public Optional<User> getByUsername(String username) {
-        Example<UserEntity> example = Example.of(UserEntity.builder().username(username).build());
-        List<UserEntity> result = userRepositoryBean.findAll(example);
-        return result.stream().findFirst().map(userMapper::toModel);
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> cq = cb.createQuery(UserEntity.class);
+
+        Root<UserEntity> user = cq.from(UserEntity.class);
+        Predicate usernamePredicate = cb.equal(cb.lower(user.get("username")), username.toLowerCase());
+        cq.where(usernamePredicate);
+
+        TypedQuery<UserEntity> query = entityManager.createQuery(cq);
+
+        return query.getResultList().stream().findFirst().map(userMapper::toModel);
     }
 
     public void save(User user) {
@@ -43,12 +54,6 @@ public class UserService {
 
     public Optional<User> getByActivationToken(UUID activationToken) {
         Example<UserEntity> example = Example.of(UserEntity.builder().activationToken(activationToken).build());
-        List<UserEntity> result = userRepositoryBean.findAll(example);
-        return result.stream().findFirst().map(userMapper::toModel);
-    }
-
-    public Optional<User> getByResetToken(UUID resetToken) {
-        Example<UserEntity> example = Example.of(UserEntity.builder().resetToken(resetToken).build());
         List<UserEntity> result = userRepositoryBean.findAll(example);
         return result.stream().findFirst().map(userMapper::toModel);
     }

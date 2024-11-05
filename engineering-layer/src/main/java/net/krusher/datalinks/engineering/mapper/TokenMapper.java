@@ -1,6 +1,6 @@
 package net.krusher.datalinks.engineering.mapper;
 
-import net.krusher.datalinks.engineering.model.domain.page.LoginTokenEntity;
+import net.krusher.datalinks.engineering.model.domain.user.LoginTokenEntity;
 import net.krusher.datalinks.model.user.LoginToken;
 import org.mapstruct.Mapper;
 

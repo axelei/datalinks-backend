@@ -27,27 +27,40 @@ public class EmailService {
     @Value("${application.url}")
     private String applicationUrl;
 
-    public enum SIGNUP_PARAMS {
-        NAME,
-        ACTIVATION_TOKEN
-    }
-
     @Autowired
     public EmailService(JavaMailSender emailSender) {
         this.emailSender = emailSender;
     }
 
-    public void sendSignupMessage(String to, Map<SIGNUP_PARAMS, String> params, String language) {
+    public void sendSignupMessage(String to, Map<SignupParams, String> params, String language) {
+        ResourceBundle labels = getResourceBundle(language);
 
-        ResourceBundle labels = getResouceBundle(EMAILS_BUNDLE, language);
+        String activationUrl = applicationUrl + "/activateUser/" + params.get(SignupParams.ACTIVATION_TOKEN);
 
-        String activationUrl = applicationUrl + "/activateUser/" + params.get(SIGNUP_PARAMS.ACTIVATION_TOKEN);
-
-        String subject = MessageFormat.format(labels.getString("signup.subject"), params.get(SIGNUP_PARAMS.NAME));
-        String body = MessageFormat.format(labels.getString("signup.body"), params.get(SIGNUP_PARAMS.NAME), activationUrl);
+        String subject = MessageFormat.format(labels.getString("signup.subject"), params.get(SignupParams.NAME));
+        String body = MessageFormat.format(labels.getString("signup.body"), params.get(SignupParams.NAME), activationUrl);
 
         emailSender.send(createMessage(to, subject, body));
+    }
 
+    public void sendRequestResetMessage(String to, Map<RequestResetTokenParams, String> params, String language) {
+        ResourceBundle labels = getResourceBundle(language);
+
+        String resetUrl = applicationUrl + "/resetUser/" + params.get(RequestResetTokenParams.RESET_TOKEN);
+
+        String subject = MessageFormat.format(labels.getString("requestReset.subject"), params.get(RequestResetTokenParams.NAME));
+        String body = MessageFormat.format(labels.getString("requestReset.body"), params.get(RequestResetTokenParams.NAME), resetUrl);
+
+        emailSender.send(createMessage(to, subject, body));
+    }
+
+    public void sendResetMessage(String to, Map<ResetParams, String> params, String language) {
+        ResourceBundle labels = getResourceBundle(language);
+
+        String subject = MessageFormat.format(labels.getString("reset.subject"), params.get(ResetParams.NAME));
+        String body = MessageFormat.format(labels.getString("reset.body"), params.get(ResetParams.NAME), params.get(ResetParams.NEW_PASSWORD));
+
+        emailSender.send(createMessage(to, subject, body));
     }
 
     private SimpleMailMessage createMessage(String to, String subject, String body) {
@@ -59,7 +72,7 @@ public class EmailService {
         return message;
     }
 
-    private ResourceBundle getResouceBundle(String bundle, String language) {
-        return ResourceBundle.getBundle(bundle, Locale.forLanguageTag(language));
+    private ResourceBundle getResourceBundle(String language) {
+        return ResourceBundle.getBundle(EmailService.EMAILS_BUNDLE, Locale.forLanguageTag(language));
     }
 }

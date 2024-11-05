@@ -10,6 +10,9 @@ import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.handler.user.ActivateUserCommandHandler;
 import net.krusher.datalinks.handler.user.GetUserByLoginTokenCommand;
 import net.krusher.datalinks.handler.user.GetUserByLoginTokenCommandHandler;
+import net.krusher.datalinks.handler.user.RequestResetUserCommand;
+import net.krusher.datalinks.handler.user.RequestResetUserCommandHandler;
+import net.krusher.datalinks.handler.user.ResetUserCommandHandler;
 import net.krusher.datalinks.mapper.SignupCommandMapper;
 import net.krusher.datalinks.model.LoginModel;
 import net.krusher.datalinks.model.SignupModel;
@@ -46,6 +49,8 @@ public class UserController {
     private final ObjectMapper objectMapper;
     private final CaptchaHelper captchaHelper;
     private final ActivateUserCommandHandler activateUserCommandHandler;
+    private final ResetUserCommandHandler resetUserCommandHandler;
+    private final RequestResetUserCommandHandler requestResetUserCommandHandler;
 
     @Autowired
     public UserController(GetUserCommandHandler getUserCommandHandler,
@@ -55,7 +60,9 @@ public class UserController {
                           SignupCommandMapper signupCommandMapper,
                           GetUserByLoginTokenCommandHandler getUserByLoginTokenCommandHandler,
                           CaptchaHelper captchaHelper,
-                          ActivateUserCommandHandler activateUserCommandHandler) {
+                          ActivateUserCommandHandler activateUserCommandHandler,
+                          ResetUserCommandHandler resetUserCommandHandler,
+                          RequestResetUserCommandHandler requestResetUserCommandHandler) {
         this.getUserCommandHandler = getUserCommandHandler;
         this.loginCommandHandler = loginCommandHandler;
         this.signupCommandHandler = signupCommandHandler;
@@ -64,6 +71,8 @@ public class UserController {
         this.getUserByLoginTokenCommandHandler = getUserByLoginTokenCommandHandler;
         this.activateUserCommandHandler = activateUserCommandHandler;
         this.captchaHelper = captchaHelper;
+        this.resetUserCommandHandler = resetUserCommandHandler;
+        this.requestResetUserCommandHandler = requestResetUserCommandHandler;
     }
 
     @GetMapping("{name}/get")
@@ -83,6 +92,22 @@ public class UserController {
     @GetMapping("{token}/activate")
     ResponseEntity<String> activate(@PathVariable("token") String token) {
         return Try.run(() -> activateUserCommandHandler.handler(UUID.fromString(token)))
+                .map(e -> ResponseEntity.ok("OK"))
+                .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
+                .get();
+    }
+
+    @GetMapping("{token}/reset")
+    ResponseEntity<String> reset(@PathVariable("token") String token) {
+        return Try.run(() -> resetUserCommandHandler.handler(UUID.fromString(token)))
+                .map(e -> ResponseEntity.ok("OK"))
+                .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
+                .get();
+    }
+
+    @PostMapping("{username}/requestReset")
+    ResponseEntity<String> requestReset(@PathVariable("username") String username, @RequestBody String email) {
+        return Try.run(() -> requestResetUserCommandHandler.handler(RequestResetUserCommand.builder().username(username).email(email).build()))
                 .map(e -> ResponseEntity.ok("OK"))
                 .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
                 .get();

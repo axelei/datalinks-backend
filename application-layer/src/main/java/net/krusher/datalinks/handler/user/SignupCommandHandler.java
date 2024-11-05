@@ -1,6 +1,8 @@
 package net.krusher.datalinks.handler.user;
 
+import net.krusher.datalinks.common.UserHelper;
 import net.krusher.datalinks.engineering.model.domain.email.EmailService;
+import net.krusher.datalinks.engineering.model.domain.email.SignupParams;
 import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
@@ -23,15 +25,17 @@ import static java.util.function.Predicate.not;
 @Service
 public class SignupCommandHandler {
 
+    private final UserHelper userHelper;
     private final UserService userService;
     private final SignupMapper signupMapper;
     private final EmailService emailService;
 
     @Autowired
-    public SignupCommandHandler(UserService userService, SignupMapper signupMapper, EmailService emailService) {
+    public SignupCommandHandler(UserHelper userHelper, UserService userService, SignupMapper signupMapper, EmailService emailService) {
         this.userService = userService;
         this.signupMapper = signupMapper;
         this.emailService = emailService;
+        this.userHelper = userHelper;
     }
 
     @Transactional
@@ -39,6 +43,7 @@ public class SignupCommandHandler {
         validateSignup(signupCommand);
 
         User user = signupMapper.toModel(signupCommand);
+        userHelper.sanitize(user);
         String salt = RandomStringUtils.secure().nextAlphanumeric(8);
         user.setSalt(salt);
         user.setPassword(DigestUtils.sha256Hex(salt + signupCommand.getPassword()));
@@ -48,9 +53,9 @@ public class SignupCommandHandler {
         userService.save(user);
 
         emailService.sendSignupMessage(signupCommand.getEmail(), Map.of(
-                EmailService.SIGNUP_PARAMS.NAME, Optional.ofNullable(user.getName()).filter(not(String::isEmpty)).orElseGet(user::getUsername),
-                EmailService.SIGNUP_PARAMS.ACTIVATION_TOKEN, user.getActivationToken().toString()),
-                signupCommand.getLanguage());
+                SignupParams.NAME, Optional.ofNullable(user.getName()).filter(not(String::isEmpty)).orElseGet(user::getUsername),
+                SignupParams.ACTIVATION_TOKEN, user.getActivationToken().toString()),
+                user.getLanguage());
     }
 
     private void validateSignup(SignupCommand signupCommand) {

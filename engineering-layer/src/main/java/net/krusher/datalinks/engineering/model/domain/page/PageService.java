@@ -25,17 +25,6 @@ public class PageService {
     }
 
     public Optional<Page> findBySlug(String slug) {
-/*        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
-
-        Root<PageEntity> book = cq.from(PageEntity.class);
-        Predicate titlePredicate = cb.equal(book.get("slug"), slug);
-        cq.where(titlePredicate);
-
-        TypedQuery<PageEntity> query = entityManager.createQuery(cq);
-
-        return pageMapper.toModel(query.getResultList().stream().findFirst().orElse(null));*/
-
         Example<PageEntity> example = Example.of(PageEntity.builder().slug(slug).build());
         List<PageEntity> result = pageRepositoryBean.findAll(example);
         return result.stream().findFirst().map(pageMapper::toModel);

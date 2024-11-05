@@ -4,5 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface LoginTokenRepositoryBean extends JpaRepository<LoginTokenEntity, UUID> {
+public interface ResetTokenRepositoryBean extends JpaRepository<ResetTokenEntity, UUID> {
 }
