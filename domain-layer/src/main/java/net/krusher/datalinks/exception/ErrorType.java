@@ -6,6 +6,7 @@ public enum ErrorType {
     CAPTCHA_ERROR,
     PERMISSIONS_ERROR,
     USER_EXISTS,
+    USER_NOT_FOUND,
     BAD_REQUEST,
 
 }

@@ -39,20 +39,27 @@ public class EmailService {
 
     public void sendSignupMessage(String to, Map<SIGNUP_PARAMS, String> params, String language) {
 
-        Locale locale = Locale.of(language);
-        ResourceBundle labels = ResourceBundle.getBundle(EMAILS_BUNDLE, locale);
+        ResourceBundle labels = getResouceBundle(EMAILS_BUNDLE, language);
 
-        String activationUrl = applicationUrl + "/activate/" + params.get(SIGNUP_PARAMS.ACTIVATION_TOKEN);
+        String activationUrl = applicationUrl + "/activateUser/" + params.get(SIGNUP_PARAMS.ACTIVATION_TOKEN);
 
         String subject = MessageFormat.format(labels.getString("signup.subject"), params.get(SIGNUP_PARAMS.NAME));
         String body = MessageFormat.format(labels.getString("signup.body"), params.get(SIGNUP_PARAMS.NAME), activationUrl);
 
+        emailSender.send(createMessage(to, subject, body));
+
+    }
+
+    private SimpleMailMessage createMessage(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(emailFrom);
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
-        emailSender.send(message);
+        return message;
+    }
 
+    private ResourceBundle getResouceBundle(String bundle, String language) {
+        return ResourceBundle.getBundle(bundle, Locale.forLanguageTag(language));
     }
 }

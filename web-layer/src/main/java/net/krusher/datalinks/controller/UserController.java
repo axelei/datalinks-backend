@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.java.Log;
 import net.krusher.datalinks.common.CaptchaHelper;
 import net.krusher.datalinks.exception.EngineException;
+import net.krusher.datalinks.handler.user.ActivateUserCommandHandler;
 import net.krusher.datalinks.handler.user.GetUserByLoginTokenCommand;
 import net.krusher.datalinks.handler.user.GetUserByLoginTokenCommandHandler;
 import net.krusher.datalinks.mapper.SignupCommandMapper;
@@ -44,6 +45,7 @@ public class UserController {
     private final SignupCommandMapper signupCommandMapper;
     private final ObjectMapper objectMapper;
     private final CaptchaHelper captchaHelper;
+    private final ActivateUserCommandHandler activateUserCommandHandler;
 
     @Autowired
     public UserController(GetUserCommandHandler getUserCommandHandler,
@@ -52,13 +54,15 @@ public class UserController {
                           ObjectMapper objectMapper,
                           SignupCommandMapper signupCommandMapper,
                           GetUserByLoginTokenCommandHandler getUserByLoginTokenCommandHandler,
-                          CaptchaHelper captchaHelper) {
+                          CaptchaHelper captchaHelper,
+                          ActivateUserCommandHandler activateUserCommandHandler) {
         this.getUserCommandHandler = getUserCommandHandler;
         this.loginCommandHandler = loginCommandHandler;
         this.signupCommandHandler = signupCommandHandler;
         this.objectMapper = objectMapper;
         this.signupCommandMapper = signupCommandMapper;
         this.getUserByLoginTokenCommandHandler = getUserByLoginTokenCommandHandler;
+        this.activateUserCommandHandler = activateUserCommandHandler;
         this.captchaHelper = captchaHelper;
     }
 
@@ -78,7 +82,10 @@ public class UserController {
 
     @GetMapping("{token}/activate")
     ResponseEntity<String> activate(@PathVariable("token") String token) {
-        return ResponseEntity.ok("Activated");
+        return Try.run(() -> activateUserCommandHandler.handler(UUID.fromString(token)))
+                .map(e -> ResponseEntity.ok("OK"))
+                .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
+                .get();
     }
 
     @PostMapping("/login")

@@ -41,16 +41,16 @@ public class UserService {
         return userRepositoryBean.findById(id).map(userMapper::toModel);
     }
 
-    public void getByActivationToken(UUID activationToken) {
+    public Optional<User> getByActivationToken(UUID activationToken) {
         Example<UserEntity> example = Example.of(UserEntity.builder().activationToken(activationToken).build());
         List<UserEntity> result = userRepositoryBean.findAll(example);
-        result.stream().findFirst().map(userMapper::toModel);
+        return result.stream().findFirst().map(userMapper::toModel);
     }
 
-    public void getByResetToken(UUID resetToken) {
+    public Optional<User> getByResetToken(UUID resetToken) {
         Example<UserEntity> example = Example.of(UserEntity.builder().resetToken(resetToken).build());
         List<UserEntity> result = userRepositoryBean.findAll(example);
-        result.stream().findFirst().map(userMapper::toModel);
+        return result.stream().findFirst().map(userMapper::toModel);
     }
 
 }
