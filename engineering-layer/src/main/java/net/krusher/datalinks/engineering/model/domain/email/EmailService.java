@@ -46,7 +46,7 @@ public class EmailService {
     public void sendRequestResetMessage(String to, Map<RequestResetTokenParams, String> params, String language) {
         ResourceBundle labels = getResourceBundle(language);
 
-        String resetUrl = applicationUrl + "/resetUser/" + params.get(RequestResetTokenParams.RESET_TOKEN);
+        String resetUrl = applicationUrl + "/resetPassword/" + params.get(RequestResetTokenParams.RESET_TOKEN);
 
         String subject = MessageFormat.format(labels.getString("requestReset.subject"), params.get(RequestResetTokenParams.NAME));
         String body = MessageFormat.format(labels.getString("requestReset.body"), params.get(RequestResetTokenParams.NAME), resetUrl);

@@ -15,6 +15,7 @@ import net.krusher.datalinks.handler.user.RequestResetUserCommandHandler;
 import net.krusher.datalinks.handler.user.ResetUserCommandHandler;
 import net.krusher.datalinks.mapper.SignupCommandMapper;
 import net.krusher.datalinks.model.LoginModel;
+import net.krusher.datalinks.model.PasswordResetRequestModel;
 import net.krusher.datalinks.model.SignupModel;
 import net.krusher.datalinks.model.user.LoginToken;
 import net.krusher.datalinks.model.user.User;
@@ -105,9 +106,16 @@ public class UserController {
                 .get();
     }
 
-    @PostMapping("{username}/requestReset")
-    ResponseEntity<String> requestReset(@PathVariable("username") String username, @RequestBody String email) {
-        return Try.run(() -> requestResetUserCommandHandler.handler(RequestResetUserCommand.builder().username(username).email(email).build()))
+    @PostMapping("/requestReset")
+    ResponseEntity<String> requestReset(@RequestBody String body, HttpServletRequest request) throws JsonProcessingException {
+        PasswordResetRequestModel passwordResetRequestModel = objectMapper.readValue(body, PasswordResetRequestModel.class);
+        if (!captchaHelper.checkCaptcha(passwordResetRequestModel.getCaptcha(), request.getRemoteAddr())) {
+            return ResponseEntity.badRequest().body("Captcha is invalid");
+        }
+        return Try.run(() -> requestResetUserCommandHandler.handler(
+                RequestResetUserCommand.builder()
+                        .username(passwordResetRequestModel.getUsername())
+                        .email(passwordResetRequestModel.getEmail()).build()))
                 .map(e -> ResponseEntity.ok("OK"))
                 .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
                 .get();

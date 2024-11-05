@@ -24,8 +24,8 @@ public class ResetTokenService {
         this.resetTokenRepositoryBean = resetTokenRepositoryBean;
     }
 
-    public void saveToken(ResetToken resetToken) {
-        entityManager.merge(resetTokenMapper.toEntity(resetToken));
+    public ResetToken saveToken(ResetToken resetToken) {
+        return resetTokenMapper.toModel(entityManager.merge(resetTokenMapper.toEntity(resetToken)));
     }
 
     public void deleteTokenById(UUID token) {

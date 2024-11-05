@@ -33,6 +33,7 @@ public class ResetTokenEntity {
 
     @PrePersist
     protected void setDefaultsOnCreate() {
+        this.resetToken = UUID.randomUUID();
         this.creationDate = Instant.now();
     }
 }

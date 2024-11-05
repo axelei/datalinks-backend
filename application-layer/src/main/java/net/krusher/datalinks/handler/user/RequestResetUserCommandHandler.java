@@ -32,7 +32,7 @@ public class RequestResetUserCommandHandler {
     @Transactional
     public void handler(RequestResetUserCommand requestResetuserCommand) {
         Optional<User> user = userService.getByUsername(requestResetuserCommand.getUsername());
-        if (user.isEmpty() || (!user.get().getEmail().equals(requestResetuserCommand.getEmail()))) {
+        if (user.isEmpty() || (!user.get().getEmail().equalsIgnoreCase(requestResetuserCommand.getEmail()))) {
             throw new EngineException(ErrorType.USER_NOT_FOUND_OR_MAIL_MISMATCH, "User not found or email mismatch");
         }
         Optional<ResetToken> existingResetToken = resetTokenService.getByUserId(user.get().getId());
@@ -41,7 +41,7 @@ public class RequestResetUserCommandHandler {
         }
 
         ResetToken resetToken = ResetToken.builder().userId(user.get().getId()).build();
-        resetTokenService.saveToken(resetToken);
+        resetToken = resetTokenService.saveToken(resetToken);
 
         emailService.sendRequestResetMessage(user.get().getEmail(),
                 Map.of(RequestResetTokenParams.NAME, user.get().getUsername(),
