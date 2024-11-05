@@ -15,4 +15,5 @@ public class SignupModel {
     private String email;
     private String name;
     private String captcha;
+    private String language;
 }

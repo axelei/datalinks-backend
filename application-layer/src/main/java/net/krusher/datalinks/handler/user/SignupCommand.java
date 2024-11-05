@@ -10,4 +10,5 @@ public class SignupCommand {
     private String password;
     private String email;
     private String name;
+    private String language;
 }

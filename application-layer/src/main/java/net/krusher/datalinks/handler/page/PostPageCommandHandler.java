@@ -21,20 +21,14 @@ import java.util.Optional;
 public class PostPageCommandHandler {
 
     private final PageService pageService;
-    private final UserService userService;
-    private final LoginTokenService loginTokenService;
     private final UserHelper userHelper;
-    private final ConfigService configService;
 
     private final Slugify slugify = Slugify.builder().build();
 
     @Autowired
-    public PostPageCommandHandler(PageService pageService, UserService userService, LoginTokenService loginTokenService, UserHelper userHelper, ConfigService configService) {
+    public PostPageCommandHandler(PageService pageService, UserHelper userHelper) {
         this.pageService = pageService;
-        this.userService = userService;
-        this.loginTokenService = loginTokenService;
         this.userHelper = userHelper;
-        this.configService = configService;
     }
 
     @Transactional

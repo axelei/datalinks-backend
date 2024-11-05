@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,7 +28,7 @@ public class LoginCommandHandler {
     @Transactional
     public Optional<LoginToken> handler(LoginCommand loginCommand) {
         Optional<User> user = userService.getByUsername(loginCommand.getUsername());
-        if (user.isPresent() && user.get().getPassword().equals(DigestUtils.sha256Hex(user.get().getSalt() + loginCommand.getPassword()))) {
+        if (user.isPresent() && user.get().getPassword().equals(DigestUtils.sha256Hex(user.get().getSalt() + loginCommand.getPassword())) && Objects.isNull(user.get().getActivationToken())) {
             LoginToken loginToken = LoginToken.builder()
                     .userId(user.get().getId())
                     .loginToken(UUID.randomUUID())

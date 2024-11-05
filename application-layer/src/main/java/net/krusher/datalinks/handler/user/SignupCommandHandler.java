@@ -1,5 +1,6 @@
 package net.krusher.datalinks.handler.user;
 
+import net.krusher.datalinks.engineering.model.domain.email.EmailService;
 import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
@@ -13,18 +14,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+
+import static java.util.function.Predicate.not;
 
 @Service
 public class SignupCommandHandler {
 
     private final UserService userService;
     private final SignupMapper signupMapper;
+    private final EmailService emailService;
 
     @Autowired
-    public SignupCommandHandler(UserService userService, SignupMapper signupMapper) {
+    public SignupCommandHandler(UserService userService, SignupMapper signupMapper, EmailService emailService) {
         this.userService = userService;
         this.signupMapper = signupMapper;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -36,8 +43,14 @@ public class SignupCommandHandler {
         user.setSalt(salt);
         user.setPassword(DigestUtils.sha256Hex(salt + signupCommand.getPassword()));
         user.setLevel(UserLevel.USER);
+        user.setActivationToken(UUID.randomUUID());
 
         userService.save(user);
+
+        emailService.sendSignupMessage(signupCommand.getEmail(), Map.of(
+                EmailService.SIGNUP_PARAMS.NAME, Optional.ofNullable(user.getName()).filter(not(String::isEmpty)).orElseGet(user::getUsername),
+                EmailService.SIGNUP_PARAMS.ACTIVATION_TOKEN, user.getActivationToken().toString()),
+                signupCommand.getLanguage());
     }
 
     private void validateSignup(SignupCommand signupCommand) {
