@@ -1,6 +1,9 @@
 package net.krusher.datalinks.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.slugify.Slugify;
+import net.krusher.datalinks.model.PostPageModel;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.handler.page.GetPageCommand;
 import net.krusher.datalinks.handler.page.GetPageCommandHandler;
@@ -26,11 +29,15 @@ public class PageController {
 
     private final GetPageCommandHandler getPageCommandHandler;
     private final PostPageCommandHandler postPageCommandHandler;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public PageController(GetPageCommandHandler getPageCommandHandler, PostPageCommandHandler postPageCommandHandler) {
+    public PageController(GetPageCommandHandler getPageCommandHandler,
+                          PostPageCommandHandler postPageCommandHandler,
+                          ObjectMapper objectMapper) {
         this.getPageCommandHandler = getPageCommandHandler;
         this.postPageCommandHandler = postPageCommandHandler;
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping("{title}")
@@ -54,10 +61,12 @@ public class PageController {
     }
 
    @PutMapping("{title}")
-    void put(@PathVariable("title") String title, @RequestBody String content, @RequestHeader(value = "login-token", required = false) String userToken) {
+    void put(@PathVariable("title") String title, @RequestBody String body, @RequestHeader(value = "login-token", required = false) String userToken) throws JsonProcessingException {
+        PostPageModel postPageModel = objectMapper.readValue(body, PostPageModel.class);
         postPageCommandHandler.handler(PostPageCommand.builder()
                 .title(title)
-                .content(content)
+                .content(postPageModel.getContent())
+                .categories(postPageModel.getCategories())
                 .loginTokenId(StringUtils.isEmpty(userToken) ? null : UUID.fromString(userToken))
                 .build());
     }

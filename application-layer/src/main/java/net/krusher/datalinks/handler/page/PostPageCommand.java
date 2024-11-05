@@ -10,5 +10,6 @@ import java.util.UUID;
 public class PostPageCommand {
     private String title;
     private String content;
+    private String[] categories;
     private UUID loginTokenId;
 }

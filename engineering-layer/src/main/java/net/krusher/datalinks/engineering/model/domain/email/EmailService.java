@@ -22,7 +22,9 @@ public class EmailService {
     @Setter
     @Value("${spring.mail.from}")
     private String emailFrom;
-
+    @Setter
+    @Value("${application.sitename}")
+    private String siteName;
     @Setter
     @Value("${application.url}")
     private String applicationUrl;
@@ -37,8 +39,8 @@ public class EmailService {
 
         String activationUrl = applicationUrl + "/activateUser/" + params.get(SignupParams.ACTIVATION_TOKEN);
 
-        String subject = MessageFormat.format(labels.getString("signup.subject"), params.get(SignupParams.NAME));
-        String body = MessageFormat.format(labels.getString("signup.body"), params.get(SignupParams.NAME), activationUrl);
+        String subject = MessageFormat.format(labels.getString("signup.subject"), siteName, params.get(SignupParams.NAME));
+        String body = MessageFormat.format(labels.getString("signup.body"), params.get(SignupParams.NAME), siteName, activationUrl);
 
         emailSender.send(createMessage(to, subject, body));
     }
@@ -48,8 +50,8 @@ public class EmailService {
 
         String resetUrl = applicationUrl + "/resetPassword/" + params.get(RequestResetTokenParams.RESET_TOKEN);
 
-        String subject = MessageFormat.format(labels.getString("requestReset.subject"), params.get(RequestResetTokenParams.NAME));
-        String body = MessageFormat.format(labels.getString("requestReset.body"), params.get(RequestResetTokenParams.NAME), resetUrl);
+        String subject = MessageFormat.format(labels.getString("requestReset.subject"), siteName);
+        String body = MessageFormat.format(labels.getString("requestReset.body"), params.get(RequestResetTokenParams.NAME), siteName, resetUrl);
 
         emailSender.send(createMessage(to, subject, body));
     }
@@ -57,8 +59,8 @@ public class EmailService {
     public void sendResetMessage(String to, Map<ResetParams, String> params, String language) {
         ResourceBundle labels = getResourceBundle(language);
 
-        String subject = MessageFormat.format(labels.getString("reset.subject"), params.get(ResetParams.NAME));
-        String body = MessageFormat.format(labels.getString("reset.body"), params.get(ResetParams.NAME), params.get(ResetParams.NEW_PASSWORD));
+        String subject = MessageFormat.format(labels.getString("reset.subject"), siteName);
+        String body = MessageFormat.format(labels.getString("reset.body"), params.get(ResetParams.NAME), siteName, params.get(ResetParams.NEW_PASSWORD));
 
         emailSender.send(createMessage(to, subject, body));
     }
