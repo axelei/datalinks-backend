@@ -2,13 +2,12 @@ package net.krusher.datalinks.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.slugify.Slugify;
-import net.krusher.datalinks.model.PostPageModel;
-import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.handler.page.GetPageCommand;
 import net.krusher.datalinks.handler.page.GetPageCommandHandler;
 import net.krusher.datalinks.handler.page.PostPageCommand;
 import net.krusher.datalinks.handler.page.PostPageCommandHandler;
+import net.krusher.datalinks.model.PostPageModel;
+import net.krusher.datalinks.model.page.Page;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -55,8 +54,8 @@ public class PageController {
 
     }
 
-    @GetMapping("{title}/block")
-    void block(@PathVariable("title") String title, @RequestHeader(value = "login-token", required = false) String userToken) {
+    @GetMapping("{title}/block/{block}")
+    void block(@PathVariable("title") String title, @PathVariable("block") String block, @RequestHeader(value = "login-token", required = false) String userToken) {
 
     }
 

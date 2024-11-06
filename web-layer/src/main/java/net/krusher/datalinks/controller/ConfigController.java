@@ -1,29 +1,27 @@
 package net.krusher.datalinks.controller;
 
-import io.vavr.control.Try;
-import net.krusher.datalinks.engineering.model.domain.configlet.ConfigService;
+import net.krusher.datalinks.handler.config.GetConfigCommandHandler;
 import net.krusher.datalinks.handler.config.GetConfigletCommand;
 import net.krusher.datalinks.handler.config.GetConfigletCommandHandler;
 import net.krusher.datalinks.model.configlet.Configlet;
-import net.krusher.datalinks.model.configlet.ConfigletKey;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/config")
 public class ConfigController {
 
     private final GetConfigletCommandHandler getConfigletCommandHandler;
+    private final GetConfigCommandHandler getConfigCommandHandler;
 
-    public ConfigController(GetConfigletCommandHandler getConfigletCommandHandler) {
+    public ConfigController(GetConfigletCommandHandler getConfigletCommandHandler, GetConfigCommandHandler getConfigCommandHandler) {
         this.getConfigletCommandHandler = getConfigletCommandHandler;
+        this.getConfigCommandHandler = getConfigCommandHandler;
     }
 
     @GetMapping("key/{key}")
@@ -33,9 +31,9 @@ public class ConfigController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("keys")
-    Map<ConfigletKey, String> get() {
-        return Arrays.stream(ConfigletKey.values()).collect(Collectors.toMap(name -> name, ConfigletKey::getDefaultValue));
+    @GetMapping("all")
+    Set<Configlet> get() {
+        return getConfigCommandHandler.handler();
     }
 
 }

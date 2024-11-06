@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ConfigService {
@@ -33,6 +36,11 @@ public class ConfigService {
             save(configlet.get());
         }
         return configlet.get();
+    }
+
+    @Cacheable("config")
+    public Set<Configlet> getConfig() {
+        return Arrays.stream(ConfigletKey.values()).map(this::getByKey).collect(Collectors.toSet());
     }
 
     private Optional<Configlet> getByKeyFromDatabase(String key) {
