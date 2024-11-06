@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Builder
@@ -22,5 +23,9 @@ public class User {
     @JsonIgnore private String password;
     @JsonIgnore private String salt;
     @JsonIgnore private UUID activationToken;
+
+    public String useName() {
+        return Optional.ofNullable(name).orElse(username);
+    }
 
 }

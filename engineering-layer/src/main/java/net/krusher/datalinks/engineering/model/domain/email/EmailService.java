@@ -65,6 +65,15 @@ public class EmailService {
         emailSender.send(createMessage(to, subject, body));
     }
 
+    public void sendPasswordChanged(String to, Map<PasswordChangeParams, String> params, String language) {
+        ResourceBundle labels = getResourceBundle(language);
+
+        String subject = MessageFormat.format(labels.getString("passwordChanged.subject"), siteName);
+        String body = MessageFormat.format(labels.getString("passwordChanged.body"), params.get(PasswordChangeParams.NAME), siteName);
+
+        emailSender.send(createMessage(to, subject, body));
+    }
+
     private SimpleMailMessage createMessage(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(emailFrom);

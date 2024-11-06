@@ -8,11 +8,13 @@ import lombok.extern.java.Log;
 import net.krusher.datalinks.common.CaptchaHelper;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.handler.user.ActivateUserCommandHandler;
+import net.krusher.datalinks.handler.user.ChangePasswordCommand;
+import net.krusher.datalinks.handler.user.ChangePasswordCommandHandler;
 import net.krusher.datalinks.handler.user.GetUserByLoginTokenCommand;
 import net.krusher.datalinks.handler.user.GetUserByLoginTokenCommandHandler;
 import net.krusher.datalinks.handler.user.RequestResetUserCommand;
 import net.krusher.datalinks.handler.user.RequestResetUserCommandHandler;
-import net.krusher.datalinks.handler.user.ResetUserCommandHandler;
+import net.krusher.datalinks.handler.user.ResetPasswordCommandHandler;
 import net.krusher.datalinks.mapper.SignupCommandMapper;
 import net.krusher.datalinks.model.LoginModel;
 import net.krusher.datalinks.model.PasswordResetRequestModel;
@@ -50,8 +52,9 @@ public class UserController {
     private final ObjectMapper objectMapper;
     private final CaptchaHelper captchaHelper;
     private final ActivateUserCommandHandler activateUserCommandHandler;
-    private final ResetUserCommandHandler resetUserCommandHandler;
+    private final ResetPasswordCommandHandler resetPasswordCommandHandler;
     private final RequestResetUserCommandHandler requestResetUserCommandHandler;
+    private final ChangePasswordCommandHandler changePasswordCommandHandler;
 
     @Autowired
     public UserController(GetUserCommandHandler getUserCommandHandler,
@@ -62,8 +65,9 @@ public class UserController {
                           GetUserByLoginTokenCommandHandler getUserByLoginTokenCommandHandler,
                           CaptchaHelper captchaHelper,
                           ActivateUserCommandHandler activateUserCommandHandler,
-                          ResetUserCommandHandler resetUserCommandHandler,
-                          RequestResetUserCommandHandler requestResetUserCommandHandler) {
+                          ResetPasswordCommandHandler resetPasswordCommandHandler,
+                          RequestResetUserCommandHandler requestResetUserCommandHandler,
+                          ChangePasswordCommandHandler changePasswordCommandHandler) {
         this.getUserCommandHandler = getUserCommandHandler;
         this.loginCommandHandler = loginCommandHandler;
         this.signupCommandHandler = signupCommandHandler;
@@ -72,8 +76,9 @@ public class UserController {
         this.getUserByLoginTokenCommandHandler = getUserByLoginTokenCommandHandler;
         this.activateUserCommandHandler = activateUserCommandHandler;
         this.captchaHelper = captchaHelper;
-        this.resetUserCommandHandler = resetUserCommandHandler;
+        this.resetPasswordCommandHandler = resetPasswordCommandHandler;
         this.requestResetUserCommandHandler = requestResetUserCommandHandler;
+        this.changePasswordCommandHandler = changePasswordCommandHandler;
     }
 
     @GetMapping("{name}/get")
@@ -100,7 +105,18 @@ public class UserController {
 
     @GetMapping("{token}/reset")
     ResponseEntity<String> reset(@PathVariable("token") String token) {
-        return Try.run(() -> resetUserCommandHandler.handler(UUID.fromString(token)))
+        return Try.run(() -> resetPasswordCommandHandler.handler(UUID.fromString(token)))
+                .map(e -> ResponseEntity.ok("OK"))
+                .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
+                .get();
+    }
+
+    @PostMapping("/passwordChange")
+    ResponseEntity<String> passwordChange(@RequestBody String body, @RequestHeader(value = "login-token") String userToken) {
+        return Try.run(() -> changePasswordCommandHandler.handler(ChangePasswordCommand.builder()
+                .password(body)
+                .loginToken(UUID.fromString(userToken))
+                .build()))
                 .map(e -> ResponseEntity.ok("OK"))
                 .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
                 .get();

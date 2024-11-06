@@ -44,7 +44,7 @@ public class RequestResetUserCommandHandler {
         resetToken = resetTokenService.saveToken(resetToken);
 
         emailService.sendRequestResetMessage(user.get().getEmail(),
-                Map.of(RequestResetTokenParams.NAME, user.get().getUsername(),
+                Map.of(RequestResetTokenParams.NAME, user.get().useName(),
                         RequestResetTokenParams.RESET_TOKEN, resetToken.getResetToken().toString()),
                 user.get().getLanguage());
 

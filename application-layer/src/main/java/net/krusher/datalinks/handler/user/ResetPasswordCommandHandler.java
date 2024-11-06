@@ -1,7 +1,6 @@
 package net.krusher.datalinks.handler.user;
 
 import net.krusher.datalinks.engineering.model.domain.email.EmailService;
-import net.krusher.datalinks.engineering.model.domain.email.RequestResetTokenParams;
 import net.krusher.datalinks.engineering.model.domain.email.ResetParams;
 import net.krusher.datalinks.engineering.model.domain.user.ResetTokenService;
 import net.krusher.datalinks.engineering.model.domain.user.UserService;
@@ -19,17 +18,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static java.util.function.Predicate.not;
-
 @Service
-public class ResetUserCommandHandler {
+public class ResetPasswordCommandHandler {
 
     private final UserService userService;
     private final ResetTokenService resetTokenService;
     private final EmailService emailService;
 
     @Autowired
-    public ResetUserCommandHandler(UserService userService, ResetTokenService resetTokenService, EmailService emailService) {
+    public ResetPasswordCommandHandler(UserService userService, ResetTokenService resetTokenService, EmailService emailService) {
         this.userService = userService;
         this.resetTokenService = resetTokenService;
         this.emailService = emailService;
@@ -51,7 +48,7 @@ public class ResetUserCommandHandler {
         resetTokenService.deleteTokenById(resetTokenId);
 
         emailService.sendResetMessage(user.getEmail(), Map.of(
-                ResetParams.NAME, Optional.ofNullable(user.getName()).filter(not(String::isEmpty)).orElseGet(user::getUsername),
+                ResetParams.NAME, user.useName(),
                 ResetParams.NEW_PASSWORD, newPassword),
                 user.getLanguage());
 
