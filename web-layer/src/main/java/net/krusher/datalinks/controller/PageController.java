@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+import static net.krusher.datalinks.common.ControllerUtil.AUTH_HEADER;
+import static net.krusher.datalinks.common.ControllerUtil.toLoginToken;
+
 @RestController
 @RequestMapping("/page")
 public class PageController {
@@ -40,33 +43,33 @@ public class PageController {
     }
 
     @GetMapping("{title}")
-    ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = "login-token", required = false) String userToken) {
+    ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
         return getPageCommandHandler.handler(GetPageCommand.builder()
                         .title(title)
-                        .loginTokenId(StringUtils.isEmpty(userToken) ? null : UUID.fromString(userToken))
+                        .loginTokenId(toLoginToken(userToken))
                         .build())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("{title}")
-    void delete(@PathVariable("title") String title, @RequestHeader(value = "login-token", required = false) String userToken) {
+    void delete(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
 
     }
 
     @GetMapping("{title}/block/{block}")
-    void block(@PathVariable("title") String title, @PathVariable("block") String block, @RequestHeader(value = "login-token", required = false) String userToken) {
+    void block(@PathVariable("title") String title, @PathVariable("block") String block, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
 
     }
 
    @PutMapping("{title}")
-    void put(@PathVariable("title") String title, @RequestBody String body, @RequestHeader(value = "login-token", required = false) String userToken) throws JsonProcessingException {
+    void put(@PathVariable("title") String title, @RequestBody String body, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) throws JsonProcessingException {
         PostPageModel postPageModel = objectMapper.readValue(body, PostPageModel.class);
         postPageCommandHandler.handler(PostPageCommand.builder()
                 .title(title)
                 .content(postPageModel.getContent())
                 .categories(postPageModel.getCategories())
-                .loginTokenId(StringUtils.isEmpty(userToken) ? null : UUID.fromString(userToken))
+                .loginTokenId(toLoginToken(userToken))
                 .build());
     }
 }

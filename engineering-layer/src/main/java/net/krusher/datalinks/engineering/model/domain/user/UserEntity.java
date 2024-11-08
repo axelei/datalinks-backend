@@ -1,12 +1,19 @@
 package net.krusher.datalinks.engineering.model.domain.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.krusher.datalinks.model.user.UserLevel;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -34,6 +41,7 @@ public class UserEntity {
     private String name;
     private Instant creationDate;
     @Column(columnDefinition = "VARCHAR(5)")
+    @ColumnDefault("en-GB")
     private String language;
 
     @Column(columnDefinition = "CHAR(64)")

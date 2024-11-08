@@ -18,7 +18,10 @@ import java.util.UUID;
 @Data
 @Builder
 @Table(name = "PAGES", indexes = {
-        @Index(name = "IDX_PAGE_SLUG", columnList = "slug")
+        @Index(name = "IDX_PAGE_SLUG", columnList = "slug"),
+        @Index(name = "IDX_PAGE_CREATOR_ID", columnList = "creatorId"),
+        @Index(name = "IDX_PAGE_CREATION_DATE", columnList = "creationDate"),
+        @Index(name = "IDX_PAGE_MODIFIED_DATE", columnList = "modifiedDate")
 })
 public class PageEntity {
 
@@ -40,11 +43,17 @@ public class PageEntity {
     @Enumerated(EnumType.STRING)
     private UserLevel readBlock;
     private Instant creationDate;
+    private Instant modifiedDate;
     private UUID creatorId;
 
     @PrePersist
     protected void setDefaultsOnCreate() {
         this.id = UUID.randomUUID();
         this.creationDate = Instant.now();
+    }
+
+    @PreUpdate
+    protected void setDefaultsOnUpdate() {
+        this.modifiedDate = Instant.now();
     }
 }

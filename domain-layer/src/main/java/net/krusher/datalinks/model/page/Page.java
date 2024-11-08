@@ -22,5 +22,6 @@ public class Page {
     private UserLevel editBlock;
     private UserLevel readBlock;
     private Instant creationDate;
+    private Instant modifiedDate;
     private UUID creatorId;
 }

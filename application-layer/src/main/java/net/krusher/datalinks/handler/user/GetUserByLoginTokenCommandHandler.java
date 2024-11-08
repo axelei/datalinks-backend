@@ -23,7 +23,7 @@ public class GetUserByLoginTokenCommandHandler {
     }
 
     public Optional<User> handler(GetUserByLoginTokenCommand getUserByLoginTokenCommand) {
-        return loginTokenService.getById(UUID.fromString(getUserByLoginTokenCommand.getLoginToken()))
+        return loginTokenService.getById(getUserByLoginTokenCommand.getLoginToken())
                 .map(LoginToken::getUserId)
                 .flatMap(userService::getById);
     }

@@ -12,20 +12,20 @@ import net.krusher.datalinks.handler.user.ChangePasswordCommand;
 import net.krusher.datalinks.handler.user.ChangePasswordCommandHandler;
 import net.krusher.datalinks.handler.user.GetUserByLoginTokenCommand;
 import net.krusher.datalinks.handler.user.GetUserByLoginTokenCommandHandler;
+import net.krusher.datalinks.handler.user.GetUserCommand;
+import net.krusher.datalinks.handler.user.GetUserCommandHandler;
+import net.krusher.datalinks.handler.user.LoginCommand;
+import net.krusher.datalinks.handler.user.LoginCommandHandler;
 import net.krusher.datalinks.handler.user.RequestResetUserCommand;
 import net.krusher.datalinks.handler.user.RequestResetUserCommandHandler;
 import net.krusher.datalinks.handler.user.ResetPasswordCommandHandler;
+import net.krusher.datalinks.handler.user.SignupCommandHandler;
 import net.krusher.datalinks.mapper.SignupCommandMapper;
 import net.krusher.datalinks.model.LoginModel;
 import net.krusher.datalinks.model.PasswordResetRequestModel;
 import net.krusher.datalinks.model.SignupModel;
 import net.krusher.datalinks.model.user.LoginToken;
 import net.krusher.datalinks.model.user.User;
-import net.krusher.datalinks.handler.user.GetUserCommand;
-import net.krusher.datalinks.handler.user.GetUserCommandHandler;
-import net.krusher.datalinks.handler.user.LoginCommand;
-import net.krusher.datalinks.handler.user.LoginCommandHandler;
-import net.krusher.datalinks.handler.user.SignupCommandHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +38,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 import java.util.UUID;
+
+import static net.krusher.datalinks.common.ControllerUtil.AUTH_HEADER;
+import static net.krusher.datalinks.common.ControllerUtil.toLoginToken;
 
 @Log
 @RestController
@@ -82,15 +85,15 @@ public class UserController {
     }
 
     @GetMapping("{name}/get")
-    ResponseEntity<User> get(@PathVariable("name") String name, @RequestHeader(value = "login-token", required = false) String userToken) {
-        return getUserCommandHandler.handler(GetUserCommand.builder().username(name).loginToken(userToken).build())
+    ResponseEntity<User> get(@PathVariable("name") String name, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+        return getUserCommandHandler.handler(GetUserCommand.builder().username(name).loginToken(toLoginToken(userToken)).build())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("{loginToken}/byLoginToken")
     ResponseEntity<User> getByLoginToken(@PathVariable("loginToken") String loginToken) {
-        return getUserByLoginTokenCommandHandler.handler(GetUserByLoginTokenCommand.builder().loginToken(loginToken).build())
+        return getUserByLoginTokenCommandHandler.handler(GetUserByLoginTokenCommand.builder().loginToken(toLoginToken(loginToken)).build())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -112,10 +115,10 @@ public class UserController {
     }
 
     @PostMapping("/passwordChange")
-    ResponseEntity<String> passwordChange(@RequestBody String body, @RequestHeader(value = "login-token") String userToken) {
+    ResponseEntity<String> passwordChange(@RequestBody String body, @RequestHeader(value = AUTH_HEADER) String userToken) {
         return Try.run(() -> changePasswordCommandHandler.handler(ChangePasswordCommand.builder()
                 .password(body)
-                .loginToken(UUID.fromString(userToken))
+                .loginToken(toLoginToken(userToken))
                 .build()))
                 .map(e -> ResponseEntity.ok("OK"))
                 .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
