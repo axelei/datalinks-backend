@@ -5,7 +5,7 @@ import net.krusher.datalinks.engineering.model.domain.user.LoginTokenService;
 import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.model.configlet.ConfigletKey;
 import net.krusher.datalinks.model.page.Page;
-import net.krusher.datalinks.model.user.LoginToken;
+import net.krusher.datalinks.model.upload.Upload;
 import net.krusher.datalinks.model.user.User;
 import net.krusher.datalinks.model.user.UserLevel;
 import org.apache.commons.lang3.StringUtils;
@@ -66,6 +66,32 @@ public class UserHelper {
         UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.CREATE_LEVEL).getValue());
         UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
         return defaultBlock.getLevel() <= userLevel.getLevel();
+    }
+
+    public boolean userCanSeeFile(Upload upload, @Nullable UUID loginTokenId) {
+        UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.SEE_FILE_LEVEL).getValue());
+        UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
+        UserLevel neededLevel = Optional.ofNullable(upload.getReadBlock()).orElse(defaultBlock);
+        return neededLevel.getLevel() <= userLevel.getLevel();
+    }
+
+    public boolean userCanUpload(@Nullable UUID loginTokenId) {
+        UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.UPLOAD_LEVEL).getValue());
+        UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
+        return defaultBlock.getLevel() <= userLevel.getLevel();
+    }
+
+    public boolean userCanDeleteUpload(@Nullable UUID loginTokenId) {
+        UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.DELETE_UPLOAD_LEVEL).getValue());
+        UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
+        return defaultBlock.getLevel() <= userLevel.getLevel();
+    }
+
+    public boolean userCanEditUpload(Upload upload, @Nullable UUID loginTokenId) {
+        UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.EDIT_UPLOAD_LEVEL).getValue());
+        UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
+        UserLevel neededLevel = Optional.ofNullable(upload.getEditBlock()).orElse(defaultBlock);
+        return neededLevel.getLevel() <= userLevel.getLevel();
     }
 
 }

@@ -43,7 +43,7 @@ public class PageController {
     }
 
     @GetMapping("{title}")
-    ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    public ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
         return getPageCommandHandler.handler(GetPageCommand.builder()
                         .title(title)
                         .loginTokenId(toLoginToken(userToken))
@@ -53,17 +53,17 @@ public class PageController {
     }
 
     @DeleteMapping("{title}")
-    void delete(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    public void delete(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
 
     }
 
     @GetMapping("{title}/block/{block}")
-    void block(@PathVariable("title") String title, @PathVariable("block") String block, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    public void block(@PathVariable("title") String title, @PathVariable("block") String block, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
 
     }
 
    @PutMapping("{title}")
-    void put(@PathVariable("title") String title, @RequestBody String body, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) throws JsonProcessingException {
+   public void put(@PathVariable("title") String title, @RequestBody String body, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) throws JsonProcessingException {
         PostPageModel postPageModel = objectMapper.readValue(body, PostPageModel.class);
         postPageCommandHandler.handler(PostPageCommand.builder()
                 .title(title)

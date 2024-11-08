@@ -25,14 +25,14 @@ public class ConfigController {
     }
 
     @GetMapping("key/{key}")
-    ResponseEntity<Configlet> get(@PathVariable("key") String key) {
+    public ResponseEntity<Configlet> get(@PathVariable("key") String key) {
         return getConfigletCommandHandler.handler(GetConfigletCommand.builder().key(key).build())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("all")
-    Set<Configlet> get() {
+    public Set<Configlet> get() {
         return getConfigCommandHandler.handler();
     }
 

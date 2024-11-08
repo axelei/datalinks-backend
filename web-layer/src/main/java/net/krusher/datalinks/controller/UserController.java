@@ -85,21 +85,21 @@ public class UserController {
     }
 
     @GetMapping("{name}/get")
-    ResponseEntity<User> get(@PathVariable("name") String name, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    public ResponseEntity<User> get(@PathVariable("name") String name, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
         return getUserCommandHandler.handler(GetUserCommand.builder().username(name).loginToken(toLoginToken(userToken)).build())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("{loginToken}/byLoginToken")
-    ResponseEntity<User> getByLoginToken(@PathVariable("loginToken") String loginToken) {
+    public ResponseEntity<User> getByLoginToken(@PathVariable("loginToken") String loginToken) {
         return getUserByLoginTokenCommandHandler.handler(GetUserByLoginTokenCommand.builder().loginToken(toLoginToken(loginToken)).build())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("{token}/activate")
-    ResponseEntity<String> activate(@PathVariable("token") String token) {
+    public ResponseEntity<String> activate(@PathVariable("token") String token) {
         return Try.run(() -> activateUserCommandHandler.handler(UUID.fromString(token)))
                 .map(e -> ResponseEntity.ok("OK"))
                 .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
@@ -107,7 +107,7 @@ public class UserController {
     }
 
     @GetMapping("{token}/reset")
-    ResponseEntity<String> reset(@PathVariable("token") String token) {
+    public ResponseEntity<String> reset(@PathVariable("token") String token) {
         return Try.run(() -> resetPasswordCommandHandler.handler(UUID.fromString(token)))
                 .map(e -> ResponseEntity.ok("OK"))
                 .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
@@ -115,7 +115,7 @@ public class UserController {
     }
 
     @PostMapping("/passwordChange")
-    ResponseEntity<String> passwordChange(@RequestBody String body, @RequestHeader(value = AUTH_HEADER) String userToken) {
+    public ResponseEntity<String> passwordChange(@RequestBody String body, @RequestHeader(value = AUTH_HEADER) String userToken) {
         return Try.run(() -> changePasswordCommandHandler.handler(ChangePasswordCommand.builder()
                 .password(body)
                 .loginToken(toLoginToken(userToken))
@@ -126,7 +126,7 @@ public class UserController {
     }
 
     @PostMapping("/requestReset")
-    ResponseEntity<String> requestReset(@RequestBody String body, HttpServletRequest request) throws JsonProcessingException {
+    public ResponseEntity<String> requestReset(@RequestBody String body, HttpServletRequest request) throws JsonProcessingException {
         PasswordResetRequestModel passwordResetRequestModel = objectMapper.readValue(body, PasswordResetRequestModel.class);
         if (!captchaHelper.checkCaptcha(passwordResetRequestModel.getCaptcha(), request.getRemoteAddr())) {
             return ResponseEntity.badRequest().body("Captcha is invalid");
@@ -141,7 +141,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    ResponseEntity<UUID> get(@RequestBody String body) throws JsonProcessingException {
+    public ResponseEntity<UUID> get(@RequestBody String body) throws JsonProcessingException {
         LoginModel loginModel = objectMapper.readValue(body, LoginModel.class);
         Optional<LoginToken> loginToken = loginCommandHandler.handler(LoginCommand.builder()
                         .username(loginModel.getUsername())
@@ -152,7 +152,7 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    ResponseEntity<String> signup(@RequestBody String body, HttpServletRequest request) throws JsonProcessingException {
+    public ResponseEntity<String> signup(@RequestBody String body, HttpServletRequest request) throws JsonProcessingException {
         SignupModel signupModel = objectMapper.readValue(body, SignupModel.class);
         if (!captchaHelper.checkCaptcha(signupModel.getCaptcha(), request.getRemoteAddr())) {
             return ResponseEntity.badRequest().body("Captcha is invalid");

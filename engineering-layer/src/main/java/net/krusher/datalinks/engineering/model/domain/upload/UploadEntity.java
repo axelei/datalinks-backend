@@ -1,15 +1,21 @@
-package net.krusher.datalinks.engineering.model.domain.page;
+package net.krusher.datalinks.engineering.model.domain.upload;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
 import net.krusher.datalinks.model.user.UserLevel;
 
 import java.time.Instant;
-import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -17,29 +23,26 @@ import java.util.UUID;
 @Entity
 @Data
 @Builder
-@Table(name = "PAGES", indexes = {
-        @Index(name = "IDX_PAGE_SLUG", columnList = "slug"),
-        @Index(name = "IDX_PAGE_CREATOR_ID", columnList = "creatorId"),
-        @Index(name = "IDX_PAGE_CREATION_DATE", columnList = "creationDate"),
-        @Index(name = "IDX_PAGE_MODIFIED_DATE", columnList = "modifiedDate")
+@Table(name = "UPLOADS", indexes = {
+        @Index(name = "IDX_UPLOAD_SLUG", columnList = "slug", unique = true),
+        @Index(name = "IDX_UPLOAD_CREATOR_ID", columnList = "creatorId"),
 })
-public class PageEntity {
+public class UploadEntity {
 
     @Id
     @Column(nullable = false)
     private UUID id;
     @Column(nullable = false)
-    private String slug;
+    private String filename;
     @Column(nullable = false)
-    private String title;
-    @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
-    private String content;
-    @ManyToMany
-    private Set<CategoryEntity> categories;
+    private String slug;
+    private String description;
     @Enumerated(EnumType.STRING)
     private UserLevel editBlock;
     @Enumerated(EnumType.STRING)
     private UserLevel readBlock;
+    @Column(columnDefinition = "CHAR(32)", nullable = false)
+    private String md5;
     private Instant creationDate;
     private Instant modifiedDate;
     private UUID creatorId;

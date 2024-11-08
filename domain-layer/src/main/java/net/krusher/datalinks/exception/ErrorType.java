@@ -11,5 +11,6 @@ public enum ErrorType {
     USER_NOT_FOUND_OR_MAIL_MISMATCH,
     RESET_REQUEST_EXISTS,
     BAD_REQUEST,
+    UPLOAD_ERROR,
 
 }
