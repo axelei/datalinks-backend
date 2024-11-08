@@ -41,7 +41,7 @@ public class UserEntity {
     private String name;
     private Instant creationDate;
     @Column(columnDefinition = "VARCHAR(5)")
-    @ColumnDefault("en-GB")
+    @ColumnDefault("'en-GB'")
     private String language;
 
     @Column(columnDefinition = "CHAR(64)")
