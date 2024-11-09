@@ -30,6 +30,6 @@ public class NewPagesCommandHandler {
         if (!PAGE_SIZES.contains(paginationCommand.getPageSize())) {
             throw new EngineException(ErrorType.BAD_REQUEST, "Page size must be one of " + PAGE_SIZES);
         }
-        return pageService.newPages(paginationCommand.getPage(), paginationCommand.getPageSize());
+        return pageService.pagesSortBy("creationDate", paginationCommand.getPage(), paginationCommand.getPageSize());
     }
 }

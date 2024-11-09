@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PageService {
@@ -40,10 +42,10 @@ public class PageService {
         entityManager.merge(pageEntity);
     }
 
-    public List<PageShort> newPages(int page, int pageSize) {
+    public List<PageShort> pagesSortBy(String column, int page, int pageSize) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
-        cq.orderBy(cb.desc(cq.from(PageEntity.class).get("creationDate")));
+        cq.orderBy(cb.desc(cq.from(PageEntity.class).get(column)));
         TypedQuery<PageEntity> query = entityManager.createQuery(cq);
         return query
                 .setFirstResult(page * pageSize)
@@ -51,10 +53,11 @@ public class PageService {
                 .getResultList().stream().map(pageMapper::toModelShort).toList();
     }
 
-    public List<PageShort> recentChanges(int page, int pageSize) {
+    public List<PageShort> contributions(UUID userId, int page, int pageSize) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
-        cq.orderBy(cb.desc(cq.from(PageEntity.class).get("modifiedDate")));
+        Root<PageEntity> from = cq.from(PageEntity.class);
+        cq.where(cb.equal(from.get("creatorId"), userId));
         TypedQuery<PageEntity> query = entityManager.createQuery(cq);
         return query
                 .setFirstResult(page * pageSize)
