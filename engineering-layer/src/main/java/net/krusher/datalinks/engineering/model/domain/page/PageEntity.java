@@ -57,6 +57,7 @@ public class PageEntity {
     protected void setDefaultsOnCreate() {
         this.id = UUID.randomUUID();
         this.creationDate = Instant.now();
+        this.modifiedDate = Instant.now();
     }
 
     @PreUpdate

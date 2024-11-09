@@ -4,11 +4,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
-import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
 import net.krusher.datalinks.model.page.Page;
+import net.krusher.datalinks.model.page.PageShort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -41,7 +39,7 @@ public class PageService {
         entityManager.merge(pageEntity);
     }
 
-    public List<Page> newPages(int page, int pageSize) {
+    public List<PageShort> newPages(int page, int pageSize) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
         cq.orderBy(cb.desc(cq.from(PageEntity.class).get("creationDate")));
@@ -49,6 +47,17 @@ public class PageService {
         return query
                 .setFirstResult(page * pageSize)
                 .setMaxResults(pageSize)
-                .getResultList().stream().map(pageMapper::toModel).toList();
+                .getResultList().stream().map(pageMapper::toModelShort).toList();
+    }
+
+    public List<PageShort> recentChanges(int page, int pageSize) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
+        cq.orderBy(cb.desc(cq.from(PageEntity.class).get("modifiedDate")));
+        TypedQuery<PageEntity> query = entityManager.createQuery(cq);
+        return query
+                .setFirstResult(page * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList().stream().map(pageMapper::toModelShort).toList();
     }
 }

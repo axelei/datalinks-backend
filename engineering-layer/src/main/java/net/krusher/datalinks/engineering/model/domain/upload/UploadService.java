@@ -1,6 +1,10 @@
 package net.krusher.datalinks.engineering.model.domain.upload;
 
 import io.vavr.control.Try;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import lombok.Setter;
 import net.krusher.datalinks.engineering.mapper.UploadMapper;
 import net.krusher.datalinks.exception.EngineException;
@@ -27,10 +31,12 @@ public class UploadService {
 
     private final UploadMapper uploadMapper;
     private final UploadRepositoryBean uploadRepositoryBean;
+    private final EntityManager entityManager;
 
-    public UploadService(UploadMapper uploadMapper, UploadRepositoryBean uploadRepositoryBean) {
+    public UploadService(UploadMapper uploadMapper, UploadRepositoryBean uploadRepositoryBean, EntityManager entityManager) {
         this.uploadMapper = uploadMapper;
         this.uploadRepositoryBean = uploadRepositoryBean;
+        this.entityManager = entityManager;
     }
 
     public void save(Upload upload) throws IOException {
@@ -64,4 +70,14 @@ public class UploadService {
         return md5.charAt(0) + "/" + md5.charAt(0) + md5.charAt(1) + "/" + filename;
     }
 
+    public List<Upload> newUploads(int page, int pageSize) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UploadEntity> cq = cb.createQuery(UploadEntity.class);
+        cq.orderBy(cb.desc(cq.from(UploadEntity.class).get("creationDate")));
+        TypedQuery<UploadEntity> query = entityManager.createQuery(cq);
+        return query
+                .setFirstResult(page * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList().stream().map(uploadMapper::toModel).toList();
+    }
 }

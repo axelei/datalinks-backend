@@ -1,13 +1,11 @@
-package net.krusher.datalinks.handler.page;
+package net.krusher.datalinks.handler.common;
 
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
 @Builder
-public class NewPagesCommand {
+public class PaginationCommand {
     private int page;
     private int pageSize;
 }

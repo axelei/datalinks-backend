@@ -4,13 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.krusher.datalinks.handler.page.GetPageCommand;
 import net.krusher.datalinks.handler.page.GetPageCommandHandler;
-import net.krusher.datalinks.handler.page.NewPagesCommand;
 import net.krusher.datalinks.handler.page.NewPagesCommandHandler;
+import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.page.PostPageCommand;
 import net.krusher.datalinks.handler.page.PostPageCommandHandler;
-import net.krusher.datalinks.model.NewPagesModel;
+import net.krusher.datalinks.handler.page.RecentChangesCommandHandler;
+import net.krusher.datalinks.model.PaginationModel;
 import net.krusher.datalinks.model.PostPageModel;
 import net.krusher.datalinks.model.page.Page;
+import net.krusher.datalinks.model.page.PageShort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,16 +37,19 @@ public class PageController {
     private final GetPageCommandHandler getPageCommandHandler;
     private final PostPageCommandHandler postPageCommandHandler;
     private final NewPagesCommandHandler newPagesCommandHandler;
+    private final RecentChangesCommandHandler recentChangesCommandHandler;
     private final ObjectMapper objectMapper;
 
     @Autowired
     public PageController(GetPageCommandHandler getPageCommandHandler,
                           PostPageCommandHandler postPageCommandHandler,
                           NewPagesCommandHandler newPagesCommandHandler,
+                          RecentChangesCommandHandler recentChangesCommandHandler,
                           ObjectMapper objectMapper) {
         this.getPageCommandHandler = getPageCommandHandler;
         this.postPageCommandHandler = postPageCommandHandler;
         this.newPagesCommandHandler = newPagesCommandHandler;
+        this.recentChangesCommandHandler = recentChangesCommandHandler;
         this.objectMapper = objectMapper;
     }
 
@@ -80,11 +85,21 @@ public class PageController {
     }
 
     @PostMapping("newPages")
-    public ResponseEntity<List<Page>> newPages(@RequestBody String body) throws JsonProcessingException {
-        NewPagesModel newPagesModel = objectMapper.readValue(body, NewPagesModel.class);
-        List<Page> pages = newPagesCommandHandler.handler(NewPagesCommand.builder()
-                .page(newPagesModel.getPage())
-                .pageSize(newPagesModel.getPageSize())
+    public ResponseEntity<List<PageShort>> newPages(@RequestBody String body) throws JsonProcessingException {
+        PaginationModel paginationModel = objectMapper.readValue(body, PaginationModel.class);
+        List<PageShort> pages = newPagesCommandHandler.handler(PaginationCommand.builder()
+                .page(paginationModel.getPage())
+                .pageSize(paginationModel.getPageSize())
+                .build());
+        return ResponseEntity.ok(pages);
+    }
+
+    @PostMapping("recentChanges")
+    public ResponseEntity<List<PageShort>> recentChanges(@RequestBody String body) throws JsonProcessingException {
+        PaginationModel paginationModel = objectMapper.readValue(body, PaginationModel.class);
+        List<PageShort> pages = recentChangesCommandHandler.handler(PaginationCommand.builder()
+                .page(paginationModel.getPage())
+                .pageSize(paginationModel.getPageSize())
                 .build());
         return ResponseEntity.ok(pages);
     }
