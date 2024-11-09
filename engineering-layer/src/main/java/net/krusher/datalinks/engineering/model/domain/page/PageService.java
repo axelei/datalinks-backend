@@ -8,6 +8,7 @@ import net.krusher.datalinks.engineering.mapper.PageMapper;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
@@ -59,5 +60,24 @@ public class PageService {
                 .setFirstResult(page * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList().stream().map(pageMapper::toModelShort).toList();
+    }
+
+    public List<PageShort> allPages(int page, int pageSize) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
+        cq.from(PageEntity.class);
+        TypedQuery<PageEntity> query = entityManager.createQuery(cq);
+        return query
+                .setFirstResult(page * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList().stream().map(pageMapper::toModelShort).toList();
+    }
+
+    @Cacheable("pageCount")
+    public int count() {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        cq.select(cb.count(cq.from(PageEntity.class)));
+        return entityManager.createQuery(cq).getSingleResult().intValue();
     }
 }

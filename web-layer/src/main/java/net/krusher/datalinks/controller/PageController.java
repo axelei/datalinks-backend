@@ -2,10 +2,11 @@ package net.krusher.datalinks.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.page.GetPageCommand;
 import net.krusher.datalinks.handler.page.GetPageCommandHandler;
+import net.krusher.datalinks.handler.page.GetRandomPageCommandHandler;
 import net.krusher.datalinks.handler.page.NewPagesCommandHandler;
-import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.page.PostPageCommand;
 import net.krusher.datalinks.handler.page.PostPageCommandHandler;
 import net.krusher.datalinks.handler.page.RecentChangesCommandHandler;
@@ -38,6 +39,7 @@ public class PageController {
     private final PostPageCommandHandler postPageCommandHandler;
     private final NewPagesCommandHandler newPagesCommandHandler;
     private final RecentChangesCommandHandler recentChangesCommandHandler;
+    private final GetRandomPageCommandHandler getRandomPageCommandHandler;
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -45,11 +47,13 @@ public class PageController {
                           PostPageCommandHandler postPageCommandHandler,
                           NewPagesCommandHandler newPagesCommandHandler,
                           RecentChangesCommandHandler recentChangesCommandHandler,
+                          GetRandomPageCommandHandler getRandomPageCommandHandler,
                           ObjectMapper objectMapper) {
         this.getPageCommandHandler = getPageCommandHandler;
         this.postPageCommandHandler = postPageCommandHandler;
         this.newPagesCommandHandler = newPagesCommandHandler;
         this.recentChangesCommandHandler = recentChangesCommandHandler;
+        this.getRandomPageCommandHandler = getRandomPageCommandHandler;
         this.objectMapper = objectMapper;
     }
 
@@ -59,6 +63,13 @@ public class PageController {
                         .title(title)
                         .loginTokenId(toLoginToken(userToken))
                         .build())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("-randomPage")
+    public ResponseEntity<PageShort> random() {
+        return getRandomPageCommandHandler.handler()
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
