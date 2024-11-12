@@ -6,6 +6,8 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
+import net.krusher.datalinks.engineering.model.domain.upload.UploadService;
+import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
 import net.krusher.datalinks.model.user.User;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class PageService {
@@ -25,13 +29,17 @@ public class PageService {
     private final PageRepositoryBean pageRepositoryBean;
     private final PageMapper pageMapper;
     private final EditRepositoryBean editRepositoryBean;
+    private final UploadService uploadService;
+
+    private static final Pattern UPLOAD_USAGE_PATTERN = Pattern.compile("/file/get/([^\"]*)\"");
 
     @Autowired
-    public PageService(EntityManager entityManager, PageRepositoryBean pageRepositoryBean, PageMapper pageMapper, EditRepositoryBean editRepositoryBean) {
+    public PageService(EntityManager entityManager, PageRepositoryBean pageRepositoryBean, PageMapper pageMapper, EditRepositoryBean editRepositoryBean, UploadService uploadService) {
         this.entityManager = entityManager;
         this.pageRepositoryBean = pageRepositoryBean;
         this.pageMapper = pageMapper;
         this.editRepositoryBean = editRepositoryBean;
+        this.uploadService = uploadService;
     }
 
     public Optional<Page> findBySlug(String slug) {
@@ -43,11 +51,8 @@ public class PageService {
     public void save(Page page, User user) {
         PageEntity pageEntity = pageMapper.toEntity(page);
         entityManager.merge(pageEntity);
-        EditEntity editEntity = EditEntity.builder()
-                .content(page.getContent())
-                .userId(Optional.ofNullable(user).map(User::getId).orElse(null))
-                .build();
-        editRepositoryBean.save(editEntity);
+        processEdit(page, user);
+        processUploadUsage(page);
     }
 
     public List<PageShort> pagesSortBy(String column, int page, int pageSize) {
@@ -111,4 +116,28 @@ public class PageService {
         cq.select(cb.count(cq.from(PageEntity.class)));
         return entityManager.createQuery(cq).getSingleResult().intValue();
     }
+
+    private void processEdit(Page page, User user) {
+        EditEntity editEntity = EditEntity.builder()
+                .content(page.getContent())
+                .userId(Optional.ofNullable(user).map(User::getId).orElse(null))
+                .build();
+        editRepositoryBean.save(editEntity);
+    }
+
+    private void processUploadUsage(Page page) {
+        uploadService.deleteUsages(page.getId());
+        Matcher m = UPLOAD_USAGE_PATTERN.matcher(page.getContent());
+        while(m.find()) {
+            String slug = m.group(1);
+            uploadService.findBySlug(slug).ifPresent(upload -> {
+                UploadUsageEntity usage = UploadUsageEntity.builder()
+                        .pageId(page.getId())
+                        .uploadId(upload.getId())
+                        .build();
+                uploadService.saveUsage(usage);
+            });
+        }
+    }
+
 }

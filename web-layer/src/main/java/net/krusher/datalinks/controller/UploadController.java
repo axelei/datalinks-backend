@@ -56,6 +56,17 @@ public class UploadController {
         this.newUploadsCommandHandler = newUploadsCommandHandler;
     }
 
+    @GetMapping("/lookAt/{filename}")
+    @ResponseBody
+    public ResponseEntity<Upload> lookAt(@PathVariable("filename") String filename, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+        Upload upload = getFileCommandHandler.handler(GetFileCommand.builder()
+                .filename(filename)
+                .loginTokenId(toLoginToken(userToken))
+                .build());
+        upload.setInputStream(null);
+        return ResponseEntity.ok(upload);
+    }
+
     @GetMapping("/get/{filename}")
     @ResponseBody
     public ResponseEntity<InputStreamResource> get(@PathVariable("filename") String filename, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {

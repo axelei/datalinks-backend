@@ -4,7 +4,9 @@ import io.vavr.control.Try;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import lombok.Setter;
 import net.krusher.datalinks.engineering.mapper.UploadMapper;
 import net.krusher.datalinks.exception.EngineException;
@@ -21,6 +23,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UploadService {
@@ -31,11 +34,16 @@ public class UploadService {
 
     private final UploadMapper uploadMapper;
     private final UploadRepositoryBean uploadRepositoryBean;
+    private final UploadUsageRepositoryBean uploadUsageRepositoryBean;
     private final EntityManager entityManager;
 
-    public UploadService(UploadMapper uploadMapper, UploadRepositoryBean uploadRepositoryBean, EntityManager entityManager) {
+    public UploadService(UploadMapper uploadMapper,
+                         UploadRepositoryBean uploadRepositoryBean,
+                         UploadUsageRepositoryBean uploadUsageRepositoryBean,
+                         EntityManager entityManager) {
         this.uploadMapper = uploadMapper;
         this.uploadRepositoryBean = uploadRepositoryBean;
+        this.uploadUsageRepositoryBean = uploadUsageRepositoryBean;
         this.entityManager = entityManager;
     }
 
@@ -82,5 +90,17 @@ public class UploadService {
                 .setFirstResult(page * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList().stream().map(uploadMapper::toModel).toList();
+    }
+
+    public void deleteUsages(UUID pageId) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaDelete<UploadUsageEntity> delete = cb. createCriteriaDelete(UploadUsageEntity.class);
+        Root<UploadUsageEntity> e = delete.from(UploadUsageEntity.class);
+        delete.where(cb.equal(e.get("pageId"), pageId));
+        entityManager.createQuery(delete).executeUpdate();
+    }
+
+    public void saveUsage(UploadUsageEntity uploadUsageEntity) {
+        entityManager.merge(uploadUsageEntity);
     }
 }
