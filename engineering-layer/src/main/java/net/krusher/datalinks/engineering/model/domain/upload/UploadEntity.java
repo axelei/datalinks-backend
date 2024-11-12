@@ -45,6 +45,8 @@ public class UploadEntity {
     private String md5;
     private Instant creationDate;
     private Instant modifiedDate;
+    private String ipCreator;
+    private String ipModifier;
     private UUID creatorId;
 
     @PrePersist

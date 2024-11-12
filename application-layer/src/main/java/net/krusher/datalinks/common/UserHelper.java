@@ -81,6 +81,13 @@ public class UserHelper {
         return defaultBlock.getLevel() <= userLevel.getLevel();
     }
 
+    public boolean userCanUpdateUpload(Upload upload, @Nullable UUID loginTokenId) {
+        UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.UPDATE_UPLOAD_LEVEL).getValue());
+        UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
+        UserLevel neededLevel = Optional.ofNullable(upload.getEditBlock()).orElse(defaultBlock);
+        return neededLevel.getLevel() <= userLevel.getLevel();
+    }
+
     public boolean userCanDeleteUpload(@Nullable UUID loginTokenId) {
         UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.DELETE_UPLOAD_LEVEL).getValue());
         UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);

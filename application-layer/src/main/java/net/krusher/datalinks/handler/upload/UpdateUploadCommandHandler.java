@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Service
-public class UploadCommandHandler {
+public class UpdateUploadCommandHandler {
 
     private final UploadService uploadService;
     private final UserHelper userHelper;
@@ -29,28 +29,20 @@ public class UploadCommandHandler {
     private final Slugify slugify = Slugify.builder().build();
 
     @Autowired
-    public UploadCommandHandler(UploadService uploadService, UserHelper userHelper) {
+    public UpdateUploadCommandHandler(UploadService uploadService, UserHelper userHelper) {
         this.uploadService = uploadService;
         this.userHelper = userHelper;
     }
 
     @Transactional
-    public String handler(UploadCommand uploadCommand) {
-        if (!userHelper.userCanUpload(uploadCommand.getLoginTokenId())) {
-            throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't upload");
+    public void handler(UpdateUploadCommand uploadCommand) {
+        Upload upload = uploadService.findBySlug(slugify.slugify(uploadCommand.getFilename()))
+                .orElseThrow(() -> new EngineException(ErrorType.UPLOAD_ERROR, "Upload not found"));
+        if (!userHelper.userCanUpdateUpload(upload, uploadCommand.getLoginToken())) {
+            throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't update upload");
         }
-        Optional<User> user = userHelper.getUserFromLoginToken(uploadCommand.getLoginTokenId());
-        Upload upload = Upload.builder()
-                .filename(uploadCommand.getFilename())
-                .inputStream(uploadCommand.getInputStream())
-                .slug(slugify.slugify(uploadCommand.getFilename()))
-                .ipCreator(uploadCommand.getIp())
-                .creatorId(user.map(User::getId).orElse(null))
-                .build();
-        Try.run(() -> uploadService.save(upload))
-                .onFailure(throwable -> {
-                    throw new EngineException(ErrorType.UPLOAD_ERROR, "Upload error", throwable);
-                });
-        return backendUrl + "/file/get/" + upload.getSlug();
+        upload.setDescription(uploadCommand.getDescription());
+        upload.setIpModifier(uploadCommand.getIp());
+        uploadService.update(upload);
     }
 }

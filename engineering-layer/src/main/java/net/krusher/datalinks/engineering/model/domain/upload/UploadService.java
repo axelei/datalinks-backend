@@ -65,6 +65,10 @@ public class UploadService {
         uploadRepositoryBean.save(uploadMapper.toEntity(upload));
     }
 
+    public void update(Upload upload) {
+        uploadRepositoryBean.save(uploadMapper.toEntity(upload));
+    }
+
     public Optional<Upload> findBySlug(String slug) {
         Example<UploadEntity> example = Example.of(UploadEntity.builder().slug(slug).build());
         List<UploadEntity> result = uploadRepositoryBean.findAll(example);

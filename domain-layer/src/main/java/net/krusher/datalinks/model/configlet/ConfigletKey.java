@@ -13,6 +13,7 @@ public enum ConfigletKey {
     READ_LEVEL(UserLevel.GUEST.name()),
     SEE_FILE_LEVEL(UserLevel.GUEST.name()),
     UPLOAD_LEVEL(UserLevel.USER.name()),
+    UPDATE_UPLOAD_LEVEL(UserLevel.USER.name()),
     DELETE_UPLOAD_LEVEL(UserLevel.ADMIN.name()),
     EDIT_UPLOAD_LEVEL(UserLevel.USER.name()),
     TOKEN_EXPIRATION("3600"),

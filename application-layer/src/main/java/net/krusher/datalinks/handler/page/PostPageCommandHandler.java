@@ -49,7 +49,7 @@ public class PostPageCommandHandler {
                 .slug(slugify.slugify(postPageCommand.getTitle()))
                 .creatorId(user.map(User::getId).orElse(null))
                 .build();
-        pageService.save(page, user.orElse(null));
+        pageService.save(page, user.orElse(null), postPageCommand.getIp());
     }
 
     private void updatePage(Page page, PostPageCommand postPageCommand) {
@@ -59,6 +59,6 @@ public class PostPageCommandHandler {
         Optional<User> user = userHelper.getUserFromLoginToken(postPageCommand.getLoginTokenId());
         page.setSlug(slugify.slugify(postPageCommand.getTitle()));
         page.setContent(postPageCommand.getContent());
-        pageService.save(page, user.orElse(null));
+        pageService.save(page, user.orElse(null), postPageCommand.getIp());
     }
 }

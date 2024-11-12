@@ -30,6 +30,7 @@ public class EditEntity {
     private UUID id;
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     private String content;
+    private String ip;
     private Instant date;
     private UUID userId;
 

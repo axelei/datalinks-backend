@@ -3,14 +3,18 @@ package net.krusher.datalinks.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Try;
+import jakarta.servlet.http.HttpServletRequest;
 import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.upload.GetFileCommand;
 import net.krusher.datalinks.handler.upload.GetFileCommandHandler;
 import net.krusher.datalinks.handler.upload.NewUploadsCommandHandler;
+import net.krusher.datalinks.handler.upload.UpdateUploadCommand;
+import net.krusher.datalinks.handler.upload.UpdateUploadCommandHandler;
 import net.krusher.datalinks.handler.upload.UploadCommand;
 import net.krusher.datalinks.handler.upload.UploadCommandHandler;
 import net.krusher.datalinks.model.FileTypes;
 import net.krusher.datalinks.model.PaginationModel;
+import net.krusher.datalinks.model.UpdateUploadModel;
 import net.krusher.datalinks.model.UploadResponse;
 import net.krusher.datalinks.model.upload.Upload;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,15 +47,18 @@ public class UploadController {
 
     private final ObjectMapper objectMapper;
     private final UploadCommandHandler uploadCommandHandler;
+    private final UpdateUploadCommandHandler updateUploadCommandHandler;
     private final GetFileCommandHandler getFileCommandHandler;
     private final NewUploadsCommandHandler newUploadsCommandHandler;
 
     @Autowired
     public UploadController(ObjectMapper objectMapper,
                             UploadCommandHandler uploadCommandHandler,
+                            UpdateUploadCommandHandler updateUploadCommandHandler,
                             GetFileCommandHandler getFileCommandHandler,
                             NewUploadsCommandHandler newUploadsCommandHandler) {
         this.uploadCommandHandler = uploadCommandHandler;
+        this.updateUploadCommandHandler = updateUploadCommandHandler;
         this.objectMapper = objectMapper;
         this.getFileCommandHandler = getFileCommandHandler;
         this.newUploadsCommandHandler = newUploadsCommandHandler;
@@ -91,7 +99,7 @@ public class UploadController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<UploadResponse> put(@RequestHeader(value = AUTH_HEADER, required = false) String userToken, @RequestParam("upload") MultipartFile upload) throws IOException {
+    public ResponseEntity<UploadResponse> put(@RequestHeader(value = AUTH_HEADER, required = false) String userToken, @RequestParam("upload") MultipartFile upload, HttpServletRequest request) throws IOException {
        String extension = upload.getOriginalFilename().substring(upload.getOriginalFilename().lastIndexOf('.') + 1);
        if (Arrays.stream(FileTypes.values()).noneMatch(fileType -> fileType.name().equalsIgnoreCase(extension))) {
            return ResponseEntity.badRequest().build();
@@ -100,8 +108,21 @@ public class UploadController {
                 .inputStream(upload.getInputStream())
                 .loginTokenId(toLoginToken(userToken))
                 .filename(upload.getOriginalFilename())
+                .ip(request.getRemoteAddr())
                 .build());
        return ResponseEntity.ok(UploadResponse.builder().url(url).build());
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<String> update(@RequestHeader(value = AUTH_HEADER, required = false) String userToken, @RequestBody String body, HttpServletRequest request) throws JsonProcessingException {
+        UpdateUploadModel paginationModel = objectMapper.readValue(body, UpdateUploadModel.class);
+        updateUploadCommandHandler.handler(UpdateUploadCommand.builder()
+                .loginToken(toLoginToken(userToken))
+                .description(paginationModel.getDescription())
+                .filename(paginationModel.getFilename())
+                .ip(request.getRemoteAddr())
+                .build());
+        return ResponseEntity.ok("ok");
     }
 
     @PostMapping("newUploads")

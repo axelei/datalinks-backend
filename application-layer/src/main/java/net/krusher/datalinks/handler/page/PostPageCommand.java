@@ -12,4 +12,5 @@ public class PostPageCommand {
     private String content;
     private String[] categories;
     private UUID loginTokenId;
+    private String ip;
 }

@@ -8,10 +8,9 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class UploadCommand {
+public class UpdateUploadCommand {
     private String filename;
     private String description;
-    private InputStream inputStream;
-    private UUID loginTokenId;
+    private UUID loginToken;
     private String ip;
 }

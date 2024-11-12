@@ -48,10 +48,10 @@ public class PageService {
         return result.stream().findFirst().map(pageMapper::toModel);
     }
 
-    public void save(Page page, User user) {
+    public void save(Page page, User user, String ip) {
         PageEntity pageEntity = pageMapper.toEntity(page);
         entityManager.merge(pageEntity);
-        processEdit(page, user);
+        processEdit(page, user, ip);
         processUploadUsage(page);
     }
 
@@ -117,10 +117,11 @@ public class PageService {
         return entityManager.createQuery(cq).getSingleResult().intValue();
     }
 
-    private void processEdit(Page page, User user) {
+    private void processEdit(Page page, User user, String ip) {
         EditEntity editEntity = EditEntity.builder()
                 .content(page.getContent())
                 .userId(Optional.ofNullable(user).map(User::getId).orElse(null))
+                .ip(ip)
                 .build();
         editRepositoryBean.save(editEntity);
     }

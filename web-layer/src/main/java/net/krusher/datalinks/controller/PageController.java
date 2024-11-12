@@ -2,6 +2,7 @@ package net.krusher.datalinks.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.handler.page.GetPageCommand;
@@ -109,13 +110,14 @@ public class PageController {
     }
 
     @PutMapping("{title}")
-    public void put(@PathVariable("title") String title, @RequestBody String body, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) throws JsonProcessingException {
+    public void put(@PathVariable("title") String title, @RequestBody String body, @RequestHeader(value = AUTH_HEADER, required = false) String userToken, HttpServletRequest request) throws JsonProcessingException {
         PostPageModel postPageModel = objectMapper.readValue(body, PostPageModel.class);
         postPageCommandHandler.handler(PostPageCommand.builder()
                 .title(title)
                 .content(postPageModel.getContent())
                 .categories(postPageModel.getCategories())
                 .loginTokenId(toLoginToken(userToken))
+                .ip(request.getRemoteAddr())
                 .build());
     }
 
