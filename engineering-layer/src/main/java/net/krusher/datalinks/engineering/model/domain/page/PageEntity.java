@@ -16,6 +16,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.krusher.datalinks.model.user.UserLevel;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 import java.util.Set;
@@ -41,8 +43,10 @@ public class PageEntity {
     private String slug;
     @Column(nullable = false)
     private String title;
+    @ColumnDefault("''")
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     private String content;
+    private String summary;
     @ManyToMany(fetch = FetchType.LAZY)
     private Set<CategoryEntity> categories;
     @Enumerated(EnumType.STRING)
@@ -58,10 +62,17 @@ public class PageEntity {
         this.id = UUID.randomUUID();
         this.creationDate = Instant.now();
         this.modifiedDate = Instant.now();
+        this.summary = summarize(content);
     }
 
     @PreUpdate
     protected void setDefaultsOnUpdate() {
         this.modifiedDate = Instant.now();
+        this.summary = summarize(content);
     }
+
+    public String summarize(String string) {
+        return StringUtils.abbreviate(string.replaceAll("<[^>]*>", ""), 100);
+    }
+
 }

@@ -49,16 +49,16 @@ public class PostPageCommandHandler {
                 .slug(slugify.slugify(postPageCommand.getTitle()))
                 .creatorId(user.map(User::getId).orElse(null))
                 .build();
-        pageService.save(page);
+        pageService.save(page, user.orElse(null));
     }
 
     private void updatePage(Page page, PostPageCommand postPageCommand) {
         if (!userHelper.userCanEdit(page, postPageCommand.getLoginTokenId())) {
             throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't edit this page");
         }
-
+        Optional<User> user = userHelper.getUserFromLoginToken(postPageCommand.getLoginTokenId());
         page.setSlug(slugify.slugify(postPageCommand.getTitle()));
         page.setContent(postPageCommand.getContent());
-        pageService.save(page);
+        pageService.save(page, user.orElse(null));
     }
 }

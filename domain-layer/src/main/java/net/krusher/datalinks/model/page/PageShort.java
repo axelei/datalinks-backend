@@ -13,6 +13,7 @@ public class PageShort {
 
     private String slug;
     private String title;
+    private String summary;
     private UserLevel editBlock;
     private UserLevel readBlock;
     private Instant creationDate;

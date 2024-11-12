@@ -18,6 +18,7 @@ public class Page {
     private String slug;
     private String title;
     private String content;
+    private String summary;
     private Set<Category> categories;
     private UserLevel editBlock;
     private UserLevel readBlock;

@@ -45,6 +45,9 @@ public class UploadService {
                 .map(digest -> Hex.encodeHexString(digest.digest(bytes)))
                 .getOrElseThrow(e -> new EngineException(ErrorType.UPLOAD_ERROR, "MD5 algorithm not found", e));
         String uploadPath = getUploadPath(md5, upload.getSlug());
+        if (findBySlug(upload.getSlug()).isPresent()) {
+            throw new EngineException(ErrorType.UPLOAD_ERROR, "File already exists");
+        }
         upload.setMd5(md5);
         Path path = Path.of(uploadDir + uploadPath);
         if (!path.getParent().toFile().exists() && !path.getParent().toFile().mkdirs()) {

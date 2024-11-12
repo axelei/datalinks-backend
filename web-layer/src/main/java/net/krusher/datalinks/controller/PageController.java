@@ -3,6 +3,7 @@ package net.krusher.datalinks.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.krusher.datalinks.handler.common.PaginationCommand;
+import net.krusher.datalinks.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.handler.page.GetPageCommand;
 import net.krusher.datalinks.handler.page.GetPageCommandHandler;
 import net.krusher.datalinks.handler.page.GetRandomPageCommandHandler;
@@ -10,6 +11,8 @@ import net.krusher.datalinks.handler.page.NewPagesCommandHandler;
 import net.krusher.datalinks.handler.page.PostPageCommand;
 import net.krusher.datalinks.handler.page.PostPageCommandHandler;
 import net.krusher.datalinks.handler.page.RecentChangesCommandHandler;
+import net.krusher.datalinks.handler.page.SearchCommandHandler;
+import net.krusher.datalinks.handler.page.TitleSearchCommandHandler;
 import net.krusher.datalinks.model.PaginationModel;
 import net.krusher.datalinks.model.PostPageModel;
 import net.krusher.datalinks.model.page.Page;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -40,6 +44,8 @@ public class PageController {
     private final NewPagesCommandHandler newPagesCommandHandler;
     private final RecentChangesCommandHandler recentChangesCommandHandler;
     private final GetRandomPageCommandHandler getRandomPageCommandHandler;
+    private final TitleSearchCommandHandler titleSearchCommandHandler;
+    private final SearchCommandHandler searchCommandHandler;
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -48,12 +54,16 @@ public class PageController {
                           NewPagesCommandHandler newPagesCommandHandler,
                           RecentChangesCommandHandler recentChangesCommandHandler,
                           GetRandomPageCommandHandler getRandomPageCommandHandler,
+                          TitleSearchCommandHandler titleSearchCommandHandler,
+                          SearchCommandHandler searchCommandHandler,
                           ObjectMapper objectMapper) {
         this.getPageCommandHandler = getPageCommandHandler;
         this.postPageCommandHandler = postPageCommandHandler;
         this.newPagesCommandHandler = newPagesCommandHandler;
         this.recentChangesCommandHandler = recentChangesCommandHandler;
         this.getRandomPageCommandHandler = getRandomPageCommandHandler;
+        this.titleSearchCommandHandler = titleSearchCommandHandler;
+        this.searchCommandHandler = searchCommandHandler;
         this.objectMapper = objectMapper;
     }
 
@@ -72,6 +82,20 @@ public class PageController {
         return getRandomPageCommandHandler.handler()
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("-titleSearch/{query}")
+    public ResponseEntity<List<PageShort>> titleSearch(@PathVariable("query") String query) {
+        return ResponseEntity.ok(titleSearchCommandHandler.handler(query));
+    }
+
+    @GetMapping("-search/{query}")
+    public ResponseEntity<List<PageShort>> search(@PathVariable("query") String query) {
+        return ResponseEntity.ok(searchCommandHandler.handler(SearchPaginationCommand.builder()
+                .query(query)
+                .page(0)
+                .pageSize(10)
+                .build()));
     }
 
     @DeleteMapping("{title}")
