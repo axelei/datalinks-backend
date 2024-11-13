@@ -62,6 +62,12 @@ public class UserHelper {
         return neededLevel.getLevel() <= userLevel.getLevel();
     }
 
+    public boolean userCanDelete(UUID loginTokenId) {
+        UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.DELETE_LEVEL).getValue());
+        UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
+        return defaultBlock.getLevel() <= userLevel.getLevel();
+    }
+
     public boolean userCanCreate(@Nullable UUID loginTokenId) {
         UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.CREATE_LEVEL).getValue());
         UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);

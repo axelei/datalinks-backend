@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.common.SearchPaginationCommand;
+import net.krusher.datalinks.handler.page.DeletePageCommand;
+import net.krusher.datalinks.handler.page.DeletePageCommandHandler;
 import net.krusher.datalinks.handler.page.GetPageCommand;
 import net.krusher.datalinks.handler.page.GetPageCommandHandler;
 import net.krusher.datalinks.handler.page.GetRandomPageCommandHandler;
@@ -46,6 +48,7 @@ public class PageController {
     private final GetRandomPageCommandHandler getRandomPageCommandHandler;
     private final TitleSearchCommandHandler titleSearchCommandHandler;
     private final SearchCommandHandler searchCommandHandler;
+    private final DeletePageCommandHandler deletePageCommandHandler;
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -56,6 +59,7 @@ public class PageController {
                           GetRandomPageCommandHandler getRandomPageCommandHandler,
                           TitleSearchCommandHandler titleSearchCommandHandler,
                           SearchCommandHandler searchCommandHandler,
+                            DeletePageCommandHandler deletePageCommandHandler,
                           ObjectMapper objectMapper) {
         this.getPageCommandHandler = getPageCommandHandler;
         this.postPageCommandHandler = postPageCommandHandler;
@@ -64,6 +68,7 @@ public class PageController {
         this.getRandomPageCommandHandler = getRandomPageCommandHandler;
         this.titleSearchCommandHandler = titleSearchCommandHandler;
         this.searchCommandHandler = searchCommandHandler;
+        this.deletePageCommandHandler = deletePageCommandHandler;
         this.objectMapper = objectMapper;
     }
 
@@ -100,7 +105,10 @@ public class PageController {
 
     @DeleteMapping("{title}")
     public void delete(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
-
+        deletePageCommandHandler.handler(DeletePageCommand.builder()
+                .title(title)
+                .loginTokenId(toLoginToken(userToken))
+                .build());
     }
 
     @GetMapping("{title}/block/{block}")
