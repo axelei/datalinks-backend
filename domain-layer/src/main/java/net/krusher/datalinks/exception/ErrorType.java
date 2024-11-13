@@ -12,5 +12,7 @@ public enum ErrorType {
     RESET_REQUEST_EXISTS,
     BAD_REQUEST,
     UPLOAD_ERROR,
+    FILE_NOT_FOUND,
+    PAGE_NOT_FOUND,
 
 }

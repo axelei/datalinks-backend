@@ -12,6 +12,7 @@ import java.util.UUID;
 @Builder
 @Data
 public class Upload {
+    @JsonIgnore
     private UUID id;
     private InputStream inputStream;
     private String filename;

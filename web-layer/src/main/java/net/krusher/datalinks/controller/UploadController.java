@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Try;
 import jakarta.servlet.http.HttpServletRequest;
 import net.krusher.datalinks.handler.common.PaginationCommand;
+import net.krusher.datalinks.handler.upload.FindUsagesCommandHandler;
 import net.krusher.datalinks.handler.upload.GetFileCommand;
 import net.krusher.datalinks.handler.upload.GetFileCommandHandler;
 import net.krusher.datalinks.handler.upload.NewUploadsCommandHandler;
@@ -16,6 +17,7 @@ import net.krusher.datalinks.model.FileTypes;
 import net.krusher.datalinks.model.PaginationModel;
 import net.krusher.datalinks.model.UpdateUploadModel;
 import net.krusher.datalinks.model.UploadResponse;
+import net.krusher.datalinks.model.page.PageShort;
 import net.krusher.datalinks.model.upload.Upload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -50,18 +52,21 @@ public class UploadController {
     private final UpdateUploadCommandHandler updateUploadCommandHandler;
     private final GetFileCommandHandler getFileCommandHandler;
     private final NewUploadsCommandHandler newUploadsCommandHandler;
+    private final FindUsagesCommandHandler findUsagesCommandHandler;
 
     @Autowired
     public UploadController(ObjectMapper objectMapper,
                             UploadCommandHandler uploadCommandHandler,
                             UpdateUploadCommandHandler updateUploadCommandHandler,
                             GetFileCommandHandler getFileCommandHandler,
-                            NewUploadsCommandHandler newUploadsCommandHandler) {
+                            NewUploadsCommandHandler newUploadsCommandHandler,
+                            FindUsagesCommandHandler findUsagesCommandHandler) {
         this.uploadCommandHandler = uploadCommandHandler;
         this.updateUploadCommandHandler = updateUploadCommandHandler;
         this.objectMapper = objectMapper;
         this.getFileCommandHandler = getFileCommandHandler;
         this.newUploadsCommandHandler = newUploadsCommandHandler;
+        this.findUsagesCommandHandler = findUsagesCommandHandler;
     }
 
     @GetMapping("/lookAt/{filename}")
@@ -133,5 +138,10 @@ public class UploadController {
                 .pageSize(paginationModel.getPageSize())
                 .build());
         return ResponseEntity.ok(pages);
+    }
+
+    @GetMapping("-usages/{filename}")
+    public ResponseEntity<List<PageShort>> usages(@PathVariable("filename") String filename) {
+        return ResponseEntity.ok(findUsagesCommandHandler.handler(filename));
     }
 }

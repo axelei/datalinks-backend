@@ -28,6 +28,8 @@ public class EditEntity {
     @Id
     @Column(nullable = false)
     private UUID id;
+    @Column(nullable = false)
+    private UUID pageId;
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     private String content;
     private String ip;

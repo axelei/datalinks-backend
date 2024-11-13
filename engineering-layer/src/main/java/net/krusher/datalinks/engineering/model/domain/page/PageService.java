@@ -10,6 +10,7 @@ import net.krusher.datalinks.engineering.model.domain.upload.UploadService;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
+import net.krusher.datalinks.model.upload.Upload;
 import net.krusher.datalinks.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -34,7 +35,11 @@ public class PageService {
     private static final Pattern UPLOAD_USAGE_PATTERN = Pattern.compile("/file/get/([^\"]*)\"");
 
     @Autowired
-    public PageService(EntityManager entityManager, PageRepositoryBean pageRepositoryBean, PageMapper pageMapper, EditRepositoryBean editRepositoryBean, UploadService uploadService) {
+    public PageService(EntityManager entityManager,
+                       PageRepositoryBean pageRepositoryBean,
+                       PageMapper pageMapper,
+                       EditRepositoryBean editRepositoryBean,
+                       UploadService uploadService) {
         this.entityManager = entityManager;
         this.pageRepositoryBean = pageRepositoryBean;
         this.pageMapper = pageMapper;
@@ -120,6 +125,7 @@ public class PageService {
     private void processEdit(Page page, User user, String ip) {
         EditEntity editEntity = EditEntity.builder()
                 .content(page.getContent())
+                .pageId(page.getId())
                 .userId(Optional.ofNullable(user).map(User::getId).orElse(null))
                 .ip(ip)
                 .build();

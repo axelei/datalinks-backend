@@ -8,9 +8,15 @@ import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import lombok.Setter;
+import net.krusher.datalinks.engineering.mapper.PageMapper;
+import net.krusher.datalinks.engineering.mapper.PageMapperImpl;
 import net.krusher.datalinks.engineering.mapper.UploadMapper;
+import net.krusher.datalinks.engineering.model.domain.page.PageEntity;
+import net.krusher.datalinks.engineering.model.domain.page.PageRepositoryBean;
+import net.krusher.datalinks.engineering.model.domain.page.PageService;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
+import net.krusher.datalinks.model.page.PageShort;
 import net.krusher.datalinks.model.upload.Upload;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,16 +41,22 @@ public class UploadService {
     private final UploadMapper uploadMapper;
     private final UploadRepositoryBean uploadRepositoryBean;
     private final UploadUsageRepositoryBean uploadUsageRepositoryBean;
+    private final PageRepositoryBean pageRepositoryBean;
+    private final PageMapper pageMapper;
     private final EntityManager entityManager;
 
     public UploadService(UploadMapper uploadMapper,
                          UploadRepositoryBean uploadRepositoryBean,
                          UploadUsageRepositoryBean uploadUsageRepositoryBean,
-                         EntityManager entityManager) {
+                         PageRepositoryBean pageRepositoryBean,
+                         EntityManager entityManager,
+                         PageMapper pageMapper) {
         this.uploadMapper = uploadMapper;
         this.uploadRepositoryBean = uploadRepositoryBean;
         this.uploadUsageRepositoryBean = uploadUsageRepositoryBean;
+        this.pageRepositoryBean = pageRepositoryBean;
         this.entityManager = entityManager;
+        this.pageMapper = pageMapper;
     }
 
     public void save(Upload upload) throws IOException {
@@ -106,5 +118,13 @@ public class UploadService {
 
     public void saveUsage(UploadUsageEntity uploadUsageEntity) {
         entityManager.merge(uploadUsageEntity);
+    }
+
+    public List<PageShort> findUsages(UUID uploadId) {
+        Example<UploadUsageEntity> example = Example.of(UploadUsageEntity.builder().uploadId(uploadId).build());
+        List<UploadUsageEntity> result = uploadUsageRepositoryBean.findAll(example);
+        return result.stream()
+                .map(uploadUsageEntity -> pageRepositoryBean.findById(uploadUsageEntity.getPageId()).orElseThrow())
+                .map(pageMapper::toModelShort).toList();
     }
 }
