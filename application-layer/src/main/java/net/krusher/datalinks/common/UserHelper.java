@@ -100,11 +100,4 @@ public class UserHelper {
         return defaultBlock.getLevel() <= userLevel.getLevel();
     }
 
-    public boolean userCanEditUpload(Upload upload, @Nullable UUID loginTokenId) {
-        UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.EDIT_UPLOAD_LEVEL).getValue());
-        UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
-        UserLevel neededLevel = Optional.ofNullable(upload.getEditBlock()).orElse(defaultBlock);
-        return neededLevel.getLevel() <= userLevel.getLevel();
-    }
-
 }

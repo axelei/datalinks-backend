@@ -7,6 +7,7 @@ import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.handler.page.DeletePageCommand;
 import net.krusher.datalinks.handler.page.DeletePageCommandHandler;
+import net.krusher.datalinks.handler.page.GetContributionsCommandHandler;
 import net.krusher.datalinks.handler.page.GetPageCommand;
 import net.krusher.datalinks.handler.page.GetPageCommandHandler;
 import net.krusher.datalinks.handler.page.GetRandomPageCommandHandler;
@@ -18,6 +19,7 @@ import net.krusher.datalinks.handler.page.SearchCommandHandler;
 import net.krusher.datalinks.handler.page.TitleSearchCommandHandler;
 import net.krusher.datalinks.model.PaginationModel;
 import net.krusher.datalinks.model.PostPageModel;
+import net.krusher.datalinks.model.page.Edit;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,7 @@ public class PageController {
     private final TitleSearchCommandHandler titleSearchCommandHandler;
     private final SearchCommandHandler searchCommandHandler;
     private final DeletePageCommandHandler deletePageCommandHandler;
+    private final GetContributionsCommandHandler getContributionsCommandHandler;
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -59,7 +62,8 @@ public class PageController {
                           GetRandomPageCommandHandler getRandomPageCommandHandler,
                           TitleSearchCommandHandler titleSearchCommandHandler,
                           SearchCommandHandler searchCommandHandler,
-                            DeletePageCommandHandler deletePageCommandHandler,
+                          DeletePageCommandHandler deletePageCommandHandler,
+                          GetContributionsCommandHandler getContributionsCommandHandler,
                           ObjectMapper objectMapper) {
         this.getPageCommandHandler = getPageCommandHandler;
         this.postPageCommandHandler = postPageCommandHandler;
@@ -69,6 +73,7 @@ public class PageController {
         this.titleSearchCommandHandler = titleSearchCommandHandler;
         this.searchCommandHandler = searchCommandHandler;
         this.deletePageCommandHandler = deletePageCommandHandler;
+        this.getContributionsCommandHandler = getContributionsCommandHandler;
         this.objectMapper = objectMapper;
     }
 
@@ -101,6 +106,11 @@ public class PageController {
                 .page(0)
                 .pageSize(10)
                 .build()));
+    }
+
+    @GetMapping("-contributions/{username}")
+    public ResponseEntity<List<Edit>> contributions(@PathVariable("username") String username) {
+        return ResponseEntity.ok(getContributionsCommandHandler.handler(username));
     }
 
     @DeleteMapping("{title}")

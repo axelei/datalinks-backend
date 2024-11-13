@@ -5,14 +5,15 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import net.krusher.datalinks.engineering.mapper.EditMapper;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
 import net.krusher.datalinks.engineering.mapper.UserMapper;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadService;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
+import net.krusher.datalinks.model.page.Edit;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
-import net.krusher.datalinks.model.upload.Upload;
 import net.krusher.datalinks.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,6 +25,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class PageService {
@@ -32,6 +34,7 @@ public class PageService {
     private final PageRepositoryBean pageRepositoryBean;
     private final PageMapper pageMapper;
     private final UserMapper userMapper;
+    private final EditMapper editMapper;
     private final EditRepositoryBean editRepositoryBean;
     private final UploadService uploadService;
 
@@ -42,6 +45,7 @@ public class PageService {
                        PageRepositoryBean pageRepositoryBean,
                        PageMapper pageMapper,
                        UserMapper userMapper,
+                       EditMapper editMapper,
                        EditRepositoryBean editRepositoryBean,
                        UploadService uploadService) {
         this.entityManager = entityManager;
@@ -49,6 +53,7 @@ public class PageService {
         this.pageMapper = pageMapper;
         this.userMapper = userMapper;
         this.editRepositoryBean = editRepositoryBean;
+        this.editMapper = editMapper;
         this.uploadService = uploadService;
     }
 
@@ -124,6 +129,7 @@ public class PageService {
                 .getResultList().stream().map(pageMapper::toModelShort).toList();
     }
 
+    // TODO pagination and stuff
     public List<PageShort> search(String query, int page, int pageSize) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
@@ -165,6 +171,33 @@ public class PageService {
                 uploadService.saveUsage(usage);
             });
         }
+    }
+
+    public List<Edit> findByUser(User user, int page, int pageSize) {
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+
+        Root<EditEntity> editRoot = cq.from(EditEntity.class);
+        Root<PageEntity> pageRoot = cq.from(PageEntity.class);
+
+        cq.select(cb.array(editRoot, pageRoot))
+                .where(cb.and(
+                        cb.equal(editRoot.get("pageId"), pageRoot.get("id")),
+                        cb.equal(editRoot.get("userId"), user.getId())
+                                ));
+
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+        List<Object[]> results = query
+                .setFirstResult(page * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList();
+
+        return results.stream().map(result -> {
+            Edit edit = editMapper.toModel((EditEntity) result[0]);
+            edit.setTitle(((PageEntity) result[1]).getTitle());
+            return edit;
+        }).collect(Collectors.toList());
     }
 
 }
