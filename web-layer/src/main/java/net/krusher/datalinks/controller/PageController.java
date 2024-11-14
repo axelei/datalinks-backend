@@ -8,10 +8,12 @@ import net.krusher.datalinks.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.handler.page.DeletePageCommand;
 import net.krusher.datalinks.handler.page.DeletePageCommandHandler;
 import net.krusher.datalinks.handler.page.GetContributionsCommandHandler;
+import net.krusher.datalinks.handler.page.GetEditCommandHandler;
 import net.krusher.datalinks.handler.page.GetPageCommand;
 import net.krusher.datalinks.handler.page.GetPageCommandHandler;
 import net.krusher.datalinks.handler.page.GetRandomPageCommandHandler;
 import net.krusher.datalinks.handler.page.NewPagesCommandHandler;
+import net.krusher.datalinks.handler.page.PageEditsCommandHandler;
 import net.krusher.datalinks.handler.page.PostPageCommand;
 import net.krusher.datalinks.handler.page.PostPageCommandHandler;
 import net.krusher.datalinks.handler.page.RecentChangesCommandHandler;
@@ -32,9 +34,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 import static net.krusher.datalinks.common.ControllerUtil.AUTH_HEADER;
 import static net.krusher.datalinks.common.ControllerUtil.toLoginToken;
@@ -52,6 +56,8 @@ public class PageController {
     private final SearchCommandHandler searchCommandHandler;
     private final DeletePageCommandHandler deletePageCommandHandler;
     private final GetContributionsCommandHandler getContributionsCommandHandler;
+    private final PageEditsCommandHandler pageEditsCommandHandler;
+    private final GetEditCommandHandler getEditCommandHandler;
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -63,7 +69,9 @@ public class PageController {
                           TitleSearchCommandHandler titleSearchCommandHandler,
                           SearchCommandHandler searchCommandHandler,
                           DeletePageCommandHandler deletePageCommandHandler,
+                          PageEditsCommandHandler pageEditsCommandHandler,
                           GetContributionsCommandHandler getContributionsCommandHandler,
+                            GetEditCommandHandler getEditCommandHandler,
                           ObjectMapper objectMapper) {
         this.getPageCommandHandler = getPageCommandHandler;
         this.postPageCommandHandler = postPageCommandHandler;
@@ -74,6 +82,8 @@ public class PageController {
         this.searchCommandHandler = searchCommandHandler;
         this.deletePageCommandHandler = deletePageCommandHandler;
         this.getContributionsCommandHandler = getContributionsCommandHandler;
+        this.pageEditsCommandHandler = pageEditsCommandHandler;
+        this.getEditCommandHandler = getEditCommandHandler;
         this.objectMapper = objectMapper;
     }
 
@@ -85,6 +95,18 @@ public class PageController {
                         .build())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("-edits/{title}")
+    public ResponseEntity<List<Edit>> edits(@PathVariable("title") String title,
+                                            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                                            @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize) {
+        List<Edit> result = pageEditsCommandHandler.handler(SearchPaginationCommand.builder()
+                .query(title)
+                .page(page)
+                .pageSize(pageSize)
+                .build());
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("-randomPage")
@@ -100,11 +122,13 @@ public class PageController {
     }
 
     @GetMapping("-search/{query}")
-    public ResponseEntity<List<PageShort>> search(@PathVariable("query") String query) {
+    public ResponseEntity<List<PageShort>> search(@PathVariable("query") String query,
+                                                  @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                                                  @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize) {
         return ResponseEntity.ok(searchCommandHandler.handler(SearchPaginationCommand.builder()
                 .query(query)
-                .page(0)
-                .pageSize(10)
+                .page(page)
+                .pageSize(pageSize)
                 .build()));
     }
 
@@ -156,5 +180,12 @@ public class PageController {
                 .pageSize(paginationModel.getPageSize())
                 .build());
         return ResponseEntity.ok(pages);
+    }
+
+    @GetMapping("-edit/{id}")
+    public ResponseEntity<Edit> edit(@PathVariable("id") String id) {
+        return getEditCommandHandler.handler(UUID.fromString(id))
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

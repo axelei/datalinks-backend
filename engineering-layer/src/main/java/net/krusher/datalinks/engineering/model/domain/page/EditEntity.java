@@ -35,6 +35,7 @@ public class EditEntity {
     private String ip;
     private Instant date;
     private UUID userId;
+    private String username;
 
     @PrePersist
     protected void setDefaultsOnCreate() {

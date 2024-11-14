@@ -11,6 +11,7 @@ import net.krusher.datalinks.engineering.mapper.UserMapper;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadService;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
+import net.krusher.datalinks.engineering.model.domain.user.UserRepositoryBean;
 import net.krusher.datalinks.model.page.Edit;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
@@ -39,6 +40,7 @@ public class PageService {
     private final UploadService uploadService;
 
     private static final Pattern UPLOAD_USAGE_PATTERN = Pattern.compile("/file/get/([^\"]*)\"");
+    private final UserRepositoryBean userRepositoryBean;
 
     @Autowired
     public PageService(EntityManager entityManager,
@@ -47,7 +49,7 @@ public class PageService {
                        UserMapper userMapper,
                        EditMapper editMapper,
                        EditRepositoryBean editRepositoryBean,
-                       UploadService uploadService) {
+                       UploadService uploadService, UserRepositoryBean userRepositoryBean) {
         this.entityManager = entityManager;
         this.pageRepositoryBean = pageRepositoryBean;
         this.pageMapper = pageMapper;
@@ -55,6 +57,7 @@ public class PageService {
         this.editRepositoryBean = editRepositoryBean;
         this.editMapper = editMapper;
         this.uploadService = uploadService;
+        this.userRepositoryBean = userRepositoryBean;
     }
 
     public Optional<Page> findBySlug(String slug) {
@@ -129,14 +132,14 @@ public class PageService {
                 .getResultList().stream().map(pageMapper::toModelShort).toList();
     }
 
-    // TODO pagination and stuff
     public List<PageShort> search(String query, int page, int pageSize) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
         cq.where(cb.like(cb.lower(cq.from(PageEntity.class).get("title")), "%" + query.toLowerCase() + "%"));
         TypedQuery<PageEntity> typedQuery = entityManager.createQuery(cq);
         return typedQuery
-                .setMaxResults(10)
+                .setFirstResult(page * pageSize)
+                .setMaxResults(pageSize)
                 .getResultList().stream().map(pageMapper::toModelShort).toList();
     }
 
@@ -174,7 +177,6 @@ public class PageService {
     }
 
     public List<Edit> findByUser(User user, int page, int pageSize) {
-
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
 
@@ -198,6 +200,46 @@ public class PageService {
             edit.setTitle(((PageEntity) result[1]).getTitle());
             return edit;
         }).collect(Collectors.toList());
+    }
+
+    public List<Edit> findByPage(Page page, int pageNumber, int pageSize) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+
+        Root<EditEntity> editFrom = cq.from(EditEntity.class);
+        Root<UserEntity> userFrom = cq.from(UserEntity.class);
+
+        cq.select(cb.array(editFrom, userFrom))
+                .where(cb.and(
+                        cb.equal(editFrom.get("userId"), userFrom.get("id")),
+                        cb.equal(editFrom.get("pageId"), page.getId())
+                ));
+
+        cq.orderBy(cb.desc(editFrom.get("date")));
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+
+        List<Object[]> results = query
+                .setFirstResult(pageNumber * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList();
+
+        return results.stream().map(result -> {
+            Edit edit = editMapper.toModel((EditEntity) result[0]);
+            edit.setUsername(((UserEntity) result[1]).getUsername());
+            return edit;
+        }).collect(Collectors.toList());
+    }
+
+    public Optional<Edit> findEditById(UUID id) {
+       Optional<Edit> edit = editRepositoryBean.findById(id).map(editMapper::toModel);
+       if (edit.isEmpty()) {
+           return Optional.empty();
+       }
+       Optional<User> user = userRepositoryBean.findById(edit.get().getUserId()).map(userMapper::toModel);
+       user.ifPresent(value -> edit.get().setUsername(value.getUsername()));
+       Optional<Page> page = pageRepositoryBean.findById(edit.get().getPageId()).map(pageMapper::toModel);
+       page.ifPresent(value -> edit.get().setTitle(value.getTitle()));
+       return edit;
     }
 
 }

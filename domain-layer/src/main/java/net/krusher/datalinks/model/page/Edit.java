@@ -15,9 +15,11 @@ public class Edit {
     @JsonIgnore
     private UUID pageId;
     private String title;
+    private String content;
     @JsonIgnore
     private String ip;
     private Instant date;
     @JsonIgnore
     private UUID userId;
+    private String username;
 }
