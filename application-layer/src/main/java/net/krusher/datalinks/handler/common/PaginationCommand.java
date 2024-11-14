@@ -1,5 +1,6 @@
 package net.krusher.datalinks.handler.common;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import net.krusher.datalinks.exception.EngineException;
