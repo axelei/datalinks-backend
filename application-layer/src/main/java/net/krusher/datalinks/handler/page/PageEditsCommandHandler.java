@@ -24,6 +24,7 @@ public class PageEditsCommandHandler {
     }
 
     public List<Edit> handler(SearchPaginationCommand query) {
+        query.validate();
         Optional<Page> page = pageService.findBySlug(slugify.slugify(query.getQuery()));
         if (page.isEmpty()) {
             return List.of();

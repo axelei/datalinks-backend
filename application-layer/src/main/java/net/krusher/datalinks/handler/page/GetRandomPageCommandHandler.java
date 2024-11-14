@@ -1,7 +1,5 @@
 package net.krusher.datalinks.handler.page;
 
-import com.github.slugify.Slugify;
-import net.krusher.datalinks.common.UserHelper;
 import net.krusher.datalinks.engineering.model.domain.page.PageService;
 import net.krusher.datalinks.model.page.PageShort;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +11,10 @@ import java.util.Optional;
 public class GetRandomPageCommandHandler {
 
     private final PageService pageService;
-    private final UserHelper userHelper;
-
-    private final Slugify slugify = Slugify.builder().build();
 
     @Autowired
-    public GetRandomPageCommandHandler(PageService pageService, UserHelper userHelper) {
+    public GetRandomPageCommandHandler(PageService pageService) {
         this.pageService = pageService;
-        this.userHelper = userHelper;
     }
 
     public Optional<PageShort> handler() {

@@ -1,6 +1,5 @@
 package net.krusher.datalinks.handler.page;
 
-import net.krusher.datalinks.common.UserHelper;
 import net.krusher.datalinks.engineering.model.domain.page.PageService;
 import net.krusher.datalinks.model.page.Edit;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +12,10 @@ import java.util.UUID;
 public class GetEditCommandHandler {
 
     private final PageService pageService;
-    private final UserHelper userHelper;
 
     @Autowired
-    public GetEditCommandHandler(PageService pageService, UserHelper userHelper) {
+    public GetEditCommandHandler(PageService pageService) {
         this.pageService = pageService;
-        this.userHelper = userHelper;
     }
 
     public Optional<Edit> handler(UUID editId) {

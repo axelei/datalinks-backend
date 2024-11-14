@@ -19,6 +19,7 @@ public class SearchCommandHandler {
     }
 
     public List<PageShort> handler(SearchPaginationCommand query) {
+        query.validate();
         return pageService.search(query.getQuery(), query.getPage(), query.getPageSize());
     }
 }

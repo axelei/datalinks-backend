@@ -133,8 +133,14 @@ public class PageController {
     }
 
     @GetMapping("-contributions/{username}")
-    public ResponseEntity<List<Edit>> contributions(@PathVariable("username") String username) {
-        return ResponseEntity.ok(getContributionsCommandHandler.handler(username));
+    public ResponseEntity<List<Edit>> contributions(@PathVariable("username") String username,
+                                                    @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                                                    @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize) {
+        return ResponseEntity.ok(getContributionsCommandHandler.handler(SearchPaginationCommand.builder()
+                .query(username)
+                .page(page)
+                .pageSize(pageSize)
+                .build()));
     }
 
     @DeleteMapping("{title}")

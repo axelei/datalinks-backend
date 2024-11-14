@@ -189,6 +189,7 @@ public class PageService {
                         cb.equal(editRoot.get("userId"), user.getId())
                                 ));
 
+        cq.orderBy(cb.desc(editRoot.get("date")));
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
         List<Object[]> results = query
                 .setFirstResult(page * pageSize)
