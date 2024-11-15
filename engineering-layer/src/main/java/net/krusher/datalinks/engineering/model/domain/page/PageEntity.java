@@ -18,6 +18,9 @@ import lombok.NoArgsConstructor;
 import net.krusher.datalinks.model.user.UserLevel;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
 import java.time.Instant;
 import java.util.Set;
@@ -28,6 +31,7 @@ import java.util.UUID;
 @Entity
 @Data
 @Builder
+@Indexed
 @Table(name = "PAGES", indexes = {
         @Index(name = "IDX_PAGE_SLUG", columnList = "slug"),
         @Index(name = "IDX_PAGE_CREATOR_ID", columnList = "creatorId"),
@@ -42,12 +46,15 @@ public class PageEntity {
     @Column(nullable = false)
     private String slug;
     @Column(nullable = false)
+    @FullTextField
     private String title;
     @ColumnDefault("''")
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
+    @FullTextField
     private String content;
     private String summary;
     @ManyToMany(fetch = FetchType.LAZY)
+    @IndexedEmbedded
     private Set<CategoryEntity> categories;
     @Enumerated(EnumType.STRING)
     private UserLevel editBlock;

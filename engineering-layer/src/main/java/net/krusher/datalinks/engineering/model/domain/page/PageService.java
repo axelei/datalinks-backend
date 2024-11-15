@@ -16,6 +16,10 @@ import net.krusher.datalinks.model.page.Edit;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
 import net.krusher.datalinks.model.user.User;
+import org.hibernate.search.engine.search.query.SearchQuery;
+import org.hibernate.search.engine.search.query.SearchResult;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
@@ -133,14 +137,15 @@ public class PageService {
     }
 
     public List<PageShort> search(String query, int page, int pageSize) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
-        cq.where(cb.like(cb.lower(cq.from(PageEntity.class).get("title")), "%" + query.toLowerCase() + "%"));
-        TypedQuery<PageEntity> typedQuery = entityManager.createQuery(cq);
-        return typedQuery
-                .setFirstResult(page * pageSize)
-                .setMaxResults(pageSize)
-                .getResultList().stream().map(pageMapper::toModelShort).toList();
+
+        SearchSession searchSession = Search.session(entityManager);
+        SearchQuery<PageEntity> search = searchSession.search(PageEntity.class)
+                .where(f -> f.match()
+                        .fields("title", "content")
+                        .matching(query)
+                ).toQuery();
+        SearchResult<PageEntity> pages = search.fetch(page * pageSize, pageSize);
+        return pages.hits().stream().map(pageMapper::toModelShort).toList();
     }
 
     @Cacheable("pageCount")
