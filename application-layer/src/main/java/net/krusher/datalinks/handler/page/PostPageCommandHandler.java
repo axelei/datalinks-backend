@@ -1,15 +1,10 @@
 package net.krusher.datalinks.handler.page;
 
-import com.github.slugify.Slugify;
 import net.krusher.datalinks.common.UserHelper;
-import net.krusher.datalinks.engineering.model.domain.configlet.ConfigService;
 import net.krusher.datalinks.engineering.model.domain.page.PageService;
-import net.krusher.datalinks.engineering.model.domain.user.LoginTokenService;
-import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.model.page.Page;
-import net.krusher.datalinks.model.user.LoginToken;
 import net.krusher.datalinks.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,13 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static net.krusher.datalinks.handler.common.SlugifyProvider.SLUGIFY;
+
 @Service
 public class PostPageCommandHandler {
 
     private final PageService pageService;
     private final UserHelper userHelper;
-
-    private final Slugify slugify = Slugify.builder().build();
 
     @Autowired
     public PostPageCommandHandler(PageService pageService, UserHelper userHelper) {
@@ -33,7 +28,7 @@ public class PostPageCommandHandler {
 
     @Transactional
     public void handler(PostPageCommand postPageCommand) {
-        pageService.findBySlug(slugify.slugify(postPageCommand.getTitle()))
+        pageService.findBySlug(SLUGIFY.slugify(postPageCommand.getTitle()))
                 .ifPresentOrElse(page -> updatePage(page, postPageCommand), () -> createPage(postPageCommand));
     }
 
@@ -46,7 +41,7 @@ public class PostPageCommandHandler {
         Page page = Page.builder()
                 .title(postPageCommand.getTitle())
                 .content(postPageCommand.getContent())
-                .slug(slugify.slugify(postPageCommand.getTitle()))
+                .slug(SLUGIFY.slugify(postPageCommand.getTitle()))
                 .creatorId(user.map(User::getId).orElse(null))
                 .build();
         pageService.save(page, user.orElse(null), postPageCommand.getIp());
@@ -57,7 +52,7 @@ public class PostPageCommandHandler {
             throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't edit this page");
         }
         Optional<User> user = userHelper.getUserFromLoginToken(postPageCommand.getLoginTokenId());
-        page.setSlug(slugify.slugify(postPageCommand.getTitle()));
+        page.setSlug(SLUGIFY.slugify(postPageCommand.getTitle()));
         page.setContent(postPageCommand.getContent());
         pageService.save(page, user.orElse(null), postPageCommand.getIp());
     }

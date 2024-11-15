@@ -38,6 +38,10 @@
             <groupId>com.github.slugify</groupId>
             <artifactId>slugify</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+        </dependency>
 
     </dependencies>
 

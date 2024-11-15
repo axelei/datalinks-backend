@@ -19,8 +19,6 @@ public class GetContributionsCommandHandler {
     private final PageService pageService;
     private final UserService userService;
 
-    private final Slugify slugify = Slugify.builder().build();
-
     @Autowired
     public GetContributionsCommandHandler(PageService pageService, UserService userService) {
         this.pageService = pageService;

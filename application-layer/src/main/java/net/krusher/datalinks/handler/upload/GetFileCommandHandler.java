@@ -1,6 +1,5 @@
 package net.krusher.datalinks.handler.upload;
 
-import com.github.slugify.Slugify;
 import net.krusher.datalinks.common.UserHelper;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadService;
 import net.krusher.datalinks.exception.EngineException;
@@ -11,13 +10,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static net.krusher.datalinks.handler.common.SlugifyProvider.SLUGIFY;
+
 @Service
 public class GetFileCommandHandler {
 
     private final UploadService uploadService;
     private final UserHelper userHelper;
-
-    private final Slugify slugify = Slugify.builder().build();
 
     @Autowired
     public GetFileCommandHandler(UploadService uploadService, UserHelper userHelper) {
@@ -26,7 +25,7 @@ public class GetFileCommandHandler {
     }
 
     public Upload handler(GetFileCommand getFileCommand) {
-        Optional<Upload> upload = uploadService.findBySlug(slugify.slugify(getFileCommand.getFilename()));
+        Optional<Upload> upload = uploadService.findBySlug(SLUGIFY.slugify(getFileCommand.getFilename()));
         if (upload.isEmpty()) {
             throw new EngineException(ErrorType.UPLOAD_ERROR, "File not found");
         }

@@ -11,12 +11,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static net.krusher.datalinks.handler.common.SlugifyProvider.SLUGIFY;
+
 @Service
 public class PageEditsCommandHandler {
 
     private final PageService pageService;
-
-    private final Slugify slugify = Slugify.builder().build();
 
     @Autowired
     public PageEditsCommandHandler(PageService pageService) {
@@ -25,7 +25,7 @@ public class PageEditsCommandHandler {
 
     public List<Edit> handler(SearchPaginationCommand query) {
         query.validate();
-        Optional<Page> page = pageService.findBySlug(slugify.slugify(query.getQuery()));
+        Optional<Page> page = pageService.findBySlug(SLUGIFY.slugify(query.getQuery()));
         if (page.isEmpty()) {
             return List.of();
         }

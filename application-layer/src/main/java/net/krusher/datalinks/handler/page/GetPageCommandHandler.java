@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static net.krusher.datalinks.handler.common.SlugifyProvider.SLUGIFY;
+
 @Service
 public class GetPageCommandHandler {
 
     private final PageService pageService;
     private final UserHelper userHelper;
-
-    private final Slugify slugify = Slugify.builder().build();
 
     @Autowired
     public GetPageCommandHandler(PageService pageService, UserHelper userHelper) {
@@ -26,7 +26,7 @@ public class GetPageCommandHandler {
     }
 
     public Optional<Page> handler(GetPageCommand getPageCommand) {
-        String slug = slugify.slugify(getPageCommand.getTitle());
+        String slug = SLUGIFY.slugify(getPageCommand.getTitle());
         Optional<Page> page = pageService.findBySlug(slug);
         if (page.isPresent() && !userHelper.userCanRead(page.get(), getPageCommand.getLoginTokenId())) {
             throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't read this page");

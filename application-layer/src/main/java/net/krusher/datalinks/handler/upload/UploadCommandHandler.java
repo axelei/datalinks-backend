@@ -1,6 +1,5 @@
 package net.krusher.datalinks.handler.upload;
 
-import com.github.slugify.Slugify;
 import io.vavr.control.Try;
 import lombok.Setter;
 import net.krusher.datalinks.common.UserHelper;
@@ -16,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static net.krusher.datalinks.handler.common.SlugifyProvider.SLUGIFY;
+
 @Service
 public class UploadCommandHandler {
 
@@ -25,8 +26,6 @@ public class UploadCommandHandler {
     @Setter
     @Value("${application.backend.url}")
     private String backendUrl;
-
-    private final Slugify slugify = Slugify.builder().build();
 
     @Autowired
     public UploadCommandHandler(UploadService uploadService, UserHelper userHelper) {
@@ -43,7 +42,7 @@ public class UploadCommandHandler {
         Upload upload = Upload.builder()
                 .filename(uploadCommand.getFilename())
                 .inputStream(uploadCommand.getInputStream())
-                .slug(slugify.slugify(uploadCommand.getFilename()))
+                .slug(SLUGIFY.slugify(uploadCommand.getFilename()))
                 .ipCreator(uploadCommand.getIp())
                 .creatorId(user.map(User::getId).orElse(null))
                 .build();
