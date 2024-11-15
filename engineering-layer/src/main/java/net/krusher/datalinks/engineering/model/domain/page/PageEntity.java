@@ -34,6 +34,7 @@ import java.util.UUID;
 @Indexed
 @Table(name = "PAGES", indexes = {
         @Index(name = "IDX_PAGE_SLUG", columnList = "slug"),
+        @Index(name = "IDX_PAGE_TITLE", columnList = "title"),
         @Index(name = "IDX_PAGE_CREATOR_ID", columnList = "creatorId"),
         @Index(name = "IDX_PAGE_CREATION_DATE", columnList = "creationDate"),
         @Index(name = "IDX_PAGE_MODIFIED_DATE", columnList = "modifiedDate")
@@ -46,7 +47,7 @@ public class PageEntity {
     @Column(nullable = false)
     private String slug;
     @Column(nullable = false)
-    @FullTextField
+    @FullTextField(analyzer = "edgeNGramAnalyzer", searchAnalyzer = "edgeNGramAnalyzer")
     private String title;
     @ColumnDefault("''")
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
@@ -79,7 +80,11 @@ public class PageEntity {
     }
 
     public String summarize(String string) {
-        return StringUtils.abbreviate(string.replaceAll("<[^>]*>", ""), 100);
+        return StringUtils.abbreviate(string
+                        .replace("</figure>", " ")
+                        .replace("</p>", " ")
+                        .replaceAll("<[^>]*>", "")
+                , 100);
     }
 
 }

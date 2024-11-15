@@ -127,22 +127,24 @@ public class PageService {
     }
 
     public List<PageShort> titleSearch(String query) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
-        cq.where(cb.like(cb.lower(cq.from(PageEntity.class).get("title")), "%" + query.toLowerCase() + "%"));
-        TypedQuery<PageEntity> typedQuery = entityManager.createQuery(cq);
-        return typedQuery
-                .setMaxResults(10)
-                .getResultList().stream().map(pageMapper::toModelShort).toList();
+        SearchSession searchSession = Search.session(entityManager);
+        SearchQuery<PageEntity> search = searchSession.search(PageEntity.class)
+                .where(f -> f.match()
+                        .fields("title")
+                        .matching(query)
+                        .fuzzy()
+                ).toQuery();
+        SearchResult<PageEntity> pages = search.fetch(10);
+        return pages.hits().stream().map(pageMapper::toModelShort).toList();
     }
 
     public List<PageShort> search(String query, int page, int pageSize) {
-
         SearchSession searchSession = Search.session(entityManager);
         SearchQuery<PageEntity> search = searchSession.search(PageEntity.class)
                 .where(f -> f.match()
                         .fields("title", "content")
                         .matching(query)
+                        .fuzzy()
                 ).toQuery();
         SearchResult<PageEntity> pages = search.fetch(page * pageSize, pageSize);
         return pages.hits().stream().map(pageMapper::toModelShort).toList();
