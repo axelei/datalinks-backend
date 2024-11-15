@@ -71,7 +71,7 @@ public class PageController {
                           DeletePageCommandHandler deletePageCommandHandler,
                           PageEditsCommandHandler pageEditsCommandHandler,
                           GetContributionsCommandHandler getContributionsCommandHandler,
-                            GetEditCommandHandler getEditCommandHandler,
+                          GetEditCommandHandler getEditCommandHandler,
                           ObjectMapper objectMapper) {
         this.getPageCommandHandler = getPageCommandHandler;
         this.postPageCommandHandler = postPageCommandHandler;
