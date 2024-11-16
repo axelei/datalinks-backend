@@ -16,7 +16,6 @@ public enum ConfigletKey {
     UPDATE_UPLOAD_LEVEL(UserLevel.USER.name()),
     DELETE_UPLOAD_LEVEL(UserLevel.ADMIN.name()),
     EDIT_UPLOAD_LEVEL(UserLevel.USER.name()),
-    TOKEN_EXPIRATION("3600"),
     ;
 
     private final String defaultValue;
