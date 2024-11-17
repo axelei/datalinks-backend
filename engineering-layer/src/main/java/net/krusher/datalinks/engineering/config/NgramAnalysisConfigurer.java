@@ -16,9 +16,9 @@ public class NgramAnalysisConfigurer implements LuceneAnalysisConfigurer {
 				.tokenFilter( StopFilterFactory.class )
 				.tokenFilter( LowerCaseFilterFactory.class )
 				.tokenFilter( LimitTokenCountFilterFactory.class )
-				.param( "maxTokenCount", "2" )
+				.param( "maxTokenCount", "3" )
 				.tokenFilter( EdgeNGramFilterFactory.class )
-				.param( "minGramSize", "2" )
+				.param( "minGramSize", "3" )
 				.param( "maxGramSize", "15" );
 	}
 }

@@ -15,6 +15,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.krusher.datalinks.model.search.Foundable;
+import net.krusher.datalinks.model.search.Foundling;
 import net.krusher.datalinks.model.user.UserLevel;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ColumnDefault;
@@ -39,7 +41,7 @@ import java.util.UUID;
         @Index(name = "IDX_PAGE_CREATION_DATE", columnList = "creationDate"),
         @Index(name = "IDX_PAGE_MODIFIED_DATE", columnList = "modifiedDate")
 })
-public class PageEntity {
+public class PageEntity implements Foundable {
 
     @Id
     @Column(nullable = false)
@@ -87,4 +89,13 @@ public class PageEntity {
                 , 100);
     }
 
+    @Override
+    public Foundling toFoundling() {
+        return Foundling.builder()
+                .id(id)
+                .title(title)
+                .content(summarize(content))
+                .type(Foundling.FoundlingType.PAGE)
+                .build();
+    }
 }

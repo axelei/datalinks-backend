@@ -5,20 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.common.SearchPaginationCommand;
-import net.krusher.datalinks.handler.page.DeletePageCommand;
-import net.krusher.datalinks.handler.page.DeletePageCommandHandler;
-import net.krusher.datalinks.handler.page.GetContributionsCommandHandler;
-import net.krusher.datalinks.handler.page.GetEditCommandHandler;
-import net.krusher.datalinks.handler.page.GetPageCommand;
-import net.krusher.datalinks.handler.page.GetPageCommandHandler;
-import net.krusher.datalinks.handler.page.GetRandomPageCommandHandler;
-import net.krusher.datalinks.handler.page.NewPagesCommandHandler;
-import net.krusher.datalinks.handler.page.PageEditsCommandHandler;
-import net.krusher.datalinks.handler.page.PostPageCommand;
-import net.krusher.datalinks.handler.page.PostPageCommandHandler;
-import net.krusher.datalinks.handler.page.RecentChangesCommandHandler;
-import net.krusher.datalinks.handler.page.SearchCommandHandler;
-import net.krusher.datalinks.handler.page.TitleSearchCommandHandler;
+import net.krusher.datalinks.handler.page.*;
 import net.krusher.datalinks.model.PaginationModel;
 import net.krusher.datalinks.model.PostPageModel;
 import net.krusher.datalinks.model.page.Edit;
@@ -26,16 +13,7 @@ import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -52,8 +30,6 @@ public class PageController {
     private final NewPagesCommandHandler newPagesCommandHandler;
     private final RecentChangesCommandHandler recentChangesCommandHandler;
     private final GetRandomPageCommandHandler getRandomPageCommandHandler;
-    private final TitleSearchCommandHandler titleSearchCommandHandler;
-    private final SearchCommandHandler searchCommandHandler;
     private final DeletePageCommandHandler deletePageCommandHandler;
     private final GetContributionsCommandHandler getContributionsCommandHandler;
     private final PageEditsCommandHandler pageEditsCommandHandler;
@@ -66,8 +42,6 @@ public class PageController {
                           NewPagesCommandHandler newPagesCommandHandler,
                           RecentChangesCommandHandler recentChangesCommandHandler,
                           GetRandomPageCommandHandler getRandomPageCommandHandler,
-                          TitleSearchCommandHandler titleSearchCommandHandler,
-                          SearchCommandHandler searchCommandHandler,
                           DeletePageCommandHandler deletePageCommandHandler,
                           PageEditsCommandHandler pageEditsCommandHandler,
                           GetContributionsCommandHandler getContributionsCommandHandler,
@@ -78,8 +52,6 @@ public class PageController {
         this.newPagesCommandHandler = newPagesCommandHandler;
         this.recentChangesCommandHandler = recentChangesCommandHandler;
         this.getRandomPageCommandHandler = getRandomPageCommandHandler;
-        this.titleSearchCommandHandler = titleSearchCommandHandler;
-        this.searchCommandHandler = searchCommandHandler;
         this.deletePageCommandHandler = deletePageCommandHandler;
         this.getContributionsCommandHandler = getContributionsCommandHandler;
         this.pageEditsCommandHandler = pageEditsCommandHandler;
@@ -114,22 +86,6 @@ public class PageController {
         return getRandomPageCommandHandler.handler()
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("-titleSearch/{query}")
-    public ResponseEntity<List<PageShort>> titleSearch(@PathVariable("query") String query) {
-        return ResponseEntity.ok(titleSearchCommandHandler.handler(query));
-    }
-
-    @GetMapping("-search/{query}")
-    public ResponseEntity<List<PageShort>> search(@PathVariable("query") String query,
-                                                  @RequestParam(name = "page", required = false, defaultValue = "0") int page,
-                                                  @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize) {
-        return ResponseEntity.ok(searchCommandHandler.handler(SearchPaginationCommand.builder()
-                .query(query)
-                .page(page)
-                .pageSize(pageSize)
-                .build()));
     }
 
     @GetMapping("-contributions/{username}")

@@ -103,18 +103,6 @@ public class PageService {
                 .getResultList().stream().map(pageMapper::toModelShort).toList();
     }
 
-    public List<PageShort> contributions(UUID userId, int page, int pageSize) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
-        Root<PageEntity> from = cq.from(PageEntity.class);
-        cq.where(cb.equal(from.get("creatorId"), userId));
-        TypedQuery<PageEntity> query = entityManager.createQuery(cq);
-        return query
-                .setFirstResult(page * pageSize)
-                .setMaxResults(pageSize)
-                .getResultList().stream().map(pageMapper::toModelShort).toList();
-    }
-
     public List<PageShort> allPages(int page, int pageSize) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
@@ -124,30 +112,6 @@ public class PageService {
                 .setFirstResult(page * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList().stream().map(pageMapper::toModelShort).toList();
-    }
-
-    public List<PageShort> titleSearch(String query) {
-        SearchSession searchSession = Search.session(entityManager);
-        SearchQuery<PageEntity> search = searchSession.search(PageEntity.class)
-                .where(f -> f.match()
-                        .fields("title")
-                        .matching(query)
-                        .fuzzy()
-                ).toQuery();
-        SearchResult<PageEntity> pages = search.fetch(10);
-        return pages.hits().stream().map(pageMapper::toModelShort).toList();
-    }
-
-    public List<PageShort> search(String query, int page, int pageSize) {
-        SearchSession searchSession = Search.session(entityManager);
-        SearchQuery<PageEntity> search = searchSession.search(PageEntity.class)
-                .where(f -> f.match()
-                        .fields("title", "content")
-                        .matching(query)
-                        .fuzzy()
-                ).toQuery();
-        SearchResult<PageEntity> pages = search.fetch(page * pageSize, pageSize);
-        return pages.hits().stream().map(pageMapper::toModelShort).toList();
     }
 
     @Cacheable("pageCount")

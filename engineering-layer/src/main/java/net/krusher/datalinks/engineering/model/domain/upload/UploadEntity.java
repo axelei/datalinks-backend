@@ -1,19 +1,15 @@
 package net.krusher.datalinks.engineering.model.domain.upload;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.krusher.datalinks.model.search.Foundable;
+import net.krusher.datalinks.model.search.Foundling;
 import net.krusher.datalinks.model.user.UserLevel;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -23,19 +19,22 @@ import java.util.UUID;
 @Entity
 @Data
 @Builder
+@Indexed
 @Table(name = "UPLOADS", indexes = {
         @Index(name = "IDX_UPLOAD_SLUG", columnList = "slug", unique = true),
         @Index(name = "IDX_UPLOAD_CREATOR_ID", columnList = "creatorId"),
 })
-public class UploadEntity {
+public class UploadEntity implements Foundable {
 
     @Id
     @Column(nullable = false)
     private UUID id;
     @Column(nullable = false)
+    @FullTextField(analyzer = "edgeNGramAnalyzer", searchAnalyzer = "edgeNGramAnalyzer")
     private String filename;
     @Column(nullable = false)
     private String slug;
+    @FullTextField
     private String description;
     @Enumerated(EnumType.STRING)
     private UserLevel editBlock;
@@ -58,5 +57,15 @@ public class UploadEntity {
     @PreUpdate
     protected void setDefaultsOnUpdate() {
         this.modifiedDate = Instant.now();
+    }
+
+    @Override
+    public Foundling toFoundling() {
+        return Foundling.builder()
+                .id(id)
+                .title(filename)
+                .content(slug)
+                .type(Foundling.FoundlingType.UPLOAD)
+                .build();
     }
 }
