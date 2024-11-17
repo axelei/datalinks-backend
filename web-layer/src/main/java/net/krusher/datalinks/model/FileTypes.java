@@ -13,7 +13,8 @@ public enum FileTypes {
     BMP(MediaType.valueOf("image/bmp")),
     GIF(MediaType.IMAGE_GIF),
     WEBP(MediaType.valueOf("image/webp")),
-    TIFF(MediaType.valueOf("image/tiff"))
+    TIFF(MediaType.valueOf("image/tiff")),
+    SVG(MediaType.valueOf("image/svg+xml")),
     ;
 
     private final MediaType mediaType;

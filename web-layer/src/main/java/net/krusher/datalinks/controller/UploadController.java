@@ -2,7 +2,7 @@ package net.krusher.datalinks.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.vavr.control.Try;
+import io.vavr.control.Option;
 import jakarta.servlet.http.HttpServletRequest;
 import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.upload.DeleteUploadCommand;
@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -88,14 +89,23 @@ public class UploadController {
     @GetMapping("/get/{filename}")
     @ResponseBody
     public ResponseEntity<InputStreamResource> get(@PathVariable("filename") String filename, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
-        return Try.of(() -> getFileCommandHandler.handler(GetFileCommand.builder()
-                .filename(filename)
-                .loginTokenId(toLoginToken(userToken))
-                .build()))
-                .map(upload -> ResponseEntity.ok()
-                        .contentType(getMediaType(upload.getFilename()))
-                        .body(new InputStreamResource(upload.getInputStream())))
-                .getOrElseGet(throwable -> ResponseEntity.notFound().build());
+        return Option.of(getFileCommandHandler.handler(GetFileCommand.builder()
+                        .filename(filename)
+                        .loginTokenId(toLoginToken(userToken))
+                        .build()))
+                .map(upload -> {
+                    InputStream inputStream = Option.of(upload.getInputStream())
+                            .getOrElse(() -> getClass().getResourceAsStream("/image-not-found-icon.svg"));
+                    MediaType mediaType = Option.of(upload.getInputStream())
+                            .map(__ -> getMediaType(upload.getFilename()))
+                            .getOrElse(FileTypes.SVG.getMediaType());
+
+                    return ResponseEntity.ok()
+                            .contentType(mediaType)
+                            .body(new InputStreamResource(inputStream));
+                })
+                .getOrElse(ResponseEntity.notFound().build());
+
     }
 
     private MediaType getMediaType(String filename) {
@@ -149,7 +159,7 @@ public class UploadController {
         return ResponseEntity.ok(pages);
     }
 
-    @GetMapping("-usages/{filename}")
+    @GetMapping("usages/{filename}")
     public ResponseEntity<List<PageShort>> usages(@PathVariable("filename") String filename) {
         return ResponseEntity.ok(findUsagesCommandHandler.handler(filename));
     }
