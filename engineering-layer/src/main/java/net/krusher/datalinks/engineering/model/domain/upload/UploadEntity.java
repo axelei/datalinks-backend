@@ -64,7 +64,7 @@ public class UploadEntity implements Foundable {
         return Foundling.builder()
                 .id(id)
                 .title(filename)
-                .content(slug)
+                .content(description)
                 .type(Foundling.FoundlingType.UPLOAD)
                 .build();
     }
