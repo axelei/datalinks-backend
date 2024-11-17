@@ -9,11 +9,8 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import lombok.Setter;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
-import net.krusher.datalinks.engineering.mapper.PageMapperImpl;
 import net.krusher.datalinks.engineering.mapper.UploadMapper;
-import net.krusher.datalinks.engineering.model.domain.page.PageEntity;
 import net.krusher.datalinks.engineering.model.domain.page.PageRepositoryBean;
-import net.krusher.datalinks.engineering.model.domain.page.PageService;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.model.page.PageShort;
@@ -23,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -88,7 +86,7 @@ public class UploadService {
         if (upload.isPresent()) {
             String uploadPath = getUploadPath(upload.get().getMd5(), upload.get().getSlug());
             upload.get().setInputStream(Try.of(() -> Files.newInputStream(Path.of(uploadDir + uploadPath)))
-                    .getOrElseThrow(e -> new EngineException(ErrorType.UPLOAD_ERROR, "File not found", e)));
+                    .getOrElse(() -> null));
         }
         return upload;
     }
@@ -106,6 +104,15 @@ public class UploadService {
                 .setFirstResult(page * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList().stream().map(uploadMapper::toModel).toList();
+    }
+
+    public void delete(Upload upload) {
+        deleteUsages(upload.getId());
+        File file = new File(uploadDir + upload.getSlug());
+        if (file.exists()) {
+            file.delete();
+        }
+        uploadRepositoryBean.deleteById(upload.getId());
     }
 
     public void deleteUsages(UUID pageId) {

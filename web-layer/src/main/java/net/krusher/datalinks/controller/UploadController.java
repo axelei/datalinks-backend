@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Try;
 import jakarta.servlet.http.HttpServletRequest;
 import net.krusher.datalinks.handler.common.PaginationCommand;
+import net.krusher.datalinks.handler.upload.DeleteUploadCommand;
+import net.krusher.datalinks.handler.upload.DeleteUploadCommandHandler;
 import net.krusher.datalinks.handler.upload.FindUsagesCommandHandler;
 import net.krusher.datalinks.handler.upload.GetFileCommand;
 import net.krusher.datalinks.handler.upload.GetFileCommandHandler;
@@ -53,6 +55,7 @@ public class UploadController {
     private final GetFileCommandHandler getFileCommandHandler;
     private final NewUploadsCommandHandler newUploadsCommandHandler;
     private final FindUsagesCommandHandler findUsagesCommandHandler;
+    private final DeleteUploadCommandHandler deleteUploadCommandHandler;
 
     @Autowired
     public UploadController(ObjectMapper objectMapper,
@@ -60,13 +63,15 @@ public class UploadController {
                             UpdateUploadCommandHandler updateUploadCommandHandler,
                             GetFileCommandHandler getFileCommandHandler,
                             NewUploadsCommandHandler newUploadsCommandHandler,
-                            FindUsagesCommandHandler findUsagesCommandHandler) {
+                            FindUsagesCommandHandler findUsagesCommandHandler,
+                            DeleteUploadCommandHandler deleteUploadCommandHandler) {
         this.uploadCommandHandler = uploadCommandHandler;
         this.updateUploadCommandHandler = updateUploadCommandHandler;
         this.objectMapper = objectMapper;
         this.getFileCommandHandler = getFileCommandHandler;
         this.newUploadsCommandHandler = newUploadsCommandHandler;
         this.findUsagesCommandHandler = findUsagesCommandHandler;
+        this.deleteUploadCommandHandler = deleteUploadCommandHandler;
     }
 
     @GetMapping("/lookAt/{filename}")
@@ -99,8 +104,12 @@ public class UploadController {
     }
 
     @DeleteMapping("/delete/{filename}")
-    void delete(@PathVariable("filename") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
-
+    ResponseEntity<String> delete(@PathVariable("filename") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+        deleteUploadCommandHandler.handler(DeleteUploadCommand.builder()
+                .filename(title)
+                .loginToken(toLoginToken(userToken))
+                .build());
+        return ResponseEntity.ok("OK");
     }
 
     @PostMapping("/upload")
