@@ -43,6 +43,7 @@ public class UploadCommandHandler {
                 .filename(uploadCommand.getFilename())
                 .inputStream(uploadCommand.getInputStream())
                 .slug(SLUGIFY.slugify(uploadCommand.getFilename()))
+                .description(uploadCommand.getDescription())
                 .ipCreator(uploadCommand.getIp())
                 .creatorId(user.map(User::getId).orElse(null))
                 .build();

@@ -123,17 +123,22 @@ public class UploadController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<UploadResponse> put(@RequestHeader(value = AUTH_HEADER, required = false) String userToken, @RequestParam("upload") MultipartFile upload, HttpServletRequest request) throws IOException {
+    public ResponseEntity<UploadResponse> put(
+            @RequestHeader(value = AUTH_HEADER, required = false) String userToken,
+            @RequestParam("upload") MultipartFile upload,
+            @RequestParam(value = "description", required = false, defaultValue = "") String description,
+            HttpServletRequest request) throws IOException {
        String extension = upload.getOriginalFilename().substring(upload.getOriginalFilename().lastIndexOf('.') + 1);
        if (Arrays.stream(FileTypes.values()).noneMatch(fileType -> fileType.name().equalsIgnoreCase(extension))) {
            return ResponseEntity.badRequest().build();
        }
        String url = uploadCommandHandler.handler(UploadCommand.builder()
-                .inputStream(upload.getInputStream())
-                .loginTokenId(toLoginToken(userToken))
-                .filename(upload.getOriginalFilename())
-                .ip(request.getRemoteAddr())
-                .build());
+               .inputStream(upload.getInputStream())
+               .loginTokenId(toLoginToken(userToken))
+               .filename(upload.getOriginalFilename())
+               .description(description)
+               .ip(request.getRemoteAddr())
+               .build());
        return ResponseEntity.ok(UploadResponse.builder().url(url).build());
     }
 
