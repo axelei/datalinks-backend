@@ -16,10 +16,6 @@ import net.krusher.datalinks.model.page.Edit;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
 import net.krusher.datalinks.model.user.User;
-import org.hibernate.search.engine.search.query.SearchQuery;
-import org.hibernate.search.engine.search.query.SearchResult;
-import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
@@ -94,13 +90,57 @@ public class PageService {
 
     public List<PageShort> pagesSortBy(String column, int page, int pageSize) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<PageEntity> cq = cb.createQuery(PageEntity.class);
-        cq.orderBy(cb.desc(cq.from(PageEntity.class).get(column)));
-        TypedQuery<PageEntity> query = entityManager.createQuery(cq);
-        return query
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+
+        Root<PageEntity> pageRoot = cq.from(PageEntity.class);
+        Root<UserEntity> userRoot = cq.from(UserEntity.class);
+
+        cq.select(cb.array(pageRoot, userRoot))
+                .where(cb.and(
+                        cb.equal(pageRoot.get("creatorId"), userRoot.get("id"))
+                ));
+
+        cq.orderBy(cb.desc(pageRoot.get(column)));
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+        List<Object[]> results = query
                 .setFirstResult(page * pageSize)
                 .setMaxResults(pageSize)
-                .getResultList().stream().map(pageMapper::toModelShort).toList();
+                .getResultList();
+
+        return results.stream().map(result -> {
+            PageShort pageItem = pageMapper.toModelShort((PageEntity) result[0]);
+            pageItem.setCreatorName(((UserEntity) result[1]).getUsername());
+            return pageItem;
+        }).collect(Collectors.toList());
+    }
+
+    public List<Edit> editsSortBy(String column, int page, int pageSize) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+
+        Root<EditEntity> editRoot = cq.from(EditEntity.class);
+        Root<PageEntity> pageRoot = cq.from(PageEntity.class);
+        Root<UserEntity> userRoot = cq.from(UserEntity.class);
+
+        cq.select(cb.array(editRoot, pageRoot, userRoot))
+                .where(cb.and(
+                        cb.equal(editRoot.get("pageId"), pageRoot.get("id")),
+                        cb.equal(editRoot.get("userId"), userRoot.get("id"))
+                ));
+
+        cq.orderBy(cb.desc(editRoot.get(column)));
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+        List<Object[]> results = query
+                .setFirstResult(page * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList();
+
+        return results.stream().map(result -> {
+            Edit edit = editMapper.toModel((EditEntity) result[0]);
+            edit.setTitle(((PageEntity) result[1]).getTitle());
+            edit.setUsername(((UserEntity) result[2]).getUsername());
+            return edit;
+        }).collect(Collectors.toList());
     }
 
     public List<PageShort> allPages(int page, int pageSize) {

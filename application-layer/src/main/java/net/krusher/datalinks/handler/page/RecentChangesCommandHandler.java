@@ -4,6 +4,7 @@ import net.krusher.datalinks.engineering.model.domain.page.PageService;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.handler.common.PaginationCommand;
+import net.krusher.datalinks.model.page.Edit;
 import net.krusher.datalinks.model.page.PageShort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,8 @@ public class RecentChangesCommandHandler {
         this.pageService = pageService;
     }
 
-    public List<PageShort> handler(PaginationCommand paginationCommand) {
+    public List<Edit> handler(PaginationCommand paginationCommand) {
         paginationCommand.validate();
-        return pageService.pagesSortBy("modifiedDate", paginationCommand.getPage(), paginationCommand.getPageSize());
+        return pageService.editsSortBy("date", paginationCommand.getPage(), paginationCommand.getPageSize());
     }
 }

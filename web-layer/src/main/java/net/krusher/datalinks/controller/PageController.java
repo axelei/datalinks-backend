@@ -135,9 +135,9 @@ public class PageController {
     }
 
     @PostMapping("recentChanges")
-    public ResponseEntity<List<PageShort>> recentChanges(@RequestBody String body) throws JsonProcessingException {
+    public ResponseEntity<List<Edit>> recentChanges(@RequestBody String body) throws JsonProcessingException {
         PaginationModel paginationModel = objectMapper.readValue(body, PaginationModel.class);
-        List<PageShort> pages = recentChangesCommandHandler.handler(PaginationCommand.builder()
+        List<Edit> pages = recentChangesCommandHandler.handler(PaginationCommand.builder()
                 .page(paginationModel.getPage())
                 .pageSize(paginationModel.getPageSize())
                 .build());

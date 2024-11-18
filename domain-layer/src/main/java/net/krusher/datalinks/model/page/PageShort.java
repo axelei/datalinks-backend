@@ -19,4 +19,5 @@ public class PageShort {
     private Instant creationDate;
     private Instant modifiedDate;
     private UUID creatorId;
+    private String creatorName;
 }
