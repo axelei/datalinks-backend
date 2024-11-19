@@ -100,4 +100,8 @@ public class UserHelper {
         return defaultBlock.getLevel() <= userLevel.getLevel();
     }
 
+    public boolean isAdmin(UUID loginTokenId) {
+        return getUserFromToken(loginTokenId).filter(user -> UserLevel.ADMIN.equals(user.getLevel())).isPresent();
+    }
+
 }

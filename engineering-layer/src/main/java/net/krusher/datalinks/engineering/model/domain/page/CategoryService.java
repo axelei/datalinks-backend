@@ -47,6 +47,10 @@ public class CategoryService {
                 .getResultList().stream().map(categoryMapper::toModel).toList();
     }
 
+    public void create(String name) {
+        categoryRepositoryBean.save(CategoryEntity.builder().name(name).build());
+    }
+
     public void delete(String name) {
         categoryRepositoryBean.deleteById(name);
         deleteLinks(name);
