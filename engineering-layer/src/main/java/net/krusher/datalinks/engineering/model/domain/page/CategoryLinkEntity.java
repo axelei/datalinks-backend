@@ -8,6 +8,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Entity
 @Data
+@Builder
 @Table(name = "CATEGORIES_PAGES", indexes = {
         @Index(name = "IDX_CATEGORY_PAGE_CATEGORY_ID", columnList = "name"),
         @Index(name = "IDX_CATEGORY_PAGE_PAGE_ID", columnList = "pageId")

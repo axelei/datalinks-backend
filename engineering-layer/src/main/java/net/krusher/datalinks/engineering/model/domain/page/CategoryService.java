@@ -7,7 +7,9 @@ import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.CategoryMapper;
+import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
 import net.krusher.datalinks.model.page.Category;
+import net.krusher.datalinks.model.page.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +47,23 @@ public class CategoryService {
                 .setFirstResult(page * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList().stream().map(categoryMapper::toModel).toList();
+    }
+
+    public void processLinks(Page page, Set<Category> categories) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaDelete<CategoryLinkEntity> delete = cb. createCriteriaDelete(CategoryLinkEntity.class);
+        Root<CategoryLinkEntity> e = delete.from(CategoryLinkEntity.class);
+        delete.where(cb.equal(e.get("id").get("pageId"), page.getId()));
+        entityManager.createQuery(delete).executeUpdate();
+
+        for (Category category : categories) {
+            categoryLinkRepositoryBean.save(CategoryLinkEntity.builder()
+                            .id(CategoryLinkEntityKey.builder()
+                                    .name(category.getName())
+                                    .pageId(page.getId())
+                                    .build())
+                    .build());
+        }
     }
 
     public void create(String name) {
@@ -88,7 +107,4 @@ public class CategoryService {
                 .map(result -> categoryMapper.toModel((CategoryEntity) result[1]))
                 .collect(Collectors.toSet());
     }
-
-
-
 }

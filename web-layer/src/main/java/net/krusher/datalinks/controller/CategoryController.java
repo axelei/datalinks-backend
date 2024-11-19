@@ -2,7 +2,9 @@ package net.krusher.datalinks.controller;
 
 import net.krusher.datalinks.handler.category.CreateCategoryCommandHandler;
 import net.krusher.datalinks.handler.category.DeleteCategoryCommandHandler;
+import net.krusher.datalinks.handler.category.FindCategoriesCommandHandler;
 import net.krusher.datalinks.handler.category.GetCategoriesCommandHandler;
+import net.krusher.datalinks.handler.category.GetCategoryCommandHandler;
 import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.model.page.Category;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +30,19 @@ public class CategoryController {
     private final GetCategoriesCommandHandler getCategoriesCommandHandler;
     private final DeleteCategoryCommandHandler deleteCategoryCommandHandler;
     private final CreateCategoryCommandHandler createCategoryCommandHandler;
+    private final GetCategoryCommandHandler getCategoryCommandHandler;
+    private final FindCategoriesCommandHandler findCategoriesCommandHandler;
 
     public CategoryController(GetCategoriesCommandHandler getCategoriesCommandHandler,
                               DeleteCategoryCommandHandler deleteCategoryCommandHandler,
-                              CreateCategoryCommandHandler createCategoryCommandHandler) {
+                              CreateCategoryCommandHandler createCategoryCommandHandler,
+                              GetCategoryCommandHandler getCategoryCommandHandler,
+                              FindCategoriesCommandHandler findCategoriesCommandHandler) {
         this.getCategoriesCommandHandler = getCategoriesCommandHandler;
         this.deleteCategoryCommandHandler = deleteCategoryCommandHandler;
         this.createCategoryCommandHandler = createCategoryCommandHandler;
+        this.getCategoryCommandHandler = getCategoryCommandHandler;
+        this.findCategoriesCommandHandler = findCategoriesCommandHandler;
     }
 
     @GetMapping("all")
@@ -58,5 +66,15 @@ public class CategoryController {
                                          @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
         createCategoryCommandHandler.handler(name, toLoginToken(userToken));
         return ResponseEntity.ok("OK");
+    }
+
+    @GetMapping("get/{name}")
+    public ResponseEntity<Category> get(@PathVariable("name") String name) {
+        return (getCategoryCommandHandler.handler(name).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build()));
+    }
+
+    @GetMapping("find/{query}")
+    public ResponseEntity<List<Category>> find(@PathVariable("query") String query) {
+        return ResponseEntity.ok(findCategoriesCommandHandler.handler(query));
     }
 }

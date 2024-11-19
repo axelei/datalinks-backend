@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.krusher.datalinks.model.page.Category;
 
 @Data
 @Builder
@@ -11,5 +12,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PostPageModel {
     private String content;
-    private String[] categories;
+    private Category[] categories;
 }

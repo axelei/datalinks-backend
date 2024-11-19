@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static net.krusher.datalinks.handler.common.SlugifyProvider.SLUGIFY;
 
@@ -41,6 +43,7 @@ public class PostPageCommandHandler {
         Page page = Page.builder()
                 .title(postPageCommand.getTitle())
                 .content(postPageCommand.getContent())
+                .categories(Arrays.stream(postPageCommand.getCategories()).collect(Collectors.toSet()))
                 .slug(SLUGIFY.slugify(postPageCommand.getTitle()))
                 .creatorId(user.map(User::getId).orElse(null))
                 .build();
@@ -54,6 +57,7 @@ public class PostPageCommandHandler {
         Optional<User> user = userHelper.getUserFromLoginToken(postPageCommand.getLoginTokenId());
         page.setSlug(SLUGIFY.slugify(postPageCommand.getTitle()));
         page.setContent(postPageCommand.getContent());
+        page.setCategories(Arrays.stream(postPageCommand.getCategories()).collect(Collectors.toSet()));
         pageService.save(page, user.orElse(null), postPageCommand.getIp());
     }
 }
