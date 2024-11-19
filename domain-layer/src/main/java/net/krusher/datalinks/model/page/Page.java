@@ -6,6 +6,7 @@ import lombok.Data;
 import net.krusher.datalinks.model.user.UserLevel;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 

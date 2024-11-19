@@ -3,6 +3,7 @@ package net.krusher.datalinks.engineering.model.domain.page;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.EditMapper;
@@ -36,6 +37,7 @@ public class PageService {
     private final PageMapper pageMapper;
     private final UserMapper userMapper;
     private final EditMapper editMapper;
+    private final CategoryService categoryService;
     private final EditRepositoryBean editRepositoryBean;
     private final UploadService uploadService;
 
@@ -48,6 +50,7 @@ public class PageService {
                        PageMapper pageMapper,
                        UserMapper userMapper,
                        EditMapper editMapper,
+                       CategoryService categoryService,
                        EditRepositoryBean editRepositoryBean,
                        UploadService uploadService, UserRepositoryBean userRepositoryBean) {
         this.entityManager = entityManager;
@@ -56,14 +59,20 @@ public class PageService {
         this.userMapper = userMapper;
         this.editRepositoryBean = editRepositoryBean;
         this.editMapper = editMapper;
+        this.categoryService = categoryService;
         this.uploadService = uploadService;
         this.userRepositoryBean = userRepositoryBean;
     }
 
     public Optional<Page> findBySlug(String slug) {
-        Example<PageEntity> example = Example.of(PageEntity.builder().slug(slug).build());
-        List<PageEntity> result = pageRepositoryBean.findAll(example);
-        return result.stream().findFirst().map(pageMapper::toModel);
+        return pageRepositoryBean.findAll(Example.of(PageEntity.builder().slug(slug).build()))
+                .stream()
+                .findFirst()
+                .map(pageEntity -> {
+                    Page page = pageMapper.toModel(pageEntity);
+                    page.setCategories(categoryService.findByPage(page.getId()));
+                    return page;
+                });
     }
 
     public void save(Page page, User user, String ip) {
@@ -80,12 +89,11 @@ public class PageService {
     }
 
     public void deleteEditsForPage(UUID pageId) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<EditEntity> cq = cb.createQuery(EditEntity.class);
-        Root<EditEntity> from = cq.from(EditEntity.class);
-        cq.where(cb.equal(from.get("pageId"), pageId));
-        TypedQuery<EditEntity> query = entityManager.createQuery(cq);
-        editRepositoryBean.deleteAll(query.getResultList());
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaDelete<EditEntity> criteriaDelete = criteriaBuilder.createCriteriaDelete(EditEntity.class);
+        Root<EditEntity> root = criteriaDelete.from(EditEntity.class);
+        criteriaDelete.where(criteriaBuilder.equal(root.get("pageId"), pageId));
+        entityManager.createQuery(criteriaDelete).executeUpdate();
     }
 
     public List<PageShort> pagesSortBy(String column, int page, int pageSize) {

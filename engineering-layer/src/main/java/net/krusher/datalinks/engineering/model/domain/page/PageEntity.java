@@ -4,10 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -22,10 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
 import java.time.Instant;
-import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -56,9 +52,6 @@ public class PageEntity implements Foundable {
     @FullTextField
     private String content;
     private String summary;
-    @ManyToMany(fetch = FetchType.LAZY)
-    @IndexedEmbedded
-    private Set<CategoryEntity> categories;
     @Enumerated(EnumType.STRING)
     private UserLevel editBlock;
     @Enumerated(EnumType.STRING)
