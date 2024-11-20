@@ -10,10 +10,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.krusher.datalinks.model.search.Foundable;
+import net.krusher.datalinks.model.search.Foundling;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +25,7 @@ import java.time.Instant;
 @Builder
 @Table(name = "CATEGORIES")
 @Indexed
-public class CategoryEntity {
+public class CategoryEntity implements Foundable {
 
     @Id
     @Column(nullable = false)
@@ -34,5 +37,14 @@ public class CategoryEntity {
     protected void setDefaultsOnCreate() {
         this.creationDate = Instant.now();
 
+    }
+
+    @Override
+    public Foundling toFoundling() {
+        return Foundling.builder()
+                .id(UUID.randomUUID())
+                .title(this.getName())
+                .type(Foundling.FoundlingType.CATEGORY)
+                .build();
     }
 }

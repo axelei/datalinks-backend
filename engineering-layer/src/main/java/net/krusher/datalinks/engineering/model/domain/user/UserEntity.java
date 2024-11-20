@@ -12,8 +12,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.krusher.datalinks.model.search.Foundable;
+import net.krusher.datalinks.model.search.Foundling;
 import net.krusher.datalinks.model.user.UserLevel;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -23,21 +27,24 @@ import java.util.UUID;
 @Entity
 @Data
 @Builder
+@Indexed
 @Table(name = "USERS", indexes = {
         @Index(name = "IDX_USER_USERNAME", columnList = "username"),
         @Index(name = "IDX_USER_ACTIVATION_TOKEN", columnList = "activationToken")
 })
-public class UserEntity {
+public class UserEntity implements Foundable {
 
     @Id
     @Column(nullable = false)
     private UUID id;
     @Column(nullable = false)
+    @FullTextField(analyzer = "edgeNGramAnalyzer", searchAnalyzer = "edgeNGramAnalyzer")
     private String username;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private UserLevel level;
     private String email;
+    @FullTextField(analyzer = "edgeNGramAnalyzer", searchAnalyzer = "edgeNGramAnalyzer")
     private String name;
     private Instant creationDate;
     @Column(columnDefinition = "VARCHAR(5)")
@@ -54,5 +61,14 @@ public class UserEntity {
     protected void setDefaultsOnCreate() {
         this.id = UUID.randomUUID();
         this.creationDate = Instant.now();
+    }
+
+    @Override
+    public Foundling toFoundling() {
+        return Foundling.builder()
+                .id(id)
+                .title(this.getUsername())
+                .type(Foundling.FoundlingType.USER)
+                .build();
     }
 }

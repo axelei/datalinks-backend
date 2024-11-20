@@ -5,6 +5,7 @@ import net.krusher.datalinks.engineering.mapper.CategoryMapper;
 import net.krusher.datalinks.engineering.model.domain.page.CategoryEntity;
 import net.krusher.datalinks.engineering.model.domain.page.PageEntity;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadEntity;
+import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
 import net.krusher.datalinks.model.page.Category;
 import net.krusher.datalinks.model.search.Foundable;
 import net.krusher.datalinks.model.search.Foundling;
@@ -31,9 +32,9 @@ public class SearchService {
 
     public List<Foundling> titleSearch(String query) {
         SearchSession searchSession = Search.session(entityManager);
-        SearchQuery<Foundable> search = searchSession.search(List.of(PageEntity.class, UploadEntity.class))
+        SearchQuery<Foundable> search = searchSession.search(List.of(PageEntity.class, UploadEntity.class, CategoryEntity.class, UserEntity.class))
                 .where(f -> f.match()
-                        .fields("title", "filename")
+                        .fields("title", "filename", "username", "name")
                         .matching(query)
                         .fuzzy()
                 ).toQuery();
@@ -43,9 +44,9 @@ public class SearchService {
 
     public List<Foundling> search(String query, int page, int pageSize) {
         SearchSession searchSession = Search.session(entityManager);
-        SearchQuery<Foundable> search = searchSession.search(List.of(PageEntity.class, UploadEntity.class))
+        SearchQuery<Foundable> search = searchSession.search(List.of(PageEntity.class, UploadEntity.class, CategoryEntity.class, UserEntity.class))
                 .where(f -> f.match()
-                        .fields("title", "content", "filename", "description")
+                        .fields("title", "content", "filename", "description", "name", "username")
                         .matching(query)
                         .fuzzy()
                 ).toQuery();
