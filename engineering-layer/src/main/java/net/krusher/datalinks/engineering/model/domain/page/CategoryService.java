@@ -7,9 +7,11 @@ import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.CategoryMapper;
-import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
+import net.krusher.datalinks.engineering.mapper.PageMapper;
+import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
 import net.krusher.datalinks.model.page.Category;
 import net.krusher.datalinks.model.page.Page;
+import net.krusher.datalinks.model.page.PageShort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,16 +27,19 @@ public class CategoryService {
     private final CategoryLinkRepositoryBean categoryLinkRepositoryBean;
     private final CategoryRepositoryBean categoryRepositoryBean;
     private final CategoryMapper categoryMapper;
+    private final PageMapper pageMapper;
     private final EntityManager entityManager;
 
     @Autowired
     public CategoryService(CategoryLinkRepositoryBean categoryLinkRepositoryBean,
                            CategoryRepositoryBean categoryRepositoryBean,
                            CategoryMapper categoryMapper,
+                           PageMapper pageMapper,
                            EntityManager entityManager) {
         this.categoryLinkRepositoryBean = categoryLinkRepositoryBean;
         this.categoryRepositoryBean = categoryRepositoryBean;
         this.categoryMapper = categoryMapper;
+        this.pageMapper = pageMapper;
         this.entityManager = entityManager;
     }
 
@@ -85,6 +90,36 @@ public class CategoryService {
 
     public Optional<Category> getCategory(String name) {
         return categoryRepositoryBean.findById(name).map(categoryMapper::toModel);
+    }
+
+    public List<PageShort> getPagesByCategory(String categoryName, int page, int pageSize) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+
+        Root<CategoryLinkEntity> categoryLinkEntityRoot = cq.from(CategoryLinkEntity.class);
+        Root<PageEntity> pageEntityRoot = cq.from(PageEntity.class);
+        Root<UserEntity> userEntityRoot = cq.from(UserEntity.class);
+
+        cq.select(cb.array(categoryLinkEntityRoot, pageEntityRoot, userEntityRoot))
+                .where(cb.and(
+                        cb.equal(categoryLinkEntityRoot.get("id").get("name"), categoryName),
+                        cb.equal(categoryLinkEntityRoot.get("id").get("pageId"), pageEntityRoot.get("id")),
+                        cb.equal(pageEntityRoot.get("creatorId"), userEntityRoot.get("id"))
+                ));
+
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+        List<Object[]> results = query
+                .setFirstResult(page * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList();
+
+        return results.stream()
+                .map(result -> {
+                    PageShort resultPage = pageMapper.toModelShort((PageEntity) result[1]);
+                    resultPage.setCreatorName(((UserEntity) result[2]).getUsername());
+                    return resultPage;
+                })
+                .collect(Collectors.toList());
     }
 
     public Set<Category> findByPage(UUID pageId) {

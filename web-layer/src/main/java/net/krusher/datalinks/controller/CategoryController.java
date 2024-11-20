@@ -3,10 +3,13 @@ package net.krusher.datalinks.controller;
 import net.krusher.datalinks.handler.category.CreateCategoryCommandHandler;
 import net.krusher.datalinks.handler.category.DeleteCategoryCommandHandler;
 import net.krusher.datalinks.handler.category.FindCategoriesCommandHandler;
+import net.krusher.datalinks.handler.category.FindCategoryPagesCommandHandler;
 import net.krusher.datalinks.handler.category.GetCategoriesCommandHandler;
 import net.krusher.datalinks.handler.category.GetCategoryCommandHandler;
 import net.krusher.datalinks.handler.common.PaginationCommand;
+import net.krusher.datalinks.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.model.page.Category;
+import net.krusher.datalinks.model.page.PageShort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,17 +35,20 @@ public class CategoryController {
     private final CreateCategoryCommandHandler createCategoryCommandHandler;
     private final GetCategoryCommandHandler getCategoryCommandHandler;
     private final FindCategoriesCommandHandler findCategoriesCommandHandler;
+    private final FindCategoryPagesCommandHandler findCategoryPagesCommandHandler;
 
     public CategoryController(GetCategoriesCommandHandler getCategoriesCommandHandler,
                               DeleteCategoryCommandHandler deleteCategoryCommandHandler,
                               CreateCategoryCommandHandler createCategoryCommandHandler,
                               GetCategoryCommandHandler getCategoryCommandHandler,
-                              FindCategoriesCommandHandler findCategoriesCommandHandler) {
+                              FindCategoriesCommandHandler findCategoriesCommandHandler,
+                              FindCategoryPagesCommandHandler findCategoryPagesCommandHandler) {
         this.getCategoriesCommandHandler = getCategoriesCommandHandler;
         this.deleteCategoryCommandHandler = deleteCategoryCommandHandler;
         this.createCategoryCommandHandler = createCategoryCommandHandler;
         this.getCategoryCommandHandler = getCategoryCommandHandler;
         this.findCategoriesCommandHandler = findCategoriesCommandHandler;
+        this.findCategoryPagesCommandHandler = findCategoryPagesCommandHandler;
     }
 
     @GetMapping("all")
@@ -76,5 +82,16 @@ public class CategoryController {
     @GetMapping("find/{query}")
     public ResponseEntity<List<Category>> find(@PathVariable("query") String query) {
         return ResponseEntity.ok(findCategoriesCommandHandler.handler(query));
+    }
+
+    @GetMapping("findPages/{query}")
+    public ResponseEntity<List<PageShort>> findPages(@PathVariable("query") String query,
+                                                     @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                                                     @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize) {
+        return ResponseEntity.ok(findCategoryPagesCommandHandler.handler(SearchPaginationCommand.builder()
+                .query(query)
+                .page(page)
+                .pageSize(pageSize)
+                .build()));
     }
 }
