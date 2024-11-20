@@ -5,14 +5,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.Instant;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,11 +25,5 @@ public class CategoryLinkEntity {
     @Id
     @Column(nullable = false)
     private CategoryLinkEntityKey id;
-    private Instant creationDate;
 
-    @PrePersist
-    protected void setDefaultsOnCreate() {
-        this.creationDate = Instant.now();
-
-    }
 }

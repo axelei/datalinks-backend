@@ -10,7 +10,6 @@ import net.krusher.datalinks.engineering.mapper.CategoryMapper;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
 import net.krusher.datalinks.model.page.Category;
-import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,15 +53,16 @@ public class CategoryService {
                 .getResultList().stream().map(categoryMapper::toModel).toList();
     }
 
-    public void processLinks(Page page, Set<Category> categories) {
+    public void processLinks(PageEntity page, Set<Category> categories) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaDelete<CategoryLinkEntity> delete = cb. createCriteriaDelete(CategoryLinkEntity.class);
-        Root<CategoryLinkEntity> e = delete.from(CategoryLinkEntity.class);
-        delete.where(cb.equal(e.get("id").get("pageId"), page.getId()));
+        CriteriaDelete<CategoryLinkEntity> delete = cb.createCriteriaDelete(CategoryLinkEntity.class);
+        Root<CategoryLinkEntity> root = delete.from(CategoryLinkEntity.class);
+        delete.where(cb.equal(root.get("id").get("pageId"), page.getId()));
         entityManager.createQuery(delete).executeUpdate();
-
+        entityManager.flush();
+        entityManager.clear();
         for (Category category : categories) {
-            categoryLinkRepositoryBean.save(CategoryLinkEntity.builder()
+            entityManager.merge(CategoryLinkEntity.builder()
                             .id(CategoryLinkEntityKey.builder()
                                     .name(category.getName())
                                     .pageId(page.getId())

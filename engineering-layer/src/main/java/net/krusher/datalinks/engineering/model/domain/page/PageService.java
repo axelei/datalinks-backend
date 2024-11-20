@@ -13,7 +13,6 @@ import net.krusher.datalinks.engineering.model.domain.upload.UploadService;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
 import net.krusher.datalinks.engineering.model.domain.user.UserRepositoryBean;
-import net.krusher.datalinks.model.page.Category;
 import net.krusher.datalinks.model.page.Edit;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,7 +79,7 @@ public class PageService {
         PageEntity pageEntity = pageMapper.toEntity(page);
         pageEntity = entityManager.merge(pageEntity);
         processEdit(pageEntity, userMapper.toEntity(user), ip);
-        categoryService.processLinks(page, page.getCategories());
+        categoryService.processLinks(pageEntity, page.getCategories());
         processUploadUsage(page);
     }
 
@@ -185,6 +183,8 @@ public class PageService {
 
     private void processUploadUsage(Page page) {
         uploadService.deleteUsages(page.getId());
+        entityManager.flush();
+        entityManager.clear();
         Matcher m = UPLOAD_USAGE_PATTERN.matcher(page.getContent());
         while(m.find()) {
             String slug = m.group(1);
