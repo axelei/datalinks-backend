@@ -80,13 +80,14 @@ public class PageService {
         pageEntity = entityManager.merge(pageEntity);
         processEdit(pageEntity, userMapper.toEntity(user), ip);
         categoryService.processLinks(pageEntity, page.getCategories());
-        processUploadUsage(page);
+        processUploadUsage(pageEntity);
     }
 
     public void delete(UUID pageId) {
         deleteEditsForPage(pageId);
         uploadService.deleteUsages(pageId);
         pageRepositoryBean.deleteById(pageId);
+        categoryService.deleteLinks(pageId);
     }
 
     public void deleteEditsForPage(UUID pageId) {
@@ -181,7 +182,7 @@ public class PageService {
         editRepositoryBean.save(editEntity);
     }
 
-    private void processUploadUsage(Page page) {
+    private void processUploadUsage(PageEntity page) {
         uploadService.deleteUsages(page.getId());
         entityManager.flush();
         entityManager.clear();

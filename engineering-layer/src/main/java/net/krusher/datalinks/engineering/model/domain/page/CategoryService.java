@@ -54,11 +54,7 @@ public class CategoryService {
     }
 
     public void processLinks(PageEntity page, Set<Category> categories) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaDelete<CategoryLinkEntity> delete = cb.createCriteriaDelete(CategoryLinkEntity.class);
-        Root<CategoryLinkEntity> root = delete.from(CategoryLinkEntity.class);
-        delete.where(cb.equal(root.get("id").get("pageId"), page.getId()));
-        entityManager.createQuery(delete).executeUpdate();
+        deleteLinks(page.getId());
         entityManager.flush();
         entityManager.clear();
         for (Category category : categories) {
@@ -69,6 +65,14 @@ public class CategoryService {
                                     .build())
                     .build());
         }
+    }
+
+    public void deleteLinks(UUID pageId) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaDelete<CategoryLinkEntity> delete = cb.createCriteriaDelete(CategoryLinkEntity.class);
+        Root<CategoryLinkEntity> root = delete.from(CategoryLinkEntity.class);
+        delete.where(cb.equal(root.get("id").get("pageId"), pageId));
+        entityManager.createQuery(delete).executeUpdate();
     }
 
     public void create(String name) {

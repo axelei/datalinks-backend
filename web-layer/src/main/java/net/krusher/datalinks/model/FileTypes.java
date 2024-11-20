@@ -15,6 +15,7 @@ public enum FileTypes {
     WEBP(MediaType.valueOf("image/webp")),
     TIFF(MediaType.valueOf("image/tiff")),
     SVG(MediaType.valueOf("image/svg+xml")),
+    JFIF(MediaType.IMAGE_JPEG),
     ;
 
     private final MediaType mediaType;
