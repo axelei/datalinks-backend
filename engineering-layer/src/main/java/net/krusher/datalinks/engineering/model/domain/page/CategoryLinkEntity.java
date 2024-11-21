@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @Table(name = "CATEGORIES_PAGES", indexes = {
-        @Index(name = "IDX_CATEGORY_PAGE_CATEGORY_ID", columnList = "name"),
+        @Index(name = "IDX_CATEGORY_PAGE_CATEGORY_ID", columnList = "categoryId"),
         @Index(name = "IDX_CATEGORY_PAGE_PAGE_ID", columnList = "pageId")
 })
 public class CategoryLinkEntity {

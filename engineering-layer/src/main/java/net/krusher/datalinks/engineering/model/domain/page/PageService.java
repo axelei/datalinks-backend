@@ -87,7 +87,7 @@ public class PageService {
         deleteEditsForPage(pageId);
         uploadService.deleteUsages(pageId);
         pageRepositoryBean.deleteById(pageId);
-        categoryService.deleteLinks(pageId);
+        categoryService.deleteLinksByPage(pageId);
     }
 
     public void deleteEditsForPage(UUID pageId) {

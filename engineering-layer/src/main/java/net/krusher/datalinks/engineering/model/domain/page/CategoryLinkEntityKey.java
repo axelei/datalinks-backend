@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CategoryLinkEntityKey {
 
-    private String name;
+    private UUID categoryId;
     private UUID pageId;
 
 }

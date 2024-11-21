@@ -4,6 +4,7 @@ import net.krusher.datalinks.common.UserHelper;
 import net.krusher.datalinks.engineering.model.domain.page.CategoryService;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
+import net.krusher.datalinks.handler.common.SlugifyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,6 @@ public class DeleteCategoryCommandHandler {
         if (!userHelper.isAdmin(loginToken)) {
             throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't delete category");
         }
-        categoryService.delete(name);
+        categoryService.deleteBySlug(SlugifyProvider.SLUGIFY.slugify(name));
     }
 }

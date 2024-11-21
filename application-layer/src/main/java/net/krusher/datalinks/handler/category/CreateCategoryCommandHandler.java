@@ -6,6 +6,7 @@ import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.handler.common.PaginationCommand;
+import net.krusher.datalinks.handler.common.SlugifyProvider;
 import net.krusher.datalinks.model.page.Category;
 import net.krusher.datalinks.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class CreateCategoryCommandHandler {
         if (!userHelper.isAdmin(loginToken)) {
             throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't create category");
         }
-        categoryService.create(name);
+        categoryService.create(Category.builder()
+                .name(name)
+                .slug(SlugifyProvider.SLUGIFY.slugify(name))
+                .build());
     }
 }

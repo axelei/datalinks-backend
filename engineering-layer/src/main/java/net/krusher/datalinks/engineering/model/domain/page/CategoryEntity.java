@@ -29,14 +29,17 @@ public class CategoryEntity implements Foundable {
 
     @Id
     @Column(nullable = false)
+    private UUID id;
+    @Column(nullable = false)
     @FullTextField(analyzer = "edgeNGramAnalyzer", searchAnalyzer = "edgeNGramAnalyzer")
     private String name;
+    private String slug;
     private Instant creationDate;
 
     @PrePersist
     protected void setDefaultsOnCreate() {
         this.creationDate = Instant.now();
-
+        this.id = UUID.randomUUID();
     }
 
     @Override
