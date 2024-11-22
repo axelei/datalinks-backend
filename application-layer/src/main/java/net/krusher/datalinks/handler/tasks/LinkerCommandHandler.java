@@ -30,7 +30,7 @@ public class LinkerCommandHandler {
             log.info("Processing title: {}", title);
             String slug = SlugifyProvider.SLUGIFY.slugify(title);
             Optional<Page> page = pageService.findBySlug(slug);
-            if (page.isEmpty()) {
+            if (page.isEmpty() || page.get().getTitle().equals(title)) {
                 return;
             }
             linkProcessorHelper.processLinkersPage(page.get(), titles);
