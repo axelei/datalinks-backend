@@ -13,13 +13,13 @@ import java.util.Optional;
 
 @Log4j2
 @Service
-public class LinkerCommandHandler {
+public class UnlinkerCommandHandler {
 
     private final PageService pageService;
     private final LinkProcessorHelper linkProcessorHelper;
 
     @Autowired
-    public LinkerCommandHandler(PageService pageService, LinkProcessorHelper linkProcessorHelper) {
+    public UnlinkerCommandHandler(PageService pageService, LinkProcessorHelper linkProcessorHelper) {
         this.pageService = pageService;
         this.linkProcessorHelper = linkProcessorHelper;
     }
@@ -33,7 +33,7 @@ public class LinkerCommandHandler {
             if (page.isEmpty()) {
                 return;
             }
-            linkProcessorHelper.processLinkersPage(page.get(), titles);
+            linkProcessorHelper.processUnlinkersPage(page.get(), titles);
         });
     }
 

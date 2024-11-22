@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,10 +33,10 @@ public class LinkProcessorHelper {
     }
 
     @Transactional
-    public void processPage(Page page, List<String> titles) {
+    public void processLinkersPage(Page page, List<String> titles) {
         String initialContent = page.getContent();
         Document doc = Jsoup.parse(page.getContent());
-        processNodes(doc.body().childNodes(), titles);
+        linkerProcessNodes(doc.body().childNodes(), titles);
         String after = doc.body().html();
         if (!initialContent.equals(after)) {
             page.setContent(after);
@@ -43,7 +44,29 @@ public class LinkProcessorHelper {
         }
     }
 
-    public void processNodes(List<Node> nodes, List<String> titles) {
+    @Transactional
+    public void processUnlinkersPage(Page page, List<String> titles) {
+        String initialContent = page.getContent();
+        Document doc = Jsoup.parse(page.getContent());
+        Elements links = doc.select("a");
+        for (Element link : links) {
+            String href = link.attr("href");
+            if (href.startsWith(applicationUrl + "/page/")) {
+                String title = href.substring(applicationUrl.length() + 6);
+                if (!exists(title, titles)) {
+                    String originalText = link.text();
+                    link.replaceWith(new TextNode(originalText));
+                }
+            }
+        }
+        String after = doc.body().html();
+        if (!initialContent.equals(after)) {
+            page.setContent(after);
+            pageService.save(page, null, null);
+        }
+    }
+
+    public void linkerProcessNodes(List<Node> nodes, List<String> titles) {
         for (Node node : nodes) {
             if (node instanceof TextNode textNode) {
                 String text = textNode.text();
@@ -69,8 +92,17 @@ public class LinkProcessorHelper {
                 Element newElement = Jsoup.parse(text).body();
                 node.replaceWith(newElement);
             } else {
-                processNodes(node.childNodes(), titles);
+                linkerProcessNodes(node.childNodes(), titles);
             }
         }
+    }
+
+    private boolean exists(String title, List<String> titles) {
+        for (String t : titles) {
+            if (t.equalsIgnoreCase(title)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
