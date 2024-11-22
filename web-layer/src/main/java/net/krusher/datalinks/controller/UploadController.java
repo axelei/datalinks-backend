@@ -23,6 +23,7 @@ import net.krusher.datalinks.model.page.PageShort;
 import net.krusher.datalinks.model.upload.Upload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -89,6 +90,7 @@ public class UploadController {
     @GetMapping("/get/{filename}")
     @ResponseBody
     public ResponseEntity<InputStreamResource> get(@PathVariable("filename") String filename, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+
         return Option.of(getFileCommandHandler.handler(GetFileCommand.builder()
                         .filename(filename)
                         .loginTokenId(toLoginToken(userToken))
@@ -100,8 +102,13 @@ public class UploadController {
                             .map(__ -> getMediaType(upload.getFilename()))
                             .getOrElse(FileTypes.SVG.getMediaType());
 
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add(HttpHeaders.CACHE_CONTROL, "max-age=3600, must-revalidate");
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + upload.getFilename() + "\"");
+
                     return ResponseEntity.ok()
                             .contentType(mediaType)
+                            .headers(headers)
                             .body(new InputStreamResource(inputStream));
                 })
                 .getOrElse(ResponseEntity.notFound().build());
