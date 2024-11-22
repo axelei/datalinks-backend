@@ -9,6 +9,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,6 +37,8 @@ import java.util.UUID;
         @Index(name = "IDX_PAGE_CREATOR_ID", columnList = "creatorId"),
         @Index(name = "IDX_PAGE_CREATION_DATE", columnList = "creationDate"),
         @Index(name = "IDX_PAGE_MODIFIED_DATE", columnList = "modifiedDate")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "PAGE_UNIQUE_SLUG", columnNames = "slug")
 })
 public class PageEntity implements Foundable {
 

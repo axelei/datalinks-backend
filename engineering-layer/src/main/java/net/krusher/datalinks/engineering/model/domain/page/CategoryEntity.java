@@ -4,8 +4,10 @@ package net.krusher.datalinks.engineering.model.domain.page;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +25,11 @@ import java.util.UUID;
 @Entity
 @Data
 @Builder
-@Table(name = "CATEGORIES")
+@Table(name = "CATEGORIES", indexes = {
+        @Index(name = "IDX_CATEGORY_SLUG", columnList = "slug"),
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "CATEGORY_UNIQUE_SLUG", columnNames = "slug")
+})
 @Indexed
 public class CategoryEntity implements Foundable {
 
