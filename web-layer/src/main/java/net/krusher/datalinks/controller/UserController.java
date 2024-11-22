@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Try;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.java.Log;
 import net.krusher.datalinks.common.CaptchaHelper;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.handler.user.ActivateUserCommandHandler;
@@ -42,7 +41,6 @@ import java.util.UUID;
 import static net.krusher.datalinks.common.ControllerUtil.AUTH_HEADER;
 import static net.krusher.datalinks.common.ControllerUtil.toLoginToken;
 
-@Log
 @RestController
 @RequestMapping("/user")
 public class UserController {

@@ -104,7 +104,6 @@ public class UploadController {
 
                     HttpHeaders headers = new HttpHeaders();
                     headers.add(HttpHeaders.CACHE_CONTROL, "max-age=3600, must-revalidate");
-                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + upload.getFilename() + "\"");
 
                     return ResponseEntity.ok()
                             .contentType(mediaType)

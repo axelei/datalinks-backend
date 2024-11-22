@@ -17,6 +17,7 @@ import net.krusher.datalinks.model.page.Edit;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
 import net.krusher.datalinks.model.user.User;
+import org.hibernate.ScrollableResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
@@ -28,6 +29,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class PageService {
@@ -264,6 +266,13 @@ public class PageService {
        Optional<Page> page = pageRepositoryBean.findById(edit.get().getPageId()).map(pageMapper::toModel);
        page.ifPresent(value -> edit.get().setTitle(value.getTitle()));
        return edit;
+    }
+
+    public List<String> findAllTitles() {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<String> cq = cb.createQuery(String.class);
+        cq.select((cq.from(PageEntity.class).get("title")));
+        return entityManager.createQuery(cq).getResultList();
     }
 
 }
