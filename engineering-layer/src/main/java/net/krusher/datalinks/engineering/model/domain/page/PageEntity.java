@@ -4,9 +4,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
@@ -39,7 +41,7 @@ import java.util.UUID;
 @Table(name = "PAGES", indexes = {
         @Index(name = "IDX_PAGE_SLUG", columnList = "slug"),
         @Index(name = "IDX_PAGE_TITLE", columnList = "title"),
-        @Index(name = "IDX_PAGE_CREATOR_ID", columnList = "creatorId"),
+        @Index(name = "IDX_PAGE_CREATOR_ID", columnList = "creator_id"),
         @Index(name = "IDX_PAGE_CREATION_DATE", columnList = "creationDate"),
         @Index(name = "IDX_PAGE_MODIFIED_DATE", columnList = "modifiedDate")
 }, uniqueConstraints = {
@@ -60,7 +62,16 @@ public class PageEntity implements Foundable {
     @FullTextField
     private String content;
     private String summary;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "pages_categories",
+            joinColumns = @JoinColumn(name = "page_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"),
+            indexes = {
+                    @Index(name = "IDX_PAGE_CATEGORY_PAGE_ID", columnList = "page_id"),
+                    @Index(name = "IDX_PAGE_CATEGORY_CATEGORY_ID", columnList = "category_id")
+            }
+    )
     private Set<CategoryEntity> categories;
     @Enumerated(EnumType.STRING)
     private UserLevel editBlock;
@@ -68,7 +79,7 @@ public class PageEntity implements Foundable {
     private UserLevel readBlock;
     private Instant creationDate;
     private Instant modifiedDate;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", updatable = false)
     private UserEntity creator;
 

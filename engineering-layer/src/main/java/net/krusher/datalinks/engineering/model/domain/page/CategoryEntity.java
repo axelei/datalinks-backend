@@ -1,8 +1,8 @@
 package net.krusher.datalinks.engineering.model.domain.page;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.ManyToMany;
@@ -13,7 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.krusher.datalinks.model.page.Category;
 import net.krusher.datalinks.model.search.Foundable;
 import net.krusher.datalinks.model.search.Foundling;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
@@ -44,8 +43,6 @@ public class CategoryEntity implements Foundable {
     private String name;
     private String slug;
     private Instant creationDate;
-    @ManyToMany(mappedBy = "categories")
-    private Set<PageEntity> pages;
 
     @PrePersist
     protected void setDefaultsOnCreate() {

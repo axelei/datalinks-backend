@@ -15,7 +15,6 @@ import net.krusher.datalinks.engineering.mapper.UserMapper;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadService;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
-import net.krusher.datalinks.engineering.model.domain.user.UserRepositoryBean;
 import net.krusher.datalinks.model.page.Edit;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
@@ -79,8 +78,8 @@ public class PageService {
     public void save(Page page, User user, String ip) {
         PageEntity pageEntity = pageMapper.toEntity(page);
         pageEntity.setCreator(userMapper.toEntity(user));
-        pageEntity = entityManager.merge(pageEntity);
         pageEntity.setCategories(page.getCategories().stream().map(categoryMapper::toEntity).collect(Collectors.toSet()));
+        pageEntity = entityManager.merge(pageEntity);
         processEdit(pageEntity, userMapper.toEntity(user), ip);
         processUploadUsage(pageEntity);
     }

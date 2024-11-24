@@ -1,6 +1,5 @@
 package net.krusher.datalinks.handler.page;
 
-import com.github.slugify.Slugify;
 import net.krusher.datalinks.common.UserHelper;
 import net.krusher.datalinks.engineering.model.domain.page.PageService;
 import net.krusher.datalinks.exception.EngineException;
@@ -31,6 +30,6 @@ public class GetPageCommandHandler {
         if (page.isPresent() && !userHelper.userCanRead(page.get(), getPageCommand.getLoginTokenId())) {
             throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't read this page");
         }
-        return pageService.findBySlug(slug);
+        return page;
     }
 }
