@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -12,12 +13,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.krusher.datalinks.model.page.Category;
 import net.krusher.datalinks.model.search.Foundable;
 import net.krusher.datalinks.model.search.Foundling;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -41,6 +44,8 @@ public class CategoryEntity implements Foundable {
     private String name;
     private String slug;
     private Instant creationDate;
+    @ManyToMany(mappedBy = "categories")
+    private Set<PageEntity> pages;
 
     @PrePersist
     protected void setDefaultsOnCreate() {

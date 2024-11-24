@@ -5,7 +5,10 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
+import net.krusher.datalinks.engineering.mapper.CategoryMapper;
 import net.krusher.datalinks.engineering.mapper.EditMapper;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
 import net.krusher.datalinks.engineering.mapper.UserMapper;
@@ -17,7 +20,6 @@ import net.krusher.datalinks.model.page.Edit;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
 import net.krusher.datalinks.model.user.User;
-import org.hibernate.ScrollableResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
@@ -29,7 +31,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class PageService {
@@ -39,12 +40,11 @@ public class PageService {
     private final PageMapper pageMapper;
     private final UserMapper userMapper;
     private final EditMapper editMapper;
-    private final CategoryService categoryService;
+    private final CategoryMapper categoryMapper;
     private final EditRepositoryBean editRepositoryBean;
     private final UploadService uploadService;
 
     private static final Pattern UPLOAD_USAGE_PATTERN = Pattern.compile("/file/get/([^\"]*)\"");
-    private final UserRepositoryBean userRepositoryBean;
 
     @Autowired
     public PageService(EntityManager entityManager,
@@ -52,18 +52,17 @@ public class PageService {
                        PageMapper pageMapper,
                        UserMapper userMapper,
                        EditMapper editMapper,
-                       CategoryService categoryService,
+                       CategoryMapper categoryMapper,
                        EditRepositoryBean editRepositoryBean,
-                       UploadService uploadService, UserRepositoryBean userRepositoryBean) {
+                       UploadService uploadService) {
         this.entityManager = entityManager;
         this.pageRepositoryBean = pageRepositoryBean;
         this.pageMapper = pageMapper;
         this.userMapper = userMapper;
         this.editRepositoryBean = editRepositoryBean;
+        this.categoryMapper = categoryMapper;
         this.editMapper = editMapper;
-        this.categoryService = categoryService;
         this.uploadService = uploadService;
-        this.userRepositoryBean = userRepositoryBean;
     }
 
     public Optional<Page> findBySlug(String slug) {
@@ -72,16 +71,17 @@ public class PageService {
                 .findFirst()
                 .map(pageEntity -> {
                     Page page = pageMapper.toModel(pageEntity);
-                    page.setCategories(categoryService.findByPage(page.getId()));
+                    page.setCategories(pageEntity.getCategories().stream().map(categoryMapper::toModel).collect(Collectors.toSet()));
                     return page;
                 });
     }
 
     public void save(Page page, User user, String ip) {
         PageEntity pageEntity = pageMapper.toEntity(page);
+        pageEntity.setCreator(userMapper.toEntity(user));
         pageEntity = entityManager.merge(pageEntity);
+        pageEntity.setCategories(page.getCategories().stream().map(categoryMapper::toEntity).collect(Collectors.toSet()));
         processEdit(pageEntity, userMapper.toEntity(user), ip);
-        categoryService.processLinks(pageEntity, page.getCategories());
         processUploadUsage(pageEntity);
     }
 
@@ -89,7 +89,6 @@ public class PageService {
         deleteEditsForPage(pageId);
         uploadService.deleteUsages(pageId);
         pageRepositoryBean.deleteById(pageId);
-        categoryService.deleteLinksByPage(pageId);
     }
 
     public void deleteEditsForPage(UUID pageId) {
@@ -109,7 +108,7 @@ public class PageService {
 
         cq.select(cb.array(pageRoot, userRoot))
                 .where(cb.and(
-                        cb.equal(pageRoot.get("creatorId"), userRoot.get("id"))
+                        cb.equal(pageRoot.get("creator"), userRoot)
                 ));
 
         cq.orderBy(cb.desc(pageRoot.get(column)));
@@ -121,7 +120,7 @@ public class PageService {
 
         return results.stream().map(result -> {
             PageShort pageItem = pageMapper.toModelShort((PageEntity) result[0]);
-            pageItem.setCreatorName(((UserEntity) result[1]).getUsername());
+            pageItem.setCreator(userMapper.toModel((UserEntity) result[1]));
             return pageItem;
         }).collect(Collectors.toList());
     }
@@ -131,15 +130,11 @@ public class PageService {
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
 
         Root<EditEntity> editRoot = cq.from(EditEntity.class);
-        Root<PageEntity> pageRoot = cq.from(PageEntity.class);
-        Root<UserEntity> userRoot = cq.from(UserEntity.class);
 
-        cq.select(cb.array(editRoot, pageRoot, userRoot))
-                .where(cb.and(
-                        cb.equal(editRoot.get("pageId"), pageRoot.get("id")),
-                        cb.equal(editRoot.get("userId"), userRoot.get("id"))
-                ));
+        Join<EditEntity, UserEntity> userJoin = editRoot.join("user", JoinType.LEFT);
+        Join<EditEntity, PageEntity> pageJoin = editRoot.join("page", JoinType.LEFT);
 
+        cq.select(cb.array(editRoot, userJoin, pageJoin));
         cq.orderBy(cb.desc(editRoot.get(column)));
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
         List<Object[]> results = query
@@ -149,8 +144,8 @@ public class PageService {
 
         return results.stream().map(result -> {
             Edit edit = editMapper.toModel((EditEntity) result[0]);
-            edit.setTitle(((PageEntity) result[1]).getTitle());
-            edit.setUsername(((UserEntity) result[2]).getUsername());
+            edit.setUser(userMapper.toModel((UserEntity) result[1]));
+            edit.setPage(pageMapper.toModel((PageEntity) result[2]));
             return edit;
         }).collect(Collectors.toList());
     }
@@ -177,8 +172,8 @@ public class PageService {
     private void processEdit(PageEntity pageEntity, UserEntity userEntity, String ip) {
         EditEntity editEntity = EditEntity.builder()
                 .content(pageEntity.getContent())
-                .pageId(pageEntity.getId())
-                .userId(Optional.ofNullable(userEntity).map(UserEntity::getId).orElse(null))
+                .page(pageEntity)
+                .user(userEntity)
                 .ip(ip)
                 .build();
         editRepositoryBean.save(editEntity);
@@ -210,8 +205,8 @@ public class PageService {
 
         cq.select(cb.array(editRoot, pageRoot))
                 .where(cb.and(
-                        cb.equal(editRoot.get("pageId"), pageRoot.get("id")),
-                        cb.equal(editRoot.get("userId"), user.getId())
+                        cb.equal(editRoot.get("page"), pageRoot),
+                        cb.equal(editRoot.get("user"), userMapper.toEntity(user))
                                 ));
 
         cq.orderBy(cb.desc(editRoot.get("date")));
@@ -233,15 +228,13 @@ public class PageService {
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
 
         Root<EditEntity> editFrom = cq.from(EditEntity.class);
-        Root<UserEntity> userFrom = cq.from(UserEntity.class);
 
-        cq.select(cb.array(editFrom, userFrom))
-                .where(cb.and(
-                        cb.equal(editFrom.get("userId"), userFrom.get("id")),
-                        cb.equal(editFrom.get("pageId"), page.getId())
-                ));
+        Join<EditEntity, UserEntity> userJoin = editFrom.join("user", JoinType.LEFT);
 
-        cq.orderBy(cb.desc(editFrom.get("date")));
+        cq.select(cb.array(editFrom, userJoin))
+                .where(cb.equal(editFrom.get("page"), pageMapper.toEntity(page)))
+                .orderBy(cb.desc(editFrom.get("date")));
+
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
 
         List<Object[]> results = query
@@ -251,21 +244,20 @@ public class PageService {
 
         return results.stream().map(result -> {
             Edit edit = editMapper.toModel((EditEntity) result[0]);
-            edit.setUsername(((UserEntity) result[1]).getUsername());
+            edit.setUser(userMapper.toModel((UserEntity) result[1]));
             return edit;
         }).collect(Collectors.toList());
     }
 
     public Optional<Edit> findEditById(UUID id) {
-       Optional<Edit> edit = editRepositoryBean.findById(id).map(editMapper::toModel);
-       if (edit.isEmpty()) {
+       Optional<EditEntity> editEntity = editRepositoryBean.findById(id);
+       if (editEntity.isEmpty()) {
            return Optional.empty();
        }
-       Optional<User> user = userRepositoryBean.findById(edit.get().getUserId()).map(userMapper::toModel);
-       user.ifPresent(value -> edit.get().setUsername(value.getUsername()));
-       Optional<Page> page = pageRepositoryBean.findById(edit.get().getPageId()).map(pageMapper::toModel);
-       page.ifPresent(value -> edit.get().setTitle(value.getTitle()));
-       return edit;
+       Edit edit = editMapper.toModel(editEntity.get());
+       edit.setUser(userMapper.toModel(editEntity.get().getUser()));
+       edit.setPage(pageMapper.toModel(editEntity.get().getPage()));
+       return Optional.of(edit);
     }
 
     public List<String> findAllTitles() {

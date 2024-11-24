@@ -3,6 +3,7 @@ package net.krusher.datalinks.model.page;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
+import net.krusher.datalinks.model.user.User;
 import net.krusher.datalinks.model.user.UserLevel;
 
 import java.time.Instant;
@@ -25,5 +26,5 @@ public class Page {
     private UserLevel readBlock;
     private Instant creationDate;
     private Instant modifiedDate;
-    private UUID creatorId;
+    private User creator;
 }

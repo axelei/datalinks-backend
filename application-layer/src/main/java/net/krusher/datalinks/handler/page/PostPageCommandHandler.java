@@ -47,7 +47,7 @@ public class PostPageCommandHandler {
                 .content(postPageCommand.getContent())
                 .categories(processCategories(postPageCommand))
                 .slug(SLUGIFY.slugify(postPageCommand.getTitle()))
-                .creatorId(user.map(User::getId).orElse(null))
+                .creator(user.orElse(null))
                 .build();
         pageService.save(page, user.orElse(null), postPageCommand.getIp());
     }

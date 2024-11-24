@@ -6,6 +6,9 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -14,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
 import net.krusher.datalinks.model.search.Foundable;
 import net.krusher.datalinks.model.search.Foundling;
 import net.krusher.datalinks.model.user.UserLevel;
@@ -23,6 +27,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -55,13 +60,17 @@ public class PageEntity implements Foundable {
     @FullTextField
     private String content;
     private String summary;
+    @ManyToMany
+    private Set<CategoryEntity> categories;
     @Enumerated(EnumType.STRING)
     private UserLevel editBlock;
     @Enumerated(EnumType.STRING)
     private UserLevel readBlock;
     private Instant creationDate;
     private Instant modifiedDate;
-    private UUID creatorId;
+    @ManyToOne
+    @JoinColumn(name = "creator_id", updatable = false)
+    private UserEntity creator;
 
     @PrePersist
     protected void setDefaultsOnCreate() {

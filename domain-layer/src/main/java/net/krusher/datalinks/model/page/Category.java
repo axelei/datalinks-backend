@@ -1,6 +1,5 @@
 package net.krusher.datalinks.model.page;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +14,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Category {
 
-    @JsonIgnore
     private UUID id;
     private String name;
     private String slug;
