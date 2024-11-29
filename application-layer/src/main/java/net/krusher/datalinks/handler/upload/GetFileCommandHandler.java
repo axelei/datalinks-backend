@@ -27,7 +27,7 @@ public class GetFileCommandHandler {
     public Upload handler(GetFileCommand getFileCommand) {
         Optional<Upload> upload = uploadService.findBySlug(SLUGIFY.slugify(getFileCommand.getFilename()));
         if (upload.isEmpty()) {
-            throw new EngineException(ErrorType.UPLOAD_ERROR, "File not found");
+            throw new EngineException(ErrorType.FILE_NOT_FOUND, "File not found");
         }
         if (!userHelper.userCanSeeFile(upload.get(), getFileCommand.getLoginTokenId())) {
             throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't see file");

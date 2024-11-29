@@ -13,8 +13,7 @@ import java.util.UUID;
 public class Edit {
 
     private UUID id;
-    private Page page;
-    private String title;
+    private PageShort page;
     private String content;
     @JsonIgnore
     private String ip;

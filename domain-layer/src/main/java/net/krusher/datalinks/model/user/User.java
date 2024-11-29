@@ -15,7 +15,7 @@ public class User {
     @JsonIgnore private UUID id;
     private String username;
     private UserLevel level;
-    private String email;
+    @JsonIgnore private String email;
     private String name;
     private Instant creationDate;
     private String language;

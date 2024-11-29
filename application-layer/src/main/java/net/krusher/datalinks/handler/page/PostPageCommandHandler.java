@@ -49,7 +49,7 @@ public class PostPageCommandHandler {
                 .slug(SLUGIFY.slugify(postPageCommand.getTitle()))
                 .creator(user.orElse(null))
                 .build();
-        pageService.save(page, user.orElse(null), postPageCommand.getIp());
+        pageService.updateOrCreate(page, user.orElse(null), postPageCommand.getIp());
     }
 
     private void updatePage(Page page, PostPageCommand postPageCommand) {
@@ -60,7 +60,7 @@ public class PostPageCommandHandler {
         page.setSlug(SLUGIFY.slugify(postPageCommand.getTitle()));
         page.setContent(postPageCommand.getContent());
         page.setCategories(processCategories(postPageCommand));
-        pageService.save(page, user.orElse(null), postPageCommand.getIp());
+        pageService.updateOrCreate(page, user.orElse(null), postPageCommand.getIp());
     }
 
     private Set<Category> processCategories(PostPageCommand postPageCommand) {

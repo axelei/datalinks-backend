@@ -84,6 +84,17 @@ public class PageService {
         processUploadUsage(pageEntity);
     }
 
+    public void updateOrCreate(Page page, User user, String ip) {
+        findBySlug(page.getSlug()).ifPresentOrElse(existing -> {
+            PageEntity pageEntity = pageMapper.toEntity(existing);
+            pageEntity.setContent(page.getContent());
+            pageEntity.setCategories(page.getCategories().stream().map(categoryMapper::toEntity).collect(Collectors.toSet()));
+            pageEntity = entityManager.merge(pageEntity);
+            processEdit(pageEntity, userMapper.toEntity(user), ip);
+            processUploadUsage(pageEntity);
+        }, () -> save(page, user, ip));
+    }
+
     public void delete(UUID pageId) {
         deleteEditsForPage(pageId);
         uploadService.deleteUsages(pageId);
@@ -144,7 +155,7 @@ public class PageService {
         return results.stream().map(result -> {
             Edit edit = editMapper.toModel((EditEntity) result[0]);
             edit.setUser(userMapper.toModel((UserEntity) result[1]));
-            edit.setPage(pageMapper.toModel((PageEntity) result[2]));
+            edit.setPage(pageMapper.toModelShort((PageEntity) result[2]));
             return edit;
         }).collect(Collectors.toList());
     }
@@ -217,7 +228,7 @@ public class PageService {
 
         return results.stream().map(result -> {
             Edit edit = editMapper.toModel((EditEntity) result[0]);
-            edit.setTitle(((PageEntity) result[1]).getTitle());
+            edit.setPage(pageMapper.toModelShort((PageEntity) result[1]));
             return edit;
         }).collect(Collectors.toList());
     }
@@ -255,7 +266,7 @@ public class PageService {
        }
        Edit edit = editMapper.toModel(editEntity.get());
        edit.setUser(userMapper.toModel(editEntity.get().getUser()));
-       edit.setPage(pageMapper.toModel(editEntity.get().getPage()));
+       edit.setPage(pageMapper.toModelShort(editEntity.get().getPage()));
        return Optional.of(edit);
     }
 

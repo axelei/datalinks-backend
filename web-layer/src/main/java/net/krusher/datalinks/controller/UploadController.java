@@ -3,7 +3,10 @@ package net.krusher.datalinks.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Option;
+import io.vavr.control.Try;
 import jakarta.servlet.http.HttpServletRequest;
+import net.krusher.datalinks.exception.EngineException;
+import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.upload.DeleteUploadCommand;
 import net.krusher.datalinks.handler.upload.DeleteUploadCommandHandler;
@@ -91,26 +94,36 @@ public class UploadController {
     @ResponseBody
     public ResponseEntity<InputStreamResource> get(@PathVariable("filename") String filename, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
 
-        return Option.of(getFileCommandHandler.handler(GetFileCommand.builder()
-                        .filename(filename)
-                        .loginTokenId(toLoginToken(userToken))
-                        .build()))
-                .map(upload -> {
-                    InputStream inputStream = Option.of(upload.getInputStream())
-                            .getOrElse(() -> getClass().getResourceAsStream("/image-not-found-icon.svg"));
-                    MediaType mediaType = Option.of(upload.getInputStream())
-                            .map(__ -> getMediaType(upload.getFilename()))
-                            .getOrElse(FileTypes.SVG.getMediaType());
-
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.add(HttpHeaders.CACHE_CONTROL, "max-age=3600, must-revalidate");
-
-                    return ResponseEntity.ok()
-                            .contentType(mediaType)
-                            .headers(headers)
-                            .body(new InputStreamResource(inputStream));
+        Upload upload = Try.of(() -> getFileCommandHandler.handler(
+                        GetFileCommand.builder()
+                                .filename(filename)
+                                .loginTokenId(toLoginToken(userToken))
+                                .build()))
+                .recover(EngineException.class, e -> {
+                    if (ErrorType.FILE_NOT_FOUND.equals(e.getErrorType())) {
+                        return null;
+                    }
+                    throw e;
                 })
-                .getOrElse(ResponseEntity.notFound().build());
+                .get();
+
+        if (upload == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        InputStream inputStream = Option.of(upload.getInputStream())
+                .getOrElse(() -> getClass().getResourceAsStream("/image-not-found-icon.svg"));
+        MediaType mediaType = Option.of(upload.getInputStream())
+                .map(__ -> getMediaType(upload.getFilename()))
+                .getOrElse(FileTypes.SVG.getMediaType());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CACHE_CONTROL, "max-age=3600, must-revalidate");
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .headers(headers)
+                .body(new InputStreamResource(inputStream));
 
     }
 
