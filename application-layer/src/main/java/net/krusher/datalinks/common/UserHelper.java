@@ -5,6 +5,7 @@ import net.krusher.datalinks.engineering.model.domain.user.LoginTokenService;
 import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.model.configlet.ConfigletKey;
 import net.krusher.datalinks.model.page.Page;
+import net.krusher.datalinks.model.page.PageShort;
 import net.krusher.datalinks.model.upload.Upload;
 import net.krusher.datalinks.model.user.User;
 import net.krusher.datalinks.model.user.UserLevel;
@@ -49,6 +50,13 @@ public class UserHelper {
     }
 
     public boolean userCanRead(Page page, UUID loginTokenId) {
+        UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.READ_LEVEL).getValue());
+        UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
+        UserLevel neededLevel = Optional.ofNullable(page.getReadBlock()).orElse(defaultBlock);
+        return neededLevel.getLevel() <= userLevel.getLevel();
+    }
+
+    public boolean userCanRead(PageShort page, UUID loginTokenId) {
         UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.READ_LEVEL).getValue());
         UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
         UserLevel neededLevel = Optional.ofNullable(page.getReadBlock()).orElse(defaultBlock);

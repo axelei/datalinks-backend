@@ -75,6 +75,13 @@ public class PageService {
                 });
     }
 
+    public Optional<PageShort> findShortBySlug(String slug) {
+        return pageRepositoryBean.findAll(Example.of(PageEntity.builder().slug(slug).build()))
+                .stream()
+                .findFirst()
+                .map(pageMapper::toModelShort);
+    }
+
     public void save(Page page, User user, String ip) {
         PageEntity pageEntity = pageMapper.toEntity(page);
         pageEntity.setCreator(userMapper.toEntity(user));

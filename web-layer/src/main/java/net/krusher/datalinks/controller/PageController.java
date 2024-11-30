@@ -11,6 +11,7 @@ import net.krusher.datalinks.handler.page.GetContributionsCommandHandler;
 import net.krusher.datalinks.handler.page.GetEditCommandHandler;
 import net.krusher.datalinks.handler.page.GetPageCommand;
 import net.krusher.datalinks.handler.page.GetPageCommandHandler;
+import net.krusher.datalinks.handler.page.GetPageShortCommandHandler;
 import net.krusher.datalinks.handler.page.GetRandomPageCommandHandler;
 import net.krusher.datalinks.handler.page.NewPagesCommandHandler;
 import net.krusher.datalinks.handler.page.PageEditsCommandHandler;
@@ -46,6 +47,7 @@ import static net.krusher.datalinks.common.ControllerUtil.toLoginToken;
 public class PageController {
 
     private final GetPageCommandHandler getPageCommandHandler;
+    private final GetPageShortCommandHandler getPageShortCommandHandler;
     private final PostPageCommandHandler postPageCommandHandler;
     private final NewPagesCommandHandler newPagesCommandHandler;
     private final RecentChangesCommandHandler recentChangesCommandHandler;
@@ -58,6 +60,7 @@ public class PageController {
 
     @Autowired
     public PageController(GetPageCommandHandler getPageCommandHandler,
+                          GetPageShortCommandHandler getPageShortCommandHandler,
                           PostPageCommandHandler postPageCommandHandler,
                           NewPagesCommandHandler newPagesCommandHandler,
                           RecentChangesCommandHandler recentChangesCommandHandler,
@@ -68,6 +71,7 @@ public class PageController {
                           GetEditCommandHandler getEditCommandHandler,
                           ObjectMapper objectMapper) {
         this.getPageCommandHandler = getPageCommandHandler;
+        this.getPageShortCommandHandler = getPageShortCommandHandler;
         this.postPageCommandHandler = postPageCommandHandler;
         this.newPagesCommandHandler = newPagesCommandHandler;
         this.recentChangesCommandHandler = recentChangesCommandHandler;
@@ -82,6 +86,16 @@ public class PageController {
     @GetMapping("{title}")
     public ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
         return getPageCommandHandler.handler(GetPageCommand.builder()
+                        .title(title)
+                        .loginTokenId(toLoginToken(userToken))
+                        .build())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("-short/{title}")
+    public ResponseEntity<PageShort> getShort(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+        return getPageShortCommandHandler.handler(GetPageCommand.builder()
                         .title(title)
                         .loginTokenId(toLoginToken(userToken))
                         .build())

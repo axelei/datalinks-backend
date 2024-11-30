@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
@@ -59,6 +60,7 @@ public class PageEntity implements Foundable {
     private String title;
     @ColumnDefault("''")
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
+    @Lob
     @FullTextField
     private String content;
     private String summary;
