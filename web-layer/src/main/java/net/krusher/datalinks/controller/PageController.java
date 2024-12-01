@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.common.SearchPaginationCommand;
+import net.krusher.datalinks.handler.page.BlockPageCommand;
+import net.krusher.datalinks.handler.page.BlockPageCommandHandler;
 import net.krusher.datalinks.handler.page.DeletePageCommand;
 import net.krusher.datalinks.handler.page.DeletePageCommandHandler;
 import net.krusher.datalinks.handler.page.GetContributionsCommandHandler;
@@ -56,6 +58,7 @@ public class PageController {
     private final GetContributionsCommandHandler getContributionsCommandHandler;
     private final PageEditsCommandHandler pageEditsCommandHandler;
     private final GetEditCommandHandler getEditCommandHandler;
+    private final BlockPageCommandHandler blockPageCommandHandler;
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -69,6 +72,7 @@ public class PageController {
                           PageEditsCommandHandler pageEditsCommandHandler,
                           GetContributionsCommandHandler getContributionsCommandHandler,
                           GetEditCommandHandler getEditCommandHandler,
+                          BlockPageCommandHandler blockPageCommandHandler,
                           ObjectMapper objectMapper) {
         this.getPageCommandHandler = getPageCommandHandler;
         this.getPageShortCommandHandler = getPageShortCommandHandler;
@@ -80,6 +84,7 @@ public class PageController {
         this.getContributionsCommandHandler = getContributionsCommandHandler;
         this.pageEditsCommandHandler = pageEditsCommandHandler;
         this.getEditCommandHandler = getEditCommandHandler;
+        this.blockPageCommandHandler = blockPageCommandHandler;
         this.objectMapper = objectMapper;
     }
 
@@ -141,9 +146,18 @@ public class PageController {
                 .build());
     }
 
-    @GetMapping("{title}/block/{block}")
-    public void block(@PathVariable("title") String title, @PathVariable("block") String block, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
-
+    @PostMapping("block/{title}")
+    public ResponseEntity<String> block(@PathVariable("title") String title,
+                      @RequestParam(name = "readBlock", required = false, defaultValue = "0") int readBlock,
+                      @RequestParam(name = "writeBlock", required = false, defaultValue = "0") int writeBlock,
+                      @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+        blockPageCommandHandler.handler(BlockPageCommand.builder()
+                .title(title)
+                .readBlock(readBlock)
+                .writeBlock(writeBlock)
+                .loginToken(toLoginToken(userToken))
+                .build());
+        return ResponseEntity.ok("OK");
     }
 
     @PutMapping("{title}")

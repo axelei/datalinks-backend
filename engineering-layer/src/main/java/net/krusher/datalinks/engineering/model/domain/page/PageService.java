@@ -19,6 +19,7 @@ import net.krusher.datalinks.model.page.Edit;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.page.PageShort;
 import net.krusher.datalinks.model.user.User;
+import net.krusher.datalinks.model.user.UserLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
@@ -140,6 +141,14 @@ public class PageService {
             pageItem.setCreator(userMapper.toModel((UserEntity) result[1]));
             return pageItem;
         }).collect(Collectors.toList());
+    }
+
+    public void block(String slug, UserLevel readBlock, UserLevel editBlock) {
+        findBySlug(slug).ifPresent(page -> {
+            page.setReadBlock(readBlock);
+            page.setEditBlock(editBlock);
+            save(page, page.getCreator(), null);
+        });
     }
 
     public List<Edit> editsSortBy(String column, int page, int pageSize) {

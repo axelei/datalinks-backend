@@ -104,7 +104,7 @@ public class PageEntity implements Foundable {
                         .replace("</figure>", " ")
                         .replace("</p>", " ")
                         .replaceAll("<[^>]*>", "")
-                , 200);
+                , 250);
     }
 
     @Override
