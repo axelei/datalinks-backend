@@ -2,7 +2,10 @@ package net.krusher.datalinks.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vavr.control.Try;
 import jakarta.servlet.http.HttpServletRequest;
+import net.krusher.datalinks.exception.EngineException;
+import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.handler.page.BlockPageCommand;
@@ -90,22 +93,36 @@ public class PageController {
 
     @GetMapping("{title}")
     public ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
-        return getPageCommandHandler.handler(GetPageCommand.builder()
-                        .title(title)
-                        .loginTokenId(toLoginToken(userToken))
-                        .build())
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return Try.of(() -> getPageCommandHandler.handler(
+                        GetPageCommand.builder()
+                                .title(title)
+                                .loginTokenId(toLoginToken(userToken))
+                                .build()))
+                .map(optionalResult -> optionalResult
+                        .map(ResponseEntity::ok)
+                        .orElseGet(() -> ResponseEntity.notFound().build()))
+                .recover(EngineException.class, e ->
+                        e.getErrorType().equals(ErrorType.PERMISSIONS_ERROR)
+                                ? ResponseEntity.status(403).build()
+                                : ResponseEntity.status(500).build())
+                .get();
     }
 
     @GetMapping("-short/{title}")
     public ResponseEntity<PageShort> getShort(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
-        return getPageShortCommandHandler.handler(GetPageCommand.builder()
-                        .title(title)
-                        .loginTokenId(toLoginToken(userToken))
-                        .build())
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return Try.of(() -> getPageShortCommandHandler.handler(
+                        GetPageCommand.builder()
+                                .title(title)
+                                .loginTokenId(toLoginToken(userToken))
+                                .build()))
+                .map(optionalResult -> optionalResult
+                        .map(ResponseEntity::ok)
+                        .orElseGet(() -> ResponseEntity.notFound().build()))
+                .recover(EngineException.class, e ->
+                        e.getErrorType().equals(ErrorType.PERMISSIONS_ERROR)
+                                ? ResponseEntity.status(403).build()
+                                : ResponseEntity.status(500).build())
+                .get();
     }
 
     @GetMapping("-edits/{title}")

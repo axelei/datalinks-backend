@@ -1,5 +1,6 @@
 package net.krusher.datalinks.common;
 
+import io.vavr.control.Try;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.UUID;
@@ -12,6 +13,6 @@ public class ControllerUtil {
             return null;
         }
         String token = bearerToken.replaceFirst("^Bearer ", StringUtils.EMPTY);
-        return UUID.fromString(token);
+        return Try.of(() -> UUID.fromString(token)).getOrElse(() -> null);
     }
 }
