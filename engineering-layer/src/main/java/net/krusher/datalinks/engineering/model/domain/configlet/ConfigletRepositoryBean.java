@@ -1,7 +1,8 @@
 package net.krusher.datalinks.engineering.model.domain.configlet;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import jakarta.enterprise.context.ApplicationScoped;
 
-public interface ConfigletRepositoryBean extends JpaRepository<ConfigletEntity, String> {
-
+@ApplicationScoped
+public class ConfigletRepositoryBean implements PanacheRepositoryBase<ConfigletEntity, String> {
 }

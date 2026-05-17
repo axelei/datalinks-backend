@@ -1,33 +1,33 @@
 package net.krusher.datalinks.handler.tasks;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.Setter;
 import net.krusher.datalinks.engineering.model.domain.page.PageService;
 import net.krusher.datalinks.model.page.Page;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Service
+@ApplicationScoped
 public class LinkProcessorHelper {
 
     private final PageService pageService;
 
     @Setter
-    @Value("${application.url}")
-    private String applicationUrl;
+    @ConfigProperty(name = "application.url")
+    String applicationUrl;
 
-    @Autowired
+    @Inject
     public LinkProcessorHelper(PageService pageService) {
         this.pageService = pageService;
     }

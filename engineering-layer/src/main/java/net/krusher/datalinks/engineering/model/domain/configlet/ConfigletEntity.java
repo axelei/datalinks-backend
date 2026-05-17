@@ -5,13 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.krusher.datalinks.engineering.model.domain.page.CategoryEntity;
-import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
-import net.krusher.datalinks.model.user.UserLevel;
-
-import java.time.Instant;
-import java.util.Set;
-import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor

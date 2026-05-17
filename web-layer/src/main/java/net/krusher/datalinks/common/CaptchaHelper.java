@@ -1,10 +1,10 @@
 package net.krusher.datalinks.common;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.Setter;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,15 +13,17 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-@Component
-@ConfigurationProperties(prefix = "google.recaptcha.key")
+@ApplicationScoped
 @Setter
 public class CaptchaHelper {
 
-    private String site;
-    private String secret;
+    @ConfigProperty(name = "google.recaptcha.key.site")
+    String site;
 
-    private final String SERVICE_URL = "https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s&remoteip=%s";
+    @ConfigProperty(name = "google.recaptcha.key.secret")
+    String secret;
+
+    private static final String SERVICE_URL = "https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s&remoteip=%s";
 
     public boolean checkCaptcha(String response, String remoteIP) {
         try {

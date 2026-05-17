@@ -4,7 +4,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
-import jakarta.servlet.http.HttpServletRequest;
+import io.vertx.ext.web.RoutingContext;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.CacheControl;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.handler.common.PaginationCommand;
@@ -22,36 +36,21 @@ import net.krusher.datalinks.model.FileTypes;
 import net.krusher.datalinks.model.PaginationModel;
 import net.krusher.datalinks.model.UpdateUploadModel;
 import net.krusher.datalinks.model.UploadResponse;
-import net.krusher.datalinks.model.page.PageShort;
 import net.krusher.datalinks.model.upload.Upload;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import org.jboss.resteasy.reactive.RestForm;
+import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 
 import static net.krusher.datalinks.common.ControllerUtil.AUTH_HEADER;
 import static net.krusher.datalinks.common.ControllerUtil.toLoginToken;
 
-@RestController
-@RequestMapping("/file")
+@Path("/file")
+@Produces(MediaType.APPLICATION_JSON)
 public class UploadController {
 
     private final ObjectMapper objectMapper;
@@ -62,7 +61,7 @@ public class UploadController {
     private final FindUsagesCommandHandler findUsagesCommandHandler;
     private final DeleteUploadCommandHandler deleteUploadCommandHandler;
 
-    @Autowired
+    @Inject
     public UploadController(ObjectMapper objectMapper,
                             UploadCommandHandler uploadCommandHandler,
                             UpdateUploadCommandHandler updateUploadCommandHandler,
@@ -79,20 +78,27 @@ public class UploadController {
         this.deleteUploadCommandHandler = deleteUploadCommandHandler;
     }
 
-    @GetMapping("/lookAt/{filename}")
-    @ResponseBody
-    public ResponseEntity<Upload> lookAt(@PathVariable("filename") String filename, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    private static String remoteAddr(RoutingContext rc) {
+        if (rc == null || rc.request().remoteAddress() == null) {
+            return null;
+        }
+        return rc.request().remoteAddress().host();
+    }
+
+    @GET
+    @Path("/lookAt/{filename}")
+    public Response lookAt(@PathParam("filename") String filename, @HeaderParam(AUTH_HEADER) String userToken) {
         Upload upload = getFileCommandHandler.handler(GetFileCommand.builder()
                 .filename(filename)
                 .loginTokenId(toLoginToken(userToken))
                 .build());
         upload.setInputStream(null);
-        return ResponseEntity.ok(upload);
+        return Response.ok(upload).build();
     }
 
-    @GetMapping("/get/{filename}")
-    @ResponseBody
-    public ResponseEntity<InputStreamResource> get(@PathVariable("filename") String filename, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    @GET
+    @Path("/get/{filename}")
+    public Response get(@PathParam("filename") String filename, @HeaderParam(AUTH_HEADER) String userToken) {
 
         Upload upload = Try.of(() -> getFileCommandHandler.handler(
                         GetFileCommand.builder()
@@ -108,7 +114,7 @@ public class UploadController {
                 .get();
 
         if (upload == null) {
-            return ResponseEntity.notFound().build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         InputStream inputStream = Option.of(upload.getInputStream())
@@ -117,14 +123,14 @@ public class UploadController {
                 .map(__ -> getMediaType(upload.getFilename()))
                 .getOrElse(FileTypes.SVG.getMediaType());
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CACHE_CONTROL, "max-age=3600, must-revalidate");
+        CacheControl cc = new CacheControl();
+        cc.setMaxAge(3600);
+        cc.setMustRevalidate(true);
 
-        return ResponseEntity.ok()
-                .contentType(mediaType)
-                .headers(headers)
-                .body(new InputStreamResource(inputStream));
-
+        return Response.ok(inputStream)
+                .type(mediaType)
+                .cacheControl(cc)
+                .build();
     }
 
     private MediaType getMediaType(String filename) {
@@ -132,59 +138,75 @@ public class UploadController {
         return FileTypes.valueOf(extension.toUpperCase()).getMediaType();
     }
 
-    @DeleteMapping("/delete/{filename}")
-    ResponseEntity<String> delete(@PathVariable("filename") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    @DELETE
+    @Path("/delete/{filename}")
+    public Response delete(@PathParam("filename") String title, @HeaderParam(AUTH_HEADER) String userToken) {
         deleteUploadCommandHandler.handler(DeleteUploadCommand.builder()
                 .filename(title)
                 .loginToken(toLoginToken(userToken))
                 .build());
-        return ResponseEntity.ok("OK");
+        return Response.ok("OK").build();
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<UploadResponse> put(
-            @RequestHeader(value = AUTH_HEADER, required = false) String userToken,
-            @RequestParam("upload") MultipartFile upload,
-            @RequestParam(value = "description", required = false, defaultValue = "") String description,
-            HttpServletRequest request) throws IOException {
-       String extension = upload.getOriginalFilename().substring(upload.getOriginalFilename().lastIndexOf('.') + 1);
-       if (Arrays.stream(FileTypes.values()).noneMatch(fileType -> fileType.name().equalsIgnoreCase(extension))) {
-           return ResponseEntity.badRequest().build();
-       }
-       String url = uploadCommandHandler.handler(UploadCommand.builder()
-               .inputStream(upload.getInputStream())
-               .loginTokenId(toLoginToken(userToken))
-               .filename(upload.getOriginalFilename())
-               .description(description)
-               .ip(request.getRemoteAddr())
-               .build());
-       return ResponseEntity.ok(UploadResponse.builder().url(url).build());
+    @POST
+    @Path("/upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response put(
+            @HeaderParam(AUTH_HEADER) String userToken,
+            @RestForm("upload") FileUpload upload,
+            @RestForm("description") @org.jboss.resteasy.reactive.PartType(MediaType.TEXT_PLAIN) String description,
+            @Context RoutingContext routingContext) throws IOException {
+        if (upload == null || upload.fileName() == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        String fileName = upload.fileName();
+        String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+        if (Arrays.stream(FileTypes.values()).noneMatch(fileType -> fileType.name().equalsIgnoreCase(extension))) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        try (InputStream is = Files.newInputStream(upload.uploadedFile())) {
+            String url = uploadCommandHandler.handler(UploadCommand.builder()
+                    .inputStream(is)
+                    .loginTokenId(toLoginToken(userToken))
+                    .filename(fileName)
+                    .description(description == null ? "" : description)
+                    .ip(remoteAddr(routingContext))
+                    .build());
+            return Response.ok(UploadResponse.builder().url(url).build()).build();
+        }
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<String> update(@RequestHeader(value = AUTH_HEADER, required = false) String userToken, @RequestBody String body, HttpServletRequest request) throws JsonProcessingException {
+    @PUT
+    @Path("/update")
+    @Consumes(MediaType.WILDCARD)
+    public Response update(@HeaderParam(AUTH_HEADER) String userToken,
+                           String body,
+                           @Context RoutingContext routingContext) throws JsonProcessingException {
         UpdateUploadModel paginationModel = objectMapper.readValue(body, UpdateUploadModel.class);
         updateUploadCommandHandler.handler(UpdateUploadCommand.builder()
                 .loginToken(toLoginToken(userToken))
                 .description(paginationModel.getDescription())
                 .filename(paginationModel.getFilename())
-                .ip(request.getRemoteAddr())
+                .ip(remoteAddr(routingContext))
                 .build());
-        return ResponseEntity.ok("ok");
+        return Response.ok("ok").build();
     }
 
-    @PostMapping("newUploads")
-    public ResponseEntity<List<Upload>> newPages(@RequestBody String body) throws JsonProcessingException {
+    @POST
+    @Path("newUploads")
+    @Consumes(MediaType.WILDCARD)
+    public Response newPages(String body) throws JsonProcessingException {
         PaginationModel paginationModel = objectMapper.readValue(body, PaginationModel.class);
         List<Upload> pages = newUploadsCommandHandler.handler(PaginationCommand.builder()
                 .page(paginationModel.getPage())
                 .pageSize(paginationModel.getPageSize())
                 .build());
-        return ResponseEntity.ok(pages);
+        return Response.ok(pages).build();
     }
 
-    @GetMapping("usages/{filename}")
-    public ResponseEntity<List<PageShort>> usages(@PathVariable("filename") String filename) {
-        return ResponseEntity.ok(findUsagesCommandHandler.handler(filename));
+    @GET
+    @Path("usages/{filename}")
+    public Response usages(@PathParam("filename") String filename) {
+        return Response.ok(findUsagesCommandHandler.handler(filename)).build();
     }
 }

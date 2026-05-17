@@ -1,21 +1,21 @@
 package net.krusher.datalinks.model;
 
+import jakarta.ws.rs.core.MediaType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.MediaType;
 
 @AllArgsConstructor
 @Getter
 public enum FileTypes {
-    JPG(MediaType.IMAGE_JPEG),
-    JPEG(MediaType.IMAGE_JPEG),
-    PNG(MediaType.IMAGE_PNG),
-    BMP(MediaType.valueOf("image/bmp")),
-    GIF(MediaType.IMAGE_GIF),
-    WEBP(MediaType.valueOf("image/webp")),
-    TIFF(MediaType.valueOf("image/tiff")),
-    SVG(MediaType.valueOf("image/svg+xml")),
-    JFIF(MediaType.IMAGE_JPEG),
+    JPG(new MediaType("image", "jpeg")),
+    JPEG(new MediaType("image", "jpeg")),
+    PNG(new MediaType("image", "png")),
+    BMP(new MediaType("image", "bmp")),
+    GIF(new MediaType("image", "gif")),
+    WEBP(new MediaType("image", "webp")),
+    TIFF(new MediaType("image", "tiff")),
+    SVG(new MediaType("image", "svg+xml")),
+    JFIF(new MediaType("image", "jpeg")),
     ;
 
     private final MediaType mediaType;

@@ -1,5 +1,7 @@
 package net.krusher.datalinks.engineering.model.domain.search;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import net.krusher.datalinks.engineering.mapper.CategoryMapper;
 import net.krusher.datalinks.engineering.model.domain.page.CategoryEntity;
@@ -13,18 +15,16 @@ import org.hibernate.search.engine.search.query.SearchQuery;
 import org.hibernate.search.engine.search.query.SearchResult;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+@ApplicationScoped
 public class SearchService {
 
     private final EntityManager entityManager;
     private final CategoryMapper categoryMapper;
 
-    @Autowired
+    @Inject
     public SearchService(EntityManager entityManager, CategoryMapper categoryMapper) {
         this.categoryMapper = categoryMapper;
         this.entityManager = entityManager;

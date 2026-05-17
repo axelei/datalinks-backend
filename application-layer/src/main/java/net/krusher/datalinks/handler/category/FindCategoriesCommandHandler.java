@@ -1,18 +1,18 @@
 package net.krusher.datalinks.handler.category;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.krusher.datalinks.engineering.model.domain.search.SearchService;
 import net.krusher.datalinks.model.page.Category;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+@ApplicationScoped
 public class FindCategoriesCommandHandler {
 
     private final SearchService searchService;
 
-    @Autowired
+    @Inject
     public FindCategoriesCommandHandler(SearchService searchService) {
         this.searchService = searchService;
     }

@@ -4,7 +4,7 @@ import net.krusher.datalinks.engineering.model.domain.configlet.ConfigletEntity;
 import net.krusher.datalinks.model.configlet.Configlet;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "jakarta-cdi")
 public interface ConfigletMapper {
 
     Configlet toModel(ConfigletEntity entity);

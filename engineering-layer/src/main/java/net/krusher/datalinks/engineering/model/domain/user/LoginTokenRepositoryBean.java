@@ -1,8 +1,10 @@
 package net.krusher.datalinks.engineering.model.domain.user;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.UUID;
 
-public interface LoginTokenRepositoryBean extends JpaRepository<LoginTokenEntity, UUID> {
+@ApplicationScoped
+public class LoginTokenRepositoryBean implements PanacheRepositoryBase<LoginTokenEntity, UUID> {
 }

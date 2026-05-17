@@ -1,5 +1,8 @@
 package net.krusher.datalinks.handler.page;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import net.krusher.datalinks.common.UserHelper;
 import net.krusher.datalinks.engineering.model.domain.page.PageService;
 import net.krusher.datalinks.exception.EngineException;
@@ -7,9 +10,6 @@ import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.model.page.Category;
 import net.krusher.datalinks.model.page.Page;
 import net.krusher.datalinks.model.user.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -18,13 +18,13 @@ import java.util.stream.Collectors;
 
 import static net.krusher.datalinks.handler.common.SlugifyProvider.SLUGIFY;
 
-@Service
+@ApplicationScoped
 public class PostPageCommandHandler {
 
     private final PageService pageService;
     private final UserHelper userHelper;
 
-    @Autowired
+    @Inject
     public PostPageCommandHandler(PageService pageService, UserHelper userHelper) {
         this.pageService = pageService;
         this.userHelper = userHelper;

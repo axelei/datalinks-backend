@@ -1,5 +1,8 @@
 package net.krusher.datalinks.handler.user;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import net.krusher.datalinks.common.UserHelper;
 import net.krusher.datalinks.engineering.model.domain.email.EmailService;
 import net.krusher.datalinks.engineering.model.domain.email.SignupParams;
@@ -12,9 +15,6 @@ import net.krusher.datalinks.model.user.UserLevel;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.Optional;
@@ -22,7 +22,7 @@ import java.util.UUID;
 
 import static java.util.function.Predicate.not;
 
-@Service
+@ApplicationScoped
 public class SignupCommandHandler {
 
     private final UserHelper userHelper;
@@ -30,7 +30,7 @@ public class SignupCommandHandler {
     private final SignupMapper signupMapper;
     private final EmailService emailService;
 
-    @Autowired
+    @Inject
     public SignupCommandHandler(UserHelper userHelper, UserService userService, SignupMapper signupMapper, EmailService emailService) {
         this.userService = userService;
         this.signupMapper = signupMapper;

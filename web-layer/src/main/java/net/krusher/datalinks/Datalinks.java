@@ -1,15 +1,13 @@
 package net.krusher.datalinks;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import io.quarkus.runtime.Quarkus;
+import io.quarkus.runtime.annotations.QuarkusMain;
 
-@EnableScheduling
-@SpringBootApplication
+@QuarkusMain
 public class Datalinks {
 
-	public static void main(String[] args) {
-		SpringApplication.run(Datalinks.class, args);
-	}
+    public static void main(String[] args) {
+        Quarkus.run(args);
+    }
 
 }

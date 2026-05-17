@@ -3,7 +3,22 @@ package net.krusher.datalinks.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Try;
-import jakarta.servlet.http.HttpServletRequest;
+import io.vertx.ext.web.RoutingContext;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.handler.common.PaginationCommand;
@@ -26,20 +41,6 @@ import net.krusher.datalinks.handler.page.RecentChangesCommandHandler;
 import net.krusher.datalinks.model.PaginationModel;
 import net.krusher.datalinks.model.PostPageModel;
 import net.krusher.datalinks.model.page.Edit;
-import net.krusher.datalinks.model.page.Page;
-import net.krusher.datalinks.model.page.PageShort;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -47,8 +48,9 @@ import java.util.UUID;
 import static net.krusher.datalinks.common.ControllerUtil.AUTH_HEADER;
 import static net.krusher.datalinks.common.ControllerUtil.toLoginToken;
 
-@RestController
-@RequestMapping("/page")
+@Path("/page")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class PageController {
 
     private final GetPageCommandHandler getPageCommandHandler;
@@ -64,7 +66,7 @@ public class PageController {
     private final BlockPageCommandHandler blockPageCommandHandler;
     private final ObjectMapper objectMapper;
 
-    @Autowired
+    @Inject
     public PageController(GetPageCommandHandler getPageCommandHandler,
                           GetPageShortCommandHandler getPageShortCommandHandler,
                           PostPageCommandHandler postPageCommandHandler,
@@ -91,128 +93,150 @@ public class PageController {
         this.objectMapper = objectMapper;
     }
 
-    @GetMapping("{title}")
-    public ResponseEntity<Page> get(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    private static String remoteAddr(RoutingContext rc) {
+        if (rc == null || rc.request().remoteAddress() == null) {
+            return null;
+        }
+        return rc.request().remoteAddress().host();
+    }
+
+    @GET
+    @Path("{title}")
+    public Response get(@PathParam("title") String title, @HeaderParam(AUTH_HEADER) String userToken) {
         return Try.of(() -> getPageCommandHandler.handler(
                         GetPageCommand.builder()
                                 .title(title)
                                 .loginTokenId(toLoginToken(userToken))
                                 .build()))
                 .map(optionalResult -> optionalResult
-                        .map(ResponseEntity::ok)
-                        .orElseGet(() -> ResponseEntity.notFound().build()))
+                        .map(p -> Response.ok(p).build())
+                        .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build()))
                 .recover(EngineException.class, e ->
                         e.getErrorType().equals(ErrorType.PERMISSIONS_ERROR)
-                                ? ResponseEntity.status(403).build()
-                                : ResponseEntity.status(500).build())
+                                ? Response.status(403).build()
+                                : Response.status(500).build())
                 .get();
     }
 
-    @GetMapping("-short/{title}")
-    public ResponseEntity<PageShort> getShort(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    @GET
+    @Path("-short/{title}")
+    public Response getShort(@PathParam("title") String title, @HeaderParam(AUTH_HEADER) String userToken) {
         return Try.of(() -> getPageShortCommandHandler.handler(
                         GetPageCommand.builder()
                                 .title(title)
                                 .loginTokenId(toLoginToken(userToken))
                                 .build()))
                 .map(optionalResult -> optionalResult
-                        .map(ResponseEntity::ok)
-                        .orElseGet(() -> ResponseEntity.notFound().build()))
+                        .map(p -> Response.ok(p).build())
+                        .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build()))
                 .recover(EngineException.class, e ->
                         e.getErrorType().equals(ErrorType.PERMISSIONS_ERROR)
-                                ? ResponseEntity.status(403).build()
-                                : ResponseEntity.status(500).build())
+                                ? Response.status(403).build()
+                                : Response.status(500).build())
                 .get();
     }
 
-    @GetMapping("-edits/{title}")
-    public ResponseEntity<List<Edit>> edits(@PathVariable("title") String title,
-                                            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
-                                            @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize) {
+    @GET
+    @Path("-edits/{title}")
+    public Response edits(@PathParam("title") String title,
+                          @QueryParam("page") @DefaultValue("0") int page,
+                          @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
         List<Edit> result = pageEditsCommandHandler.handler(SearchPaginationCommand.builder()
                 .query(title)
                 .page(page)
                 .pageSize(pageSize)
                 .build());
-        return ResponseEntity.ok(result);
+        return Response.ok(result).build();
     }
 
-    @GetMapping("-randomPage")
-    public ResponseEntity<PageShort> random() {
+    @GET
+    @Path("-randomPage")
+    public Response random() {
         return getRandomPageCommandHandler.handler()
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(p -> Response.ok(p).build())
+                .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
 
-    @GetMapping("-contributions/{username}")
-    public ResponseEntity<List<Edit>> contributions(@PathVariable("username") String username,
-                                                    @RequestParam(name = "page", required = false, defaultValue = "0") int page,
-                                                    @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize) {
-        return ResponseEntity.ok(getContributionsCommandHandler.handler(SearchPaginationCommand.builder()
+    @GET
+    @Path("-contributions/{username}")
+    public Response contributions(@PathParam("username") String username,
+                                  @QueryParam("page") @DefaultValue("0") int page,
+                                  @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
+        return Response.ok(getContributionsCommandHandler.handler(SearchPaginationCommand.builder()
                 .query(username)
                 .page(page)
                 .pageSize(pageSize)
-                .build()));
+                .build())).build();
     }
 
-    @DeleteMapping("{title}")
-    public void delete(@PathVariable("title") String title, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    @DELETE
+    @Path("{title}")
+    public void delete(@PathParam("title") String title, @HeaderParam(AUTH_HEADER) String userToken) {
         deletePageCommandHandler.handler(DeletePageCommand.builder()
                 .title(title)
                 .loginTokenId(toLoginToken(userToken))
                 .build());
     }
 
-    @PostMapping("block/{title}")
-    public ResponseEntity<String> block(@PathVariable("title") String title,
-                      @RequestParam(name = "readBlock", required = false, defaultValue = "0") int readBlock,
-                      @RequestParam(name = "writeBlock", required = false, defaultValue = "0") int writeBlock,
-                      @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    @POST
+    @Path("block/{title}")
+    public Response block(@PathParam("title") String title,
+                          @QueryParam("readBlock") @DefaultValue("0") int readBlock,
+                          @QueryParam("writeBlock") @DefaultValue("0") int writeBlock,
+                          @HeaderParam(AUTH_HEADER) String userToken) {
         blockPageCommandHandler.handler(BlockPageCommand.builder()
                 .title(title)
                 .readBlock(readBlock)
                 .writeBlock(writeBlock)
                 .loginToken(toLoginToken(userToken))
                 .build());
-        return ResponseEntity.ok("OK");
+        return Response.ok("OK").build();
     }
 
-    @PutMapping("{title}")
-    public void put(@PathVariable("title") String title, @RequestBody String body, @RequestHeader(value = AUTH_HEADER, required = false) String userToken, HttpServletRequest request) throws JsonProcessingException {
+    @PUT
+    @Path("{title}")
+    @Consumes(MediaType.WILDCARD)
+    public void put(@PathParam("title") String title,
+                    String body,
+                    @HeaderParam(AUTH_HEADER) String userToken,
+                    @Context RoutingContext routingContext) throws JsonProcessingException {
         PostPageModel postPageModel = objectMapper.readValue(body, PostPageModel.class);
         postPageCommandHandler.handler(PostPageCommand.builder()
                 .title(title)
                 .content(postPageModel.getContent())
                 .categories(postPageModel.getCategories())
                 .loginTokenId(toLoginToken(userToken))
-                .ip(request.getRemoteAddr())
+                .ip(remoteAddr(routingContext))
                 .build());
     }
 
-    @PostMapping("newPages")
-    public ResponseEntity<List<PageShort>> newPages(@RequestBody String body) throws JsonProcessingException {
+    @POST
+    @Path("newPages")
+    @Consumes(MediaType.WILDCARD)
+    public Response newPages(String body) throws JsonProcessingException {
         PaginationModel paginationModel = objectMapper.readValue(body, PaginationModel.class);
-        List<PageShort> pages = newPagesCommandHandler.handler(PaginationCommand.builder()
+        return Response.ok(newPagesCommandHandler.handler(PaginationCommand.builder()
                 .page(paginationModel.getPage())
                 .pageSize(paginationModel.getPageSize())
-                .build());
-        return ResponseEntity.ok(pages);
+                .build())).build();
     }
 
-    @PostMapping("recentChanges")
-    public ResponseEntity<List<Edit>> recentChanges(@RequestBody String body) throws JsonProcessingException {
+    @POST
+    @Path("recentChanges")
+    @Consumes(MediaType.WILDCARD)
+    public Response recentChanges(String body) throws JsonProcessingException {
         PaginationModel paginationModel = objectMapper.readValue(body, PaginationModel.class);
-        List<Edit> pages = recentChangesCommandHandler.handler(PaginationCommand.builder()
+        return Response.ok(recentChangesCommandHandler.handler(PaginationCommand.builder()
                 .page(paginationModel.getPage())
                 .pageSize(paginationModel.getPageSize())
-                .build());
-        return ResponseEntity.ok(pages);
+                .build())).build();
     }
 
-    @GetMapping("-edit/{id}")
-    public ResponseEntity<Edit> edit(@PathVariable("id") String id) {
+    @GET
+    @Path("-edit/{id}")
+    public Response edit(@PathParam("id") String id) {
         return getEditCommandHandler.handler(UUID.fromString(id))
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(e -> Response.ok(e).build())
+                .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
 }

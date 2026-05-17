@@ -1,10 +1,10 @@
 package net.krusher.datalinks.engineering.model.domain.page;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.UUID;
 
-public interface PageRepositoryBean extends JpaRepository<PageEntity, UUID> {
-
-
+@ApplicationScoped
+public class PageRepositoryBean implements PanacheRepositoryBase<PageEntity, UUID> {
 }

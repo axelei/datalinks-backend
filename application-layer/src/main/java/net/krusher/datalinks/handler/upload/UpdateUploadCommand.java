@@ -3,7 +3,6 @@ package net.krusher.datalinks.handler.upload;
 import lombok.Builder;
 import lombok.Data;
 
-import java.io.InputStream;
 import java.util.UUID;
 
 @Data

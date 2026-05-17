@@ -1,8 +1,10 @@
 package net.krusher.datalinks.engineering.model.domain.user;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.UUID;
 
-public interface ResetTokenRepositoryBean extends JpaRepository<ResetTokenEntity, UUID> {
+@ApplicationScoped
+public class ResetTokenRepositoryBean implements PanacheRepositoryBase<ResetTokenEntity, UUID> {
 }

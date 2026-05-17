@@ -5,7 +5,7 @@ import net.krusher.datalinks.model.page.Edit;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "jakarta-cdi")
 public interface EditMapper {
 
     @Mapping(target = "page", ignore = true)

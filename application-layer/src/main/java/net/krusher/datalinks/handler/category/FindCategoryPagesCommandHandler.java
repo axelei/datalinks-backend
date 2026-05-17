@@ -1,20 +1,20 @@
 package net.krusher.datalinks.handler.category;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.krusher.datalinks.engineering.model.domain.page.CategoryService;
 import net.krusher.datalinks.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.handler.common.SlugifyProvider;
 import net.krusher.datalinks.model.page.PageShort;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+@ApplicationScoped
 public class FindCategoryPagesCommandHandler {
 
     private final CategoryService categoryService;
 
-    @Autowired
+    @Inject
     public FindCategoryPagesCommandHandler(CategoryService categoryService) {
         this.categoryService = categoryService;
     }

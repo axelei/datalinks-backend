@@ -3,7 +3,18 @@ package net.krusher.datalinks.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Try;
-import jakarta.servlet.http.HttpServletRequest;
+import io.vertx.ext.web.RoutingContext;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import net.krusher.datalinks.common.CaptchaHelper;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.handler.user.ActivateUserCommandHandler;
@@ -24,16 +35,6 @@ import net.krusher.datalinks.model.LoginModel;
 import net.krusher.datalinks.model.PasswordResetRequestModel;
 import net.krusher.datalinks.model.SignupModel;
 import net.krusher.datalinks.model.user.LoginToken;
-import net.krusher.datalinks.model.user.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -41,8 +42,8 @@ import java.util.UUID;
 import static net.krusher.datalinks.common.ControllerUtil.AUTH_HEADER;
 import static net.krusher.datalinks.common.ControllerUtil.toLoginToken;
 
-@RestController
-@RequestMapping("/user")
+@Path("/user")
+@Produces(MediaType.APPLICATION_JSON)
 public class UserController {
 
     private final GetUserCommandHandler getUserCommandHandler;
@@ -57,7 +58,7 @@ public class UserController {
     private final RequestResetUserCommandHandler requestResetUserCommandHandler;
     private final ChangePasswordCommandHandler changePasswordCommandHandler;
 
-    @Autowired
+    @Inject
     public UserController(GetUserCommandHandler getUserCommandHandler,
                           LoginCommandHandler loginCommandHandler,
                           SignupCommandHandler signupCommandHandler,
@@ -82,82 +83,101 @@ public class UserController {
         this.changePasswordCommandHandler = changePasswordCommandHandler;
     }
 
-    @GetMapping("{name}/get")
-    public ResponseEntity<User> get(@PathVariable("name") String name, @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    private static String remoteAddr(RoutingContext rc) {
+        if (rc == null || rc.request().remoteAddress() == null) {
+            return null;
+        }
+        return rc.request().remoteAddress().host();
+    }
+
+    @GET
+    @Path("{name}/get")
+    public Response get(@PathParam("name") String name, @HeaderParam(AUTH_HEADER) String userToken) {
         return getUserCommandHandler.handler(GetUserCommand.builder().username(name).loginToken(toLoginToken(userToken)).build())
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(u -> Response.ok(u).build())
+                .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
 
-    @GetMapping("{loginToken}/byLoginToken")
-    public ResponseEntity<User> getByLoginToken(@PathVariable("loginToken") String loginToken) {
+    @GET
+    @Path("{loginToken}/byLoginToken")
+    public Response getByLoginToken(@PathParam("loginToken") String loginToken) {
         return getUserByLoginTokenCommandHandler.handler(GetUserByLoginTokenCommand.builder().loginToken(toLoginToken(loginToken)).build())
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(u -> Response.ok(u).build())
+                .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
 
-    @GetMapping("{token}/activate")
-    public ResponseEntity<String> activate(@PathVariable("token") String token) {
+    @GET
+    @Path("{token}/activate")
+    public Response activate(@PathParam("token") String token) {
         return Try.run(() -> activateUserCommandHandler.handler(UUID.fromString(token)))
-                .map(e -> ResponseEntity.ok("OK"))
-                .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
+                .map(e -> Response.ok("OK").build())
+                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity(e.getErrorType().name()).build())
                 .get();
     }
 
-    @GetMapping("{token}/reset")
-    public ResponseEntity<String> reset(@PathVariable("token") String token) {
+    @GET
+    @Path("{token}/reset")
+    public Response reset(@PathParam("token") String token) {
         return Try.run(() -> resetPasswordCommandHandler.handler(UUID.fromString(token)))
-                .map(e -> ResponseEntity.ok("OK"))
-                .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
+                .map(e -> Response.ok("OK").build())
+                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity(e.getErrorType().name()).build())
                 .get();
     }
 
-    @PostMapping("/passwordChange")
-    public ResponseEntity<String> passwordChange(@RequestBody String body, @RequestHeader(value = AUTH_HEADER) String userToken) {
+    @POST
+    @Path("/passwordChange")
+    @Consumes(MediaType.WILDCARD)
+    public Response passwordChange(String body, @HeaderParam(AUTH_HEADER) String userToken) {
         return Try.run(() -> changePasswordCommandHandler.handler(ChangePasswordCommand.builder()
                 .password(body)
                 .loginToken(toLoginToken(userToken))
                 .build()))
-                .map(e -> ResponseEntity.ok("OK"))
-                .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
+                .map(e -> Response.ok("OK").build())
+                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity(e.getErrorType().name()).build())
                 .get();
     }
 
-    @PostMapping("/requestReset")
-    public ResponseEntity<String> requestReset(@RequestBody String body, HttpServletRequest request) throws JsonProcessingException {
+    @POST
+    @Path("/requestReset")
+    @Consumes(MediaType.WILDCARD)
+    public Response requestReset(String body, @Context RoutingContext routingContext) throws JsonProcessingException {
         PasswordResetRequestModel passwordResetRequestModel = objectMapper.readValue(body, PasswordResetRequestModel.class);
-        if (!captchaHelper.checkCaptcha(passwordResetRequestModel.getCaptcha(), request.getRemoteAddr())) {
-            return ResponseEntity.badRequest().body("Captcha is invalid");
+        if (!captchaHelper.checkCaptcha(passwordResetRequestModel.getCaptcha(), remoteAddr(routingContext))) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Captcha is invalid").build();
         }
         return Try.run(() -> requestResetUserCommandHandler.handler(
-                RequestResetUserCommand.builder()
-                        .username(passwordResetRequestModel.getUsername())
-                        .email(passwordResetRequestModel.getEmail()).build()))
-                .map(e -> ResponseEntity.ok("OK"))
-                .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
+                        RequestResetUserCommand.builder()
+                                .username(passwordResetRequestModel.getUsername())
+                                .email(passwordResetRequestModel.getEmail()).build()))
+                .map(e -> Response.ok("OK").build())
+                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity(e.getErrorType().name()).build())
                 .get();
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<UUID> get(@RequestBody String body) throws JsonProcessingException {
+    @POST
+    @Path("/login")
+    @Consumes(MediaType.WILDCARD)
+    public Response login(String body) throws JsonProcessingException {
         LoginModel loginModel = objectMapper.readValue(body, LoginModel.class);
         Optional<LoginToken> loginToken = loginCommandHandler.handler(LoginCommand.builder()
-                        .username(loginModel.getUsername())
-                        .password(loginModel.getPassword())
-                        .build());
-        return loginToken.map(token -> ResponseEntity.ok(token.getLoginToken()))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .username(loginModel.getUsername())
+                .password(loginModel.getPassword())
+                .build());
+        return loginToken.map(token -> Response.ok(token.getLoginToken()).build())
+                .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
 
-    @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody String body, HttpServletRequest request) throws JsonProcessingException {
+    @POST
+    @Path("/signup")
+    @Consumes(MediaType.WILDCARD)
+    public Response signup(String body, @Context RoutingContext routingContext) throws JsonProcessingException {
         SignupModel signupModel = objectMapper.readValue(body, SignupModel.class);
-        if (!captchaHelper.checkCaptcha(signupModel.getCaptcha(), request.getRemoteAddr())) {
-            return ResponseEntity.badRequest().body("Captcha is invalid");
+        if (!captchaHelper.checkCaptcha(signupModel.getCaptcha(), remoteAddr(routingContext))) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Captcha is invalid").build();
         }
         return Try.run(() -> signupCommandHandler.handle(signupCommandMapper.toCommand(signupModel)))
-                .map(e -> ResponseEntity.ok("OK"))
-                .recover(EngineException.class, e -> ResponseEntity.badRequest().body(e.getErrorType().name()))
+                .map(e -> Response.ok("OK").build())
+                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity(e.getErrorType().name()).build())
                 .get();
     }
 }

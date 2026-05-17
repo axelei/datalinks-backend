@@ -1,22 +1,22 @@
 package net.krusher.datalinks.handler.user;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.model.user.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
+@ApplicationScoped
 public class ActivateUserCommandHandler {
 
     private final UserService userService;
 
-    @Autowired
+    @Inject
     public ActivateUserCommandHandler(UserService userService) {
         this.userService = userService;
     }

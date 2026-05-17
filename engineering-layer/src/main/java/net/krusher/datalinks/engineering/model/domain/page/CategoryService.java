@@ -1,9 +1,10 @@
 package net.krusher.datalinks.engineering.model.domain.page;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -14,18 +15,12 @@ import net.krusher.datalinks.engineering.mapper.UserMapper;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
 import net.krusher.datalinks.model.page.Category;
 import net.krusher.datalinks.model.page.PageShort;
-import net.krusher.datalinks.model.user.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Service
+@ApplicationScoped
 public class CategoryService {
 
     private final CategoryRepositoryBean categoryRepositoryBean;
@@ -34,7 +29,7 @@ public class CategoryService {
     private final UserMapper userMapper;
     private final EntityManager entityManager;
 
-    @Autowired
+    @Inject
     public CategoryService(CategoryRepositoryBean categoryRepositoryBean,
                            CategoryMapper categoryMapper,
                            PageMapper pageMapper,
@@ -59,19 +54,17 @@ public class CategoryService {
     }
 
     public void create(Category category) {
-        categoryRepositoryBean.save(categoryMapper.toEntity(category));
+        categoryRepositoryBean.persist(categoryMapper.toEntity(category));
     }
 
     public void deleteBySlug(String slug) {
         Optional<Category> category = getCategoryBySlug(slug);
-        category.ifPresent((element) -> {
-            categoryRepositoryBean.deleteById(element.getId());
-        });
+        category.ifPresent((element) -> categoryRepositoryBean.deleteById(element.getId()));
     }
 
     public Optional<Category> getCategoryBySlug(String slug) {
-        return categoryRepositoryBean.findAll(Example.of(CategoryEntity.builder().slug(slug).build()))
-                .stream().findFirst()
+        return categoryRepositoryBean.find("slug", slug)
+                .firstResultOptional()
                 .map(categoryMapper::toModel);
     }
 

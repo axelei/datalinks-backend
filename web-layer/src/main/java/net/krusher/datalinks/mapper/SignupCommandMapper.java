@@ -4,7 +4,7 @@ import net.krusher.datalinks.handler.user.SignupCommand;
 import net.krusher.datalinks.model.SignupModel;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "jakarta-cdi")
 public interface SignupCommandMapper {
 
     SignupCommand toCommand(SignupModel signupModel);

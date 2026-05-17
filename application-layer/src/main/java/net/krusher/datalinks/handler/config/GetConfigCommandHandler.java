@@ -1,19 +1,19 @@
 package net.krusher.datalinks.handler.config;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import net.krusher.datalinks.engineering.model.domain.configlet.ConfigService;
 import net.krusher.datalinks.model.configlet.Configlet;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
-@Service
+@ApplicationScoped
 public class GetConfigCommandHandler {
 
     private final ConfigService configService;
 
-    @Autowired
+    @Inject
     public GetConfigCommandHandler(ConfigService configService) {
         this.configService = configService;
     }

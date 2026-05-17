@@ -1,5 +1,8 @@
 package net.krusher.datalinks.handler.user;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import net.krusher.datalinks.engineering.model.domain.email.EmailService;
 import net.krusher.datalinks.engineering.model.domain.email.RequestResetTokenParams;
 import net.krusher.datalinks.engineering.model.domain.user.ResetTokenService;
@@ -8,21 +11,18 @@ import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.model.user.ResetToken;
 import net.krusher.datalinks.model.user.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.Optional;
 
-@Service
+@ApplicationScoped
 public class RequestResetUserCommandHandler {
 
     private final UserService userService;
     private final ResetTokenService resetTokenService;
     private final EmailService emailService;
 
-    @Autowired
+    @Inject
     public RequestResetUserCommandHandler(UserService userService, ResetTokenService resetTokenService, EmailService emailService) {
         this.userService = userService;
         this.resetTokenService = resetTokenService;

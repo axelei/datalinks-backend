@@ -1,42 +1,47 @@
 package net.krusher.datalinks.controller;
 
+import jakarta.inject.Inject;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import net.krusher.datalinks.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.handler.search.SearchCommandHandler;
 import net.krusher.datalinks.handler.search.TitleSearchCommandHandler;
-import net.krusher.datalinks.model.search.Foundling;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@RestController
-@RequestMapping("/search")
+@Path("/search")
+@Produces(MediaType.APPLICATION_JSON)
 public class SearchController {
 
     private final TitleSearchCommandHandler titleSearchCommandHandler;
     private final SearchCommandHandler searchCommandHandler;
 
-    @Autowired
+    @Inject
     public SearchController(final TitleSearchCommandHandler titleSearchCommandHandler,
                             final SearchCommandHandler searchCommandHandler) {
         this.titleSearchCommandHandler = titleSearchCommandHandler;
         this.searchCommandHandler = searchCommandHandler;
     }
 
-    @GetMapping("titleSearch/{query}")
-    public ResponseEntity<List<Foundling>> titleSearch(@PathVariable("query") String query) {
-        return ResponseEntity.ok(titleSearchCommandHandler.handler(query));
+    @GET
+    @Path("titleSearch/{query}")
+    public Response titleSearch(@PathParam("query") String query) {
+        return Response.ok(titleSearchCommandHandler.handler(query)).build();
     }
 
-    @GetMapping("full/{query}")
-    public ResponseEntity<List<Foundling>> search(@PathVariable("query") String query,
-                                                  @RequestParam(name = "page", required = false, defaultValue = "0") int page,
-                                                  @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize) {
-        return ResponseEntity.ok(searchCommandHandler.handler(SearchPaginationCommand.builder()
+    @GET
+    @Path("full/{query}")
+    public Response search(@PathParam("query") String query,
+                           @QueryParam("page") @DefaultValue("0") int page,
+                           @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
+        return Response.ok(searchCommandHandler.handler(SearchPaginationCommand.builder()
                 .query(query)
                 .page(page)
                 .pageSize(pageSize)
-                .build()));
+                .build())).build();
     }
 }

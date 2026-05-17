@@ -1,5 +1,8 @@
 package net.krusher.datalinks.handler.user;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import net.krusher.datalinks.engineering.model.domain.email.EmailService;
 import net.krusher.datalinks.engineering.model.domain.email.ResetParams;
 import net.krusher.datalinks.engineering.model.domain.user.ResetTokenService;
@@ -10,22 +13,19 @@ import net.krusher.datalinks.model.user.ResetToken;
 import net.krusher.datalinks.model.user.User;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
+@ApplicationScoped
 public class ResetPasswordCommandHandler {
 
     private final UserService userService;
     private final ResetTokenService resetTokenService;
     private final EmailService emailService;
 
-    @Autowired
+    @Inject
     public ResetPasswordCommandHandler(UserService userService, ResetTokenService resetTokenService, EmailService emailService) {
         this.userService = userService;
         this.resetTokenService = resetTokenService;

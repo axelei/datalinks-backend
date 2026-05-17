@@ -1,9 +1,10 @@
 package net.krusher.datalinks.engineering.model.domain.upload;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.UUID;
 
-public interface UploadRepositoryBean extends JpaRepository<UploadEntity, UUID> {
-
+@ApplicationScoped
+public class UploadRepositoryBean implements PanacheRepositoryBase<UploadEntity, UUID> {
 }

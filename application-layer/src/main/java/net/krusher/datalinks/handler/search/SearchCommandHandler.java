@@ -1,19 +1,19 @@
 package net.krusher.datalinks.handler.search;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.krusher.datalinks.engineering.model.domain.search.SearchService;
 import net.krusher.datalinks.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.model.search.Foundling;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+@ApplicationScoped
 public class SearchCommandHandler {
 
     private final SearchService searchService;
 
-    @Autowired
+    @Inject
     public SearchCommandHandler(SearchService searchService) {
         this.searchService = searchService;
     }

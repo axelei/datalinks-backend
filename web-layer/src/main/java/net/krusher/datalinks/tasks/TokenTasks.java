@@ -1,19 +1,21 @@
 package net.krusher.datalinks.tasks;
 
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.krusher.datalinks.handler.tasks.TokenCleanupCommandHandler;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
-@Service
+@ApplicationScoped
 public class TokenTasks {
 
     private final TokenCleanupCommandHandler tokenCleanupCommandHandler;
 
+    @Inject
     public TokenTasks(TokenCleanupCommandHandler tokenCleanupCommandHandler) {
         this.tokenCleanupCommandHandler = tokenCleanupCommandHandler;
     }
 
-    @Scheduled(cron = "0 0 4 * * *")
+    @Scheduled(cron = "0 0 4 * * ?")
     public void tokenCleanup() {
         tokenCleanupCommandHandler.handler();
     }

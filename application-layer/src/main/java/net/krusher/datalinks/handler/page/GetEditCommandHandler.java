@@ -1,19 +1,19 @@
 package net.krusher.datalinks.handler.page;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.krusher.datalinks.engineering.model.domain.page.PageService;
 import net.krusher.datalinks.model.page.Edit;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
+@ApplicationScoped
 public class GetEditCommandHandler {
 
     private final PageService pageService;
 
-    @Autowired
+    @Inject
     public GetEditCommandHandler(PageService pageService) {
         this.pageService = pageService;
     }

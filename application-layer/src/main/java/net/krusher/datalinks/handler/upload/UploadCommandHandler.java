@@ -1,6 +1,9 @@
 package net.krusher.datalinks.handler.upload;
 
 import io.vavr.control.Try;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.Setter;
 import net.krusher.datalinks.common.UserHelper;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadService;
@@ -8,26 +11,23 @@ import net.krusher.datalinks.exception.EngineException;
 import net.krusher.datalinks.exception.ErrorType;
 import net.krusher.datalinks.model.upload.Upload;
 import net.krusher.datalinks.model.user.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.Optional;
 
 import static net.krusher.datalinks.handler.common.SlugifyProvider.SLUGIFY;
 
-@Service
+@ApplicationScoped
 public class UploadCommandHandler {
 
     private final UploadService uploadService;
     private final UserHelper userHelper;
 
     @Setter
-    @Value("${application.backend.url}")
-    private String backendUrl;
+    @ConfigProperty(name = "application.backend.url")
+    String backendUrl;
 
-    @Autowired
+    @Inject
     public UploadCommandHandler(UploadService uploadService, UserHelper userHelper) {
         this.uploadService = uploadService;
         this.userHelper = userHelper;

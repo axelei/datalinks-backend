@@ -1,5 +1,18 @@
 package net.krusher.datalinks.controller;
 
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import net.krusher.datalinks.handler.category.CreateCategoryCommandHandler;
 import net.krusher.datalinks.handler.category.DeleteCategoryCommandHandler;
 import net.krusher.datalinks.handler.category.FindCategoriesCommandHandler;
@@ -10,24 +23,15 @@ import net.krusher.datalinks.handler.common.PaginationCommand;
 import net.krusher.datalinks.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.model.page.Category;
 import net.krusher.datalinks.model.page.PageShort;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 import static net.krusher.datalinks.common.ControllerUtil.AUTH_HEADER;
 import static net.krusher.datalinks.common.ControllerUtil.toLoginToken;
 
-@RestController
-@RequestMapping("/category")
+@Path("/category")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class CategoryController {
 
     private final GetCategoriesCommandHandler getCategoriesCommandHandler;
@@ -37,6 +41,7 @@ public class CategoryController {
     private final FindCategoriesCommandHandler findCategoriesCommandHandler;
     private final FindCategoryPagesCommandHandler findCategoryPagesCommandHandler;
 
+    @Inject
     public CategoryController(GetCategoriesCommandHandler getCategoriesCommandHandler,
                               DeleteCategoryCommandHandler deleteCategoryCommandHandler,
                               CreateCategoryCommandHandler createCategoryCommandHandler,
@@ -51,47 +56,58 @@ public class CategoryController {
         this.findCategoryPagesCommandHandler = findCategoryPagesCommandHandler;
     }
 
-    @GetMapping("all")
-    public ResponseEntity<List<Category>> getAll(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
-                                                 @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize) {
-        return ResponseEntity.ok(getCategoriesCommandHandler.handler(PaginationCommand.builder()
+    @GET
+    @Path("all")
+    public Response getAll(@QueryParam("page") @DefaultValue("0") int page,
+                           @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
+        List<Category> categories = getCategoriesCommandHandler.handler(PaginationCommand.builder()
                 .page(page)
                 .pageSize(pageSize)
-                .build()));
+                .build());
+        return Response.ok(categories).build();
     }
 
-    @DeleteMapping("delete/{name}")
-    public ResponseEntity<String> delete(@PathVariable("name") String name,
-                                         @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    @DELETE
+    @Path("delete/{name}")
+    public Response delete(@PathParam("name") String name,
+                           @HeaderParam(AUTH_HEADER) String userToken) {
         deleteCategoryCommandHandler.handler(name, toLoginToken(userToken));
-        return ResponseEntity.ok("OK");
+        return Response.ok("OK").build();
     }
 
-    @PutMapping("add")
-    public ResponseEntity<String> update(@RequestBody String name,
-                                         @RequestHeader(value = AUTH_HEADER, required = false) String userToken) {
+    @PUT
+    @Path("add")
+    @Consumes(MediaType.WILDCARD)
+    public Response update(String name,
+                           @HeaderParam(AUTH_HEADER) String userToken) {
         createCategoryCommandHandler.handler(name, toLoginToken(userToken));
-        return ResponseEntity.ok("OK");
+        return Response.ok("OK").build();
     }
 
-    @GetMapping("get/{name}")
-    public ResponseEntity<Category> get(@PathVariable("name") String name) {
-        return (getCategoryCommandHandler.handler(name).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build()));
+    @GET
+    @Path("get/{name}")
+    public Response get(@PathParam("name") String name) {
+        return getCategoryCommandHandler.handler(name)
+                .map(c -> Response.ok(c).build())
+                .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
 
-    @GetMapping("find/{query}")
-    public ResponseEntity<List<Category>> find(@PathVariable("query") String query) {
-        return ResponseEntity.ok(findCategoriesCommandHandler.handler(query));
+    @GET
+    @Path("find/{query}")
+    public Response find(@PathParam("query") String query) {
+        return Response.ok(findCategoriesCommandHandler.handler(query)).build();
     }
 
-    @GetMapping("findPages/{query}")
-    public ResponseEntity<List<PageShort>> findPages(@PathVariable("query") String query,
-                                                     @RequestParam(name = "page", required = false, defaultValue = "0") int page,
-                                                     @RequestParam(name = "pageSize", required = false, defaultValue = "10") int pageSize) {
-        return ResponseEntity.ok(findCategoryPagesCommandHandler.handler(SearchPaginationCommand.builder()
+    @GET
+    @Path("findPages/{query}")
+    public Response findPages(@PathParam("query") String query,
+                              @QueryParam("page") @DefaultValue("0") int page,
+                              @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
+        List<PageShort> pages = findCategoryPagesCommandHandler.handler(SearchPaginationCommand.builder()
                 .query(query)
                 .page(page)
                 .pageSize(pageSize)
-                .build()));
+                .build());
+        return Response.ok(pages).build();
     }
 }

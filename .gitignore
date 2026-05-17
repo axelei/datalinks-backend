@@ -26,3 +26,6 @@ replay_pid*
 
 # Idea
 .idea
+**/*.iml
+*.iml
+.run

@@ -1,5 +1,7 @@
 package net.krusher.datalinks.common;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.krusher.datalinks.engineering.model.domain.configlet.ConfigService;
 import net.krusher.datalinks.engineering.model.domain.user.LoginTokenService;
 import net.krusher.datalinks.engineering.model.domain.user.UserService;
@@ -10,21 +12,18 @@ import net.krusher.datalinks.model.upload.Upload;
 import net.krusher.datalinks.model.user.User;
 import net.krusher.datalinks.model.user.UserLevel;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
+@ApplicationScoped
 public class UserHelper {
 
     private final UserService userService;
     private final LoginTokenService loginTokenService;
     private final ConfigService configService;
 
-    @Autowired
+    @Inject
     public UserHelper(UserService userService, LoginTokenService loginTokenService, ConfigService configService) {
         this.userService = userService;
         this.loginTokenService = loginTokenService;
@@ -76,33 +75,33 @@ public class UserHelper {
         return defaultBlock.getLevel() <= userLevel.getLevel();
     }
 
-    public boolean userCanCreate(@Nullable UUID loginTokenId) {
+    public boolean userCanCreate(UUID loginTokenId) {
         UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.CREATE_LEVEL).getValue());
         UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
         return defaultBlock.getLevel() <= userLevel.getLevel();
     }
 
-    public boolean userCanSeeFile(Upload upload, @Nullable UUID loginTokenId) {
+    public boolean userCanSeeFile(Upload upload, UUID loginTokenId) {
         UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.SEE_FILE_LEVEL).getValue());
         UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
         UserLevel neededLevel = Optional.ofNullable(upload.getReadBlock()).orElse(defaultBlock);
         return neededLevel.getLevel() <= userLevel.getLevel();
     }
 
-    public boolean userCanUpload(@Nullable UUID loginTokenId) {
+    public boolean userCanUpload(UUID loginTokenId) {
         UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.UPLOAD_LEVEL).getValue());
         UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
         return defaultBlock.getLevel() <= userLevel.getLevel();
     }
 
-    public boolean userCanUpdateUpload(Upload upload, @Nullable UUID loginTokenId) {
+    public boolean userCanUpdateUpload(Upload upload, UUID loginTokenId) {
         UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.UPDATE_UPLOAD_LEVEL).getValue());
         UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
         UserLevel neededLevel = Optional.ofNullable(upload.getEditBlock()).orElse(defaultBlock);
         return neededLevel.getLevel() <= userLevel.getLevel();
     }
 
-    public boolean userCanDeleteUpload(@Nullable UUID loginTokenId) {
+    public boolean userCanDeleteUpload(UUID loginTokenId) {
         UserLevel defaultBlock = UserLevel.valueOf(configService.getByKey(ConfigletKey.DELETE_UPLOAD_LEVEL).getValue());
         UserLevel userLevel = getUserFromToken(loginTokenId).map(User::getLevel).orElse(UserLevel.GUEST);
         return defaultBlock.getLevel() <= userLevel.getLevel();

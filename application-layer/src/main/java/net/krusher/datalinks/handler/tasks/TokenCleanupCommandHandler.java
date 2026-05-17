@@ -1,18 +1,18 @@
 package net.krusher.datalinks.handler.tasks;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import net.krusher.datalinks.engineering.model.domain.user.LoginTokenService;
 import net.krusher.datalinks.engineering.model.domain.user.ResetTokenService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@ApplicationScoped
 public class TokenCleanupCommandHandler {
 
     private final LoginTokenService loginTokenService;
     private final ResetTokenService resetTokenService;
 
-    @Autowired
+    @Inject
     public TokenCleanupCommandHandler(LoginTokenService loginTokenService,
                                       ResetTokenService resetTokenService) {
         this.loginTokenService = loginTokenService;

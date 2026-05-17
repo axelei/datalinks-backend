@@ -1,35 +1,30 @@
 package net.krusher.datalinks.engineering.config;
 
+import io.quarkus.runtime.LaunchMode;
+import io.quarkus.runtime.StartupEvent;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
+import jakarta.transaction.Transactional;
+import lombok.extern.jbosslog.JBossLog;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-@Component
-@Log4j2
-public class HibernateSearchIndexRefresher implements ApplicationListener<ContextRefreshedEvent> {
+@ApplicationScoped
+@JBossLog
+public class HibernateSearchIndexRefresher {
 
     private final EntityManager entityManager;
 
-    @Value("${spring.profiles.active}")
-    private String activeProfile;
-
-    @Autowired
+    @Inject
     public HibernateSearchIndexRefresher(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
-    @Override
     @Transactional
-    public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
-        if (activeProfile.equals("dev")) {
+    void onStart(@Observes StartupEvent ev) {
+        if (LaunchMode.current() == LaunchMode.DEVELOPMENT) {
             try {
                 SearchSession searchSession = Search.session(entityManager);
                 searchSession.massIndexer()
