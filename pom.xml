@@ -23,6 +23,7 @@
         <lombok.version>1.18.46</lombok.version>
         <mapstruct.version>1.7.0.Beta1</mapstruct.version>
         <jandex.version>3.5.3</jandex.version>
+        <quarkus-lucene.version>2.3.0</quarkus-lucene.version>
 
         <surefire-plugin.version>3.5.5</surefire-plugin.version>
         <skipITs>true</skipITs>

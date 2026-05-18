@@ -40,10 +40,11 @@
             <artifactId>quarkus-jdbc-mariadb</artifactId>
         </dependency>
 
-        <!-- Hibernate Search (Elasticsearch) -->
+        <!-- Apache Lucene embebido (extensión Quarkiverse) -->
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-search-orm-elasticsearch</artifactId>
+            <groupId>io.quarkiverse.lucene</groupId>
+            <artifactId>quarkus-lucene</artifactId>
+            <version>${quarkus-lucene.version}</version>
         </dependency>
 
         <!-- Mailer -->

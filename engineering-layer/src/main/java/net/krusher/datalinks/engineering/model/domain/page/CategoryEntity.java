@@ -13,8 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.krusher.datalinks.model.search.Foundable;
 import net.krusher.datalinks.model.search.Foundling;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -29,14 +27,12 @@ import java.util.UUID;
 }, uniqueConstraints = {
         @UniqueConstraint(name = "CATEGORY_UNIQUE_SLUG", columnNames = "slug")
 })
-@Indexed
 public class CategoryEntity implements Foundable {
 
     @Id
     @Column(nullable = false)
     private UUID id;
     @Column(nullable = false)
-    @FullTextField(analyzer = "edgeNGramAnalyzer", searchAnalyzer = "edgeNGramAnalyzer")
     private String name;
     private String slug;
     private Instant creationDate;
