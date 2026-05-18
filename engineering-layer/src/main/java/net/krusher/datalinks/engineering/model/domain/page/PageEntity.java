@@ -26,8 +26,6 @@ import net.krusher.datalinks.model.search.Foundling;
 import net.krusher.datalinks.model.user.UserLevel;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.time.Instant;
 import java.util.Set;
@@ -38,7 +36,6 @@ import java.util.UUID;
 @Entity
 @Data
 @Builder
-@Indexed
 @Table(name = "PAGES", indexes = {
         @Index(name = "IDX_PAGE_SLUG", columnList = "slug"),
         @Index(name = "IDX_PAGE_TITLE", columnList = "title"),
@@ -56,12 +53,10 @@ public class PageEntity implements Foundable {
     @Column(nullable = false)
     private String slug;
     @Column(nullable = false)
-    @FullTextField(analyzer = "edgeNGramAnalyzer", searchAnalyzer = "edgeNGramAnalyzer")
     private String title;
     @ColumnDefault("''")
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     @Lob
-    @FullTextField
     private String content;
     private String summary;
     @ManyToMany(fetch = FetchType.LAZY)
