@@ -17,18 +17,13 @@ import java.util.Map;
 import java.util.Optional;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class ChangePasswordCommandHandler {
 
     private final UserHelper userHelper;
     private final UserService userService;
     private final EmailService emailService;
 
-    @Inject
-    public ChangePasswordCommandHandler(UserHelper userHelper, UserService userService, EmailService emailService) {
-        this.userHelper = userHelper;
-        this.userService = userService;
-        this.emailService = emailService;
-    }
 
     @Transactional
     public void handler(ChangePasswordCommand changePasswordCommand) {

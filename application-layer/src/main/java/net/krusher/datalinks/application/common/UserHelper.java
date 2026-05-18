@@ -17,18 +17,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class UserHelper {
 
     private final UserService userService;
     private final LoginTokenService loginTokenService;
     private final ConfigService configService;
 
-    @Inject
-    public UserHelper(UserService userService, LoginTokenService loginTokenService, ConfigService configService) {
-        this.userService = userService;
-        this.loginTokenService = loginTokenService;
-        this.configService = configService;
-    }
 
     public Optional<User> getUserFromLoginToken(UUID loginTokenId) {
         return Optional.ofNullable(loginTokenId)

@@ -9,14 +9,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class GetEditCommandHandler {
 
     private final PageService pageService;
 
-    @Inject
-    public GetEditCommandHandler(PageService pageService) {
-        this.pageService = pageService;
-    }
 
     public Optional<Edit> handler(UUID editId) {
         return pageService.findEditById(editId);

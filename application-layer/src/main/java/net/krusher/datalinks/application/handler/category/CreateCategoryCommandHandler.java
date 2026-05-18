@@ -13,17 +13,12 @@ import net.krusher.datalinks.domain.model.page.Category;
 import java.util.UUID;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class CreateCategoryCommandHandler {
 
     private final CategoryService categoryService;
     private final UserHelper userHelper;
 
-    @Inject
-    public CreateCategoryCommandHandler(CategoryService categoryService,
-                                        UserHelper userHelper) {
-        this.categoryService = categoryService;
-        this.userHelper = userHelper;
-    }
 
     @Transactional
     public void handler(String name, UUID loginToken) {

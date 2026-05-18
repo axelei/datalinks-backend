@@ -19,18 +19,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class ResetPasswordCommandHandler {
 
     private final UserService userService;
     private final ResetTokenService resetTokenService;
     private final EmailService emailService;
 
-    @Inject
-    public ResetPasswordCommandHandler(UserService userService, ResetTokenService resetTokenService, EmailService emailService) {
-        this.userService = userService;
-        this.resetTokenService = resetTokenService;
-        this.emailService = emailService;
-    }
 
     @Transactional
     public void handler(UUID resetTokenId) {

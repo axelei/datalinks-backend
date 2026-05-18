@@ -14,16 +14,12 @@ import java.util.Optional;
 import static net.krusher.datalinks.application.handler.common.SlugifyProvider.SLUGIFY;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class DeletePageCommandHandler {
 
     private final PageService pageService;
     private final UserHelper userHelper;
 
-    @Inject
-    public DeletePageCommandHandler(PageService pageService, UserHelper userHelper) {
-        this.pageService = pageService;
-        this.userHelper = userHelper;
-    }
 
     @Transactional
     public void handler(DeletePageCommand deletePageCommand) {

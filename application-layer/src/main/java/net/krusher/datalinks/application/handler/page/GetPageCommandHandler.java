@@ -13,16 +13,12 @@ import java.util.Optional;
 import static net.krusher.datalinks.application.handler.common.SlugifyProvider.SLUGIFY;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class GetPageCommandHandler {
 
     private final PageService pageService;
     private final UserHelper userHelper;
 
-    @Inject
-    public GetPageCommandHandler(PageService pageService, UserHelper userHelper) {
-        this.pageService = pageService;
-        this.userHelper = userHelper;
-    }
 
     public Optional<Page> handler(GetPageCommand getPageCommand) {
         String slug = SLUGIFY.slugify(getPageCommand.getTitle());

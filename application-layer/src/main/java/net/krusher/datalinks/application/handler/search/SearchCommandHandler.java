@@ -9,14 +9,11 @@ import net.krusher.datalinks.domain.model.search.Foundling;
 import java.util.List;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class SearchCommandHandler {
 
     private final SearchService searchService;
 
-    @Inject
-    public SearchCommandHandler(SearchService searchService) {
-        this.searchService = searchService;
-    }
 
     public List<Foundling> handler(SearchPaginationCommand query) {
         query.validate();

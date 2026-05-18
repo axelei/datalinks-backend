@@ -9,14 +9,11 @@ import net.krusher.datalinks.domain.model.page.Category;
 import java.util.List;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class GetCategoriesCommandHandler {
 
     private final CategoryService categoryService;
 
-    @Inject
-    public GetCategoriesCommandHandler(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
 
     public List<Category> handler(PaginationCommand paginationCommand) {
         paginationCommand.validate();

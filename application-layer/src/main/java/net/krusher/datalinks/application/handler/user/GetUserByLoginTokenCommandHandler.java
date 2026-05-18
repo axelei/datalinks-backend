@@ -10,16 +10,12 @@ import net.krusher.datalinks.domain.model.user.User;
 import java.util.Optional;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class GetUserByLoginTokenCommandHandler {
 
     private final UserService userService;
     private final LoginTokenService loginTokenService;
 
-    @Inject
-    public GetUserByLoginTokenCommandHandler(UserService userService, LoginTokenService loginTokenService) {
-        this.userService = userService;
-        this.loginTokenService = loginTokenService;
-    }
 
     public Optional<User> handler(GetUserByLoginTokenCommand getUserByLoginTokenCommand) {
         return loginTokenService.getById(getUserByLoginTokenCommand.getLoginToken())

@@ -32,6 +32,7 @@ import static net.krusher.datalinks.web.common.ControllerUtil.toLoginToken;
 @Path("/category")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class CategoryController {
 
     private final GetCategoriesCommandHandler getCategoriesCommandHandler;
@@ -41,20 +42,6 @@ public class CategoryController {
     private final FindCategoriesCommandHandler findCategoriesCommandHandler;
     private final FindCategoryPagesCommandHandler findCategoryPagesCommandHandler;
 
-    @Inject
-    public CategoryController(GetCategoriesCommandHandler getCategoriesCommandHandler,
-                              DeleteCategoryCommandHandler deleteCategoryCommandHandler,
-                              CreateCategoryCommandHandler createCategoryCommandHandler,
-                              GetCategoryCommandHandler getCategoryCommandHandler,
-                              FindCategoriesCommandHandler findCategoriesCommandHandler,
-                              FindCategoryPagesCommandHandler findCategoryPagesCommandHandler) {
-        this.getCategoriesCommandHandler = getCategoriesCommandHandler;
-        this.deleteCategoryCommandHandler = deleteCategoryCommandHandler;
-        this.createCategoryCommandHandler = createCategoryCommandHandler;
-        this.getCategoryCommandHandler = getCategoryCommandHandler;
-        this.findCategoriesCommandHandler = findCategoriesCommandHandler;
-        this.findCategoryPagesCommandHandler = findCategoryPagesCommandHandler;
-    }
 
     @GET
     @Path("all")

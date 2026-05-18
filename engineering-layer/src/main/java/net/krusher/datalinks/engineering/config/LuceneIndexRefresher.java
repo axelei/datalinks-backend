@@ -25,16 +25,12 @@ import java.util.List;
 
 @ApplicationScoped
 @JBossLog
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class LuceneIndexRefresher {
 
     private final EntityManager entityManager;
     private final LuceneIndexManager indexManager;
 
-    @Inject
-    public LuceneIndexRefresher(EntityManager entityManager, LuceneIndexManager indexManager) {
-        this.entityManager = entityManager;
-        this.indexManager = indexManager;
-    }
 
     @Transactional
     void onStart(@Observes StartupEvent ev) {

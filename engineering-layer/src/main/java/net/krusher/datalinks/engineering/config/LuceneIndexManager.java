@@ -3,6 +3,7 @@ package net.krusher.datalinks.engineering.config;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
+import lombok.Getter;
 import lombok.extern.jbosslog.JBossLog;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
@@ -27,12 +28,12 @@ public class LuceneIndexManager {
 
     private final String indexDir;
     private Directory directory;
+    @Getter
     private Analyzer analyzer;
     private IndexWriter writer;
     private SearcherManager searcherManager;
 
-    public LuceneIndexManager(
-            @ConfigProperty(name = "application.search.index-dir", defaultValue = "./data/lucene-index") String indexDir) {
+    public LuceneIndexManager(@ConfigProperty(name = "application.search.index-dir", defaultValue = "./data/lucene-index") String indexDir) {
         this.indexDir = indexDir;
     }
 
@@ -71,10 +72,6 @@ public class LuceneIndexManager {
         } catch (Exception e) {
             log.errorf(e, "Error closing %s", name);
         }
-    }
-
-    public Analyzer getAnalyzer() {
-        return analyzer;
     }
 
     public synchronized void addOrUpdate(String docId, Document doc) throws IOException {

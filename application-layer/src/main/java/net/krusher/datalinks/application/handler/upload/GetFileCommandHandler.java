@@ -13,16 +13,12 @@ import java.util.Optional;
 import static net.krusher.datalinks.application.handler.common.SlugifyProvider.SLUGIFY;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class GetFileCommandHandler {
 
     private final UploadService uploadService;
     private final UserHelper userHelper;
 
-    @Inject
-    public GetFileCommandHandler(UploadService uploadService, UserHelper userHelper) {
-        this.uploadService = uploadService;
-        this.userHelper = userHelper;
-    }
 
     public Upload handler(GetFileCommand getFileCommand) {
         Optional<Upload> upload = uploadService.findBySlug(SLUGIFY.slugify(getFileCommand.getFilename()));

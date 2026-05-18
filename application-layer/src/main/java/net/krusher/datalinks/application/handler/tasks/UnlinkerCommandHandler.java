@@ -13,16 +13,12 @@ import java.util.Optional;
 
 @JBossLog
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class UnlinkerCommandHandler {
 
     private final PageService pageService;
     private final LinkProcessorHelper linkProcessorHelper;
 
-    @Inject
-    public UnlinkerCommandHandler(PageService pageService, LinkProcessorHelper linkProcessorHelper) {
-        this.pageService = pageService;
-        this.linkProcessorHelper = linkProcessorHelper;
-    }
 
     public void handler() {
         final List<String> titles = pageService.findAllTitles().stream().sorted(Comparator.comparingInt(String::length).reversed()).toList();

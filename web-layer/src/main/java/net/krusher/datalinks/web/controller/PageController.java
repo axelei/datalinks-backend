@@ -51,6 +51,7 @@ import static net.krusher.datalinks.web.common.ControllerUtil.toLoginToken;
 @Path("/page")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class PageController {
 
     private final GetPageCommandHandler getPageCommandHandler;
@@ -66,32 +67,6 @@ public class PageController {
     private final BlockPageCommandHandler blockPageCommandHandler;
     private final ObjectMapper objectMapper;
 
-    @Inject
-    public PageController(GetPageCommandHandler getPageCommandHandler,
-                          GetPageShortCommandHandler getPageShortCommandHandler,
-                          PostPageCommandHandler postPageCommandHandler,
-                          NewPagesCommandHandler newPagesCommandHandler,
-                          RecentChangesCommandHandler recentChangesCommandHandler,
-                          GetRandomPageCommandHandler getRandomPageCommandHandler,
-                          DeletePageCommandHandler deletePageCommandHandler,
-                          PageEditsCommandHandler pageEditsCommandHandler,
-                          GetContributionsCommandHandler getContributionsCommandHandler,
-                          GetEditCommandHandler getEditCommandHandler,
-                          BlockPageCommandHandler blockPageCommandHandler,
-                          ObjectMapper objectMapper) {
-        this.getPageCommandHandler = getPageCommandHandler;
-        this.getPageShortCommandHandler = getPageShortCommandHandler;
-        this.postPageCommandHandler = postPageCommandHandler;
-        this.newPagesCommandHandler = newPagesCommandHandler;
-        this.recentChangesCommandHandler = recentChangesCommandHandler;
-        this.getRandomPageCommandHandler = getRandomPageCommandHandler;
-        this.deletePageCommandHandler = deletePageCommandHandler;
-        this.getContributionsCommandHandler = getContributionsCommandHandler;
-        this.pageEditsCommandHandler = pageEditsCommandHandler;
-        this.getEditCommandHandler = getEditCommandHandler;
-        this.blockPageCommandHandler = blockPageCommandHandler;
-        this.objectMapper = objectMapper;
-    }
 
     private static String remoteAddr(RoutingContext rc) {
         if (rc == null || rc.request().remoteAddress() == null) {

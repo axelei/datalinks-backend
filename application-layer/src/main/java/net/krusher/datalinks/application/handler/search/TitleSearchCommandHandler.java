@@ -8,14 +8,11 @@ import net.krusher.datalinks.domain.model.search.Foundling;
 import java.util.List;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class TitleSearchCommandHandler {
 
     private final SearchService searchService;
 
-    @Inject
-    public TitleSearchCommandHandler(SearchService searchService) {
-        this.searchService = searchService;
-    }
 
     public List<Foundling> handler(String query) {
         return searchService.titleSearch(query);

@@ -7,17 +7,12 @@ import net.krusher.datalinks.engineering.model.domain.user.LoginTokenService;
 import net.krusher.datalinks.engineering.model.domain.user.ResetTokenService;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class TokenCleanupCommandHandler {
 
     private final LoginTokenService loginTokenService;
     private final ResetTokenService resetTokenService;
 
-    @Inject
-    public TokenCleanupCommandHandler(LoginTokenService loginTokenService,
-                                      ResetTokenService resetTokenService) {
-        this.loginTokenService = loginTokenService;
-        this.resetTokenService = resetTokenService;
-    }
 
     @Transactional
     public void handler() {

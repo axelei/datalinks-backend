@@ -9,14 +9,11 @@ import net.krusher.datalinks.domain.model.page.Category;
 import java.util.Optional;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class GetCategoryCommandHandler {
 
     private final CategoryService categoryService;
 
-    @Inject
-    public GetCategoryCommandHandler(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
 
     public Optional<Category> handler(String name) {
         return categoryService.getCategoryBySlug(SlugifyProvider.SLUGIFY.slugify(name));

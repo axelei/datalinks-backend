@@ -9,14 +9,11 @@ import net.krusher.datalinks.domain.model.upload.Upload;
 import java.util.List;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class NewUploadsCommandHandler {
 
     private final UploadService uploadService;
 
-    @Inject
-    public NewUploadsCommandHandler(UploadService uploadService) {
-        this.uploadService = uploadService;
-    }
 
     public List<Upload> handler(PaginationCommand paginationCommand) {
         paginationCommand.validate();

@@ -8,14 +8,11 @@ import net.krusher.datalinks.domain.model.page.Category;
 import java.util.List;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class FindCategoriesCommandHandler {
 
     private final SearchService searchService;
 
-    @Inject
-    public FindCategoriesCommandHandler(SearchService searchService) {
-        this.searchService = searchService;
-    }
 
     public List<Category> handler(String query) {
         return searchService.searchCategories(query);

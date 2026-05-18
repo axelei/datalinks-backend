@@ -12,16 +12,12 @@ import net.krusher.datalinks.domain.model.user.UserLevel;
 import static net.krusher.datalinks.application.handler.common.SlugifyProvider.SLUGIFY;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class BlockPageCommandHandler {
 
     private final PageService pageService;
     private final UserHelper userHelper;
 
-    @Inject
-    public BlockPageCommandHandler(PageService pageService, UserHelper userHelper) {
-        this.pageService = pageService;
-        this.userHelper = userHelper;
-    }
 
     @Transactional
     public void handler(BlockPageCommand blockPageCommand) {

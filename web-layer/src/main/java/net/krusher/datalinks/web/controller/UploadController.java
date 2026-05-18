@@ -51,6 +51,7 @@ import static net.krusher.datalinks.web.common.ControllerUtil.toLoginToken;
 
 @Path("/file")
 @Produces(MediaType.APPLICATION_JSON)
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class UploadController {
 
     private final ObjectMapper objectMapper;
@@ -61,22 +62,6 @@ public class UploadController {
     private final FindUsagesCommandHandler findUsagesCommandHandler;
     private final DeleteUploadCommandHandler deleteUploadCommandHandler;
 
-    @Inject
-    public UploadController(ObjectMapper objectMapper,
-                            UploadCommandHandler uploadCommandHandler,
-                            UpdateUploadCommandHandler updateUploadCommandHandler,
-                            GetFileCommandHandler getFileCommandHandler,
-                            NewUploadsCommandHandler newUploadsCommandHandler,
-                            FindUsagesCommandHandler findUsagesCommandHandler,
-                            DeleteUploadCommandHandler deleteUploadCommandHandler) {
-        this.uploadCommandHandler = uploadCommandHandler;
-        this.updateUploadCommandHandler = updateUploadCommandHandler;
-        this.objectMapper = objectMapper;
-        this.getFileCommandHandler = getFileCommandHandler;
-        this.newUploadsCommandHandler = newUploadsCommandHandler;
-        this.findUsagesCommandHandler = findUsagesCommandHandler;
-        this.deleteUploadCommandHandler = deleteUploadCommandHandler;
-    }
 
     private static String remoteAddr(RoutingContext rc) {
         if (rc == null || rc.request().remoteAddress() == null) {

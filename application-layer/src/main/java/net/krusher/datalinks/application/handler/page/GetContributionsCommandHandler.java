@@ -13,16 +13,12 @@ import net.krusher.datalinks.domain.model.user.User;
 import java.util.List;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class GetContributionsCommandHandler {
 
     private final PageService pageService;
     private final UserService userService;
 
-    @Inject
-    public GetContributionsCommandHandler(PageService pageService, UserService userService) {
-        this.pageService = pageService;
-        this.userService = userService;
-    }
 
     public List<Edit> handler(SearchPaginationCommand query) {
         query.validate();

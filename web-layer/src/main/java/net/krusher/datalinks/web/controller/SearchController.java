@@ -15,17 +15,12 @@ import net.krusher.datalinks.application.handler.search.TitleSearchCommandHandle
 
 @Path("/search")
 @Produces(MediaType.APPLICATION_JSON)
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class SearchController {
 
     private final TitleSearchCommandHandler titleSearchCommandHandler;
     private final SearchCommandHandler searchCommandHandler;
 
-    @Inject
-    public SearchController(final TitleSearchCommandHandler titleSearchCommandHandler,
-                            final SearchCommandHandler searchCommandHandler) {
-        this.titleSearchCommandHandler = titleSearchCommandHandler;
-        this.searchCommandHandler = searchCommandHandler;
-    }
 
     @GET
     @Path("titleSearch/{query}")

@@ -16,18 +16,13 @@ import java.util.Map;
 import java.util.Optional;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class RequestResetUserCommandHandler {
 
     private final UserService userService;
     private final ResetTokenService resetTokenService;
     private final EmailService emailService;
 
-    @Inject
-    public RequestResetUserCommandHandler(UserService userService, ResetTokenService resetTokenService, EmailService emailService) {
-        this.userService = userService;
-        this.resetTokenService = resetTokenService;
-        this.emailService = emailService;
-    }
 
     @Transactional
     public void handler(RequestResetUserCommand requestResetuserCommand) {

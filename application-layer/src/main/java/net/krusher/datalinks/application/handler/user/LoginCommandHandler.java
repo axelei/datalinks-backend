@@ -14,16 +14,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class LoginCommandHandler {
 
     private final UserService userService;
     private final LoginTokenService loginTokenService;
 
-    @Inject
-    public LoginCommandHandler(UserService userService, LoginTokenService loginTokenService) {
-        this.userService = userService;
-        this.loginTokenService = loginTokenService;
-    }
 
     @Transactional
     public Optional<LoginToken> handler(LoginCommand loginCommand) {

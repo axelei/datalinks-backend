@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class PageService {
 
     private final EntityManager entityManager;
@@ -45,24 +46,6 @@ public class PageService {
 
     private static final Pattern UPLOAD_USAGE_PATTERN = Pattern.compile("/file/get/([^\"]*)\"");
 
-    @Inject
-    public PageService(EntityManager entityManager,
-                       PageRepositoryBean pageRepositoryBean,
-                       PageMapper pageMapper,
-                       UserMapper userMapper,
-                       EditMapper editMapper,
-                       CategoryMapper categoryMapper,
-                       EditRepositoryBean editRepositoryBean,
-                       UploadService uploadService) {
-        this.entityManager = entityManager;
-        this.pageRepositoryBean = pageRepositoryBean;
-        this.pageMapper = pageMapper;
-        this.userMapper = userMapper;
-        this.editRepositoryBean = editRepositoryBean;
-        this.categoryMapper = categoryMapper;
-        this.editMapper = editMapper;
-        this.uploadService = uploadService;
-    }
 
     public Optional<Page> findBySlug(String slug) {
         return pageRepositoryBean.find("slug", slug)

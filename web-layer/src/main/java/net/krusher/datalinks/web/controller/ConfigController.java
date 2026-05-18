@@ -16,16 +16,12 @@ import java.util.Set;
 
 @Path("/config")
 @Produces(MediaType.APPLICATION_JSON)
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class ConfigController {
 
     private final GetConfigletCommandHandler getConfigletCommandHandler;
     private final GetConfigCommandHandler getConfigCommandHandler;
 
-    @Inject
-    public ConfigController(GetConfigletCommandHandler getConfigletCommandHandler, GetConfigCommandHandler getConfigCommandHandler) {
-        this.getConfigletCommandHandler = getConfigletCommandHandler;
-        this.getConfigCommandHandler = getConfigCommandHandler;
-    }
 
     @GET
     @Path("key/{key}")

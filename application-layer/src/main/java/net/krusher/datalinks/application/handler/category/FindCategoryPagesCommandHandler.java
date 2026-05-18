@@ -10,14 +10,11 @@ import net.krusher.datalinks.domain.model.page.PageShort;
 import java.util.List;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class FindCategoryPagesCommandHandler {
 
     private final CategoryService categoryService;
 
-    @Inject
-    public FindCategoryPagesCommandHandler(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
 
     public List<PageShort> handler(SearchPaginationCommand searchPaginationCommand) {
         return categoryService.getPagesByCategorySlug(

@@ -12,17 +12,12 @@ import net.krusher.datalinks.application.handler.common.SlugifyProvider;
 import java.util.UUID;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class DeleteCategoryCommandHandler {
 
     private final CategoryService categoryService;
     private final UserHelper userHelper;
 
-    @Inject
-    public DeleteCategoryCommandHandler(CategoryService categoryService,
-                                        UserHelper userHelper) {
-        this.categoryService = categoryService;
-        this.userHelper = userHelper;
-    }
 
     @Transactional
     public void handler(String name, UUID loginToken) {

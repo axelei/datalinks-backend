@@ -23,6 +23,7 @@ import java.util.UUID;
 import static java.util.function.Predicate.not;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class SignupCommandHandler {
 
     private final UserHelper userHelper;
@@ -30,13 +31,6 @@ public class SignupCommandHandler {
     private final SignupMapper signupMapper;
     private final EmailService emailService;
 
-    @Inject
-    public SignupCommandHandler(UserHelper userHelper, UserService userService, SignupMapper signupMapper, EmailService emailService) {
-        this.userService = userService;
-        this.signupMapper = signupMapper;
-        this.emailService = emailService;
-        this.userHelper = userHelper;
-    }
 
     @Transactional
     public void handle(SignupCommand signupCommand) {

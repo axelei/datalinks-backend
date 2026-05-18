@@ -12,14 +12,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class ActivateUserCommandHandler {
 
     private final UserService userService;
 
-    @Inject
-    public ActivateUserCommandHandler(UserService userService) {
-        this.userService = userService;
-    }
 
     @Transactional
     public void handler(UUID activationToken) {

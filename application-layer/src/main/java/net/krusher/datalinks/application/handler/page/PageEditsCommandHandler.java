@@ -13,14 +13,11 @@ import java.util.Optional;
 import static net.krusher.datalinks.application.handler.common.SlugifyProvider.SLUGIFY;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class PageEditsCommandHandler {
 
     private final PageService pageService;
 
-    @Inject
-    public PageEditsCommandHandler(PageService pageService) {
-        this.pageService = pageService;
-    }
 
     public List<Edit> handler(SearchPaginationCommand query) {
         query.validate();

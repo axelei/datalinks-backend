@@ -12,16 +12,12 @@ import net.krusher.datalinks.domain.model.upload.Upload;
 import static net.krusher.datalinks.application.handler.common.SlugifyProvider.SLUGIFY;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class UpdateUploadCommandHandler {
 
     private final UploadService uploadService;
     private final UserHelper userHelper;
 
-    @Inject
-    public UpdateUploadCommandHandler(UploadService uploadService, UserHelper userHelper) {
-        this.uploadService = uploadService;
-        this.userHelper = userHelper;
-    }
 
     @Transactional
     public void handler(UpdateUploadCommand uploadCommand) {

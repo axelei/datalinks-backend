@@ -9,14 +9,11 @@ import net.krusher.datalinks.domain.model.page.PageShort;
 import java.util.List;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class NewPagesCommandHandler {
 
     private final PageService pageService;
 
-    @Inject
-    public NewPagesCommandHandler(PageService pageService) {
-        this.pageService = pageService;
-    }
 
     public List<PageShort> handler(PaginationCommand paginationCommand) {
         paginationCommand.validate();

@@ -9,14 +9,11 @@ import net.krusher.datalinks.domain.model.page.Edit;
 import java.util.List;
 
 @ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class RecentChangesCommandHandler {
 
     private final PageService pageService;
 
-    @Inject
-    public RecentChangesCommandHandler(PageService pageService) {
-        this.pageService = pageService;
-    }
 
     public List<Edit> handler(PaginationCommand paginationCommand) {
         paginationCommand.validate();
