@@ -9,7 +9,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.UserMapper;
-import net.krusher.datalinks.model.user.User;
+import net.krusher.datalinks.domain.model.user.User;
 
 import java.util.Optional;
 import java.util.UUID;

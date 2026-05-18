@@ -21,9 +21,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
-import net.krusher.datalinks.model.search.Foundable;
-import net.krusher.datalinks.model.search.Foundling;
-import net.krusher.datalinks.model.user.UserLevel;
+import net.krusher.datalinks.domain.model.search.Foundable;
+import net.krusher.datalinks.domain.model.search.Foundling;
+import net.krusher.datalinks.domain.model.user.UserLevel;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ColumnDefault;
 

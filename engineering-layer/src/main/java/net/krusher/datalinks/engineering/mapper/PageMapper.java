@@ -1,8 +1,8 @@
 package net.krusher.datalinks.engineering.mapper;
 
 import net.krusher.datalinks.engineering.model.domain.page.PageEntity;
-import net.krusher.datalinks.model.page.Page;
-import net.krusher.datalinks.model.page.PageShort;
+import net.krusher.datalinks.domain.model.page.Page;
+import net.krusher.datalinks.domain.model.page.PageShort;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

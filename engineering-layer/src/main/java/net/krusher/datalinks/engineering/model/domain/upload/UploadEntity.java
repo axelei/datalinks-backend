@@ -5,9 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.krusher.datalinks.model.search.Foundable;
-import net.krusher.datalinks.model.search.Foundling;
-import net.krusher.datalinks.model.user.UserLevel;
+import net.krusher.datalinks.domain.model.search.Foundable;
+import net.krusher.datalinks.domain.model.search.Foundling;
+import net.krusher.datalinks.domain.model.user.UserLevel;
 
 import java.time.Instant;
 import java.util.UUID;

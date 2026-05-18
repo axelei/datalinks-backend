@@ -24,7 +24,7 @@ import java.util.UUID;
 @Builder
 @Table(name = "EDITS", indexes = {
         @Index(name = "IDX_EDIT_DATE", columnList = "date"),
-        @Index(name = "IDX_EDIT_USER_ID", columnList = "userId")
+        @Index(name = "IDX_EDIT_USER_ID", columnList = "user_id")
 })
 public class EditEntity {
 

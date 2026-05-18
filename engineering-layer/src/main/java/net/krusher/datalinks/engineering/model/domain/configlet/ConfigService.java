@@ -5,8 +5,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import net.krusher.datalinks.engineering.mapper.ConfigletMapper;
-import net.krusher.datalinks.model.configlet.Configlet;
-import net.krusher.datalinks.model.configlet.ConfigletKey;
+import net.krusher.datalinks.domain.model.configlet.Configlet;
+import net.krusher.datalinks.domain.model.configlet.ConfigletKey;
 
 import java.util.Arrays;
 import java.util.Optional;

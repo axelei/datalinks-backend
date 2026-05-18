@@ -18,11 +18,11 @@ import net.krusher.datalinks.engineering.mapper.UserMapper;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadService;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
-import net.krusher.datalinks.model.page.Edit;
-import net.krusher.datalinks.model.page.Page;
-import net.krusher.datalinks.model.page.PageShort;
-import net.krusher.datalinks.model.user.User;
-import net.krusher.datalinks.model.user.UserLevel;
+import net.krusher.datalinks.domain.model.page.Edit;
+import net.krusher.datalinks.domain.model.page.Page;
+import net.krusher.datalinks.domain.model.page.PageShort;
+import net.krusher.datalinks.domain.model.user.User;
+import net.krusher.datalinks.domain.model.user.UserLevel;
 
 import java.util.List;
 import java.util.Optional;

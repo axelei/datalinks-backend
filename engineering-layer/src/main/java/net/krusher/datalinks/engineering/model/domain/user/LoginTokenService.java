@@ -7,7 +7,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.TokenMapper;
-import net.krusher.datalinks.model.user.LoginToken;
+import net.krusher.datalinks.domain.model.user.LoginToken;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

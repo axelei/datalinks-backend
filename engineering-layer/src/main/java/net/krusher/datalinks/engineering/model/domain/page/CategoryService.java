@@ -13,8 +13,8 @@ import net.krusher.datalinks.engineering.mapper.CategoryMapper;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
 import net.krusher.datalinks.engineering.mapper.UserMapper;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
-import net.krusher.datalinks.model.page.Category;
-import net.krusher.datalinks.model.page.PageShort;
+import net.krusher.datalinks.domain.model.page.Category;
+import net.krusher.datalinks.domain.model.page.PageShort;
 
 import java.util.List;
 import java.util.Optional;

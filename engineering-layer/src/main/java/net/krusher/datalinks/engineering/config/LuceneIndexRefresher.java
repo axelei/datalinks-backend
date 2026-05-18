@@ -12,7 +12,7 @@ import net.krusher.datalinks.engineering.model.domain.page.CategoryEntity;
 import net.krusher.datalinks.engineering.model.domain.page.PageEntity;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadEntity;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
-import net.krusher.datalinks.model.search.Foundling;
+import net.krusher.datalinks.domain.model.search.Foundling;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;

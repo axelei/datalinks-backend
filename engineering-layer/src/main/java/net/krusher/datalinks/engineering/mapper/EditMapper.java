@@ -1,7 +1,7 @@
 package net.krusher.datalinks.engineering.mapper;
 
 import net.krusher.datalinks.engineering.model.domain.page.EditEntity;
-import net.krusher.datalinks.model.page.Edit;
+import net.krusher.datalinks.domain.model.page.Edit;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

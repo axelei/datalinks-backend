@@ -12,9 +12,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.krusher.datalinks.model.search.Foundable;
-import net.krusher.datalinks.model.search.Foundling;
-import net.krusher.datalinks.model.user.UserLevel;
+import net.krusher.datalinks.domain.model.search.Foundable;
+import net.krusher.datalinks.domain.model.search.Foundling;
+import net.krusher.datalinks.domain.model.user.UserLevel;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
