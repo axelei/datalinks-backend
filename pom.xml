@@ -28,12 +28,6 @@
         <skipITs>true</skipITs>
     </properties>
 
-    <modules>
-        <module>domain-layer</module>
-        <module>engineering-layer</module>
-        <module>application-layer</module>
-        <module>web-layer</module>
-    </modules>
 
     <dependencyManagement>
         <dependencies>
@@ -59,6 +53,16 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>engineering-layer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>web-layer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>integration-tests</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -222,12 +226,24 @@
     <profiles>
         <profile>
             <id>dev</id>
+            <modules>
+                <module>domain-layer</module>
+                <module>engineering-layer</module>
+                <module>application-layer</module>
+                <module>web-layer</module>
+            </modules>
             <properties>
                 <quarkus.profile>dev</quarkus.profile>
             </properties>
         </profile>
         <profile>
             <id>prod</id>
+            <modules>
+                <module>domain-layer</module>
+                <module>engineering-layer</module>
+                <module>application-layer</module>
+                <module>web-layer</module>
+            </modules>
             <properties>
                 <quarkus.profile>prod</quarkus.profile>
             </properties>
@@ -237,8 +253,27 @@
         </profile>
         <profile>
             <id>native</id>
+            <modules>
+                <module>domain-layer</module>
+                <module>engineering-layer</module>
+                <module>application-layer</module>
+                <module>web-layer</module>
+            </modules>
             <properties>
                 <quarkus.profile>native</quarkus.profile>
+            </properties>
+        </profile>
+        <profile>
+            <id>integration-tests</id>
+            <modules>
+                <module>domain-layer</module>
+                <module>engineering-layer</module>
+                <module>application-layer</module>
+                <module>web-layer</module>
+                <module>integration-tests</module>
+            </modules>
+            <properties>
+                <skipITs>false</skipITs>
             </properties>
         </profile>
     </profiles>
