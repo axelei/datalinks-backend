@@ -1,6 +1,9 @@
 package net.krusher.datalinks.domain.model.user;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.Optional;
 
