@@ -39,6 +39,12 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-logging-json</artifactId>
+                <version>${quarkus.platform.version}</version>
+            </dependency>
+
             <!-- internal -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -207,20 +213,6 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>${quarkus.platform.group-id}</groupId>
-                <artifactId>quarkus-maven-plugin</artifactId>
-                <version>${quarkus.platform.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 
     <profiles>
