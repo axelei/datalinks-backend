@@ -12,6 +12,7 @@ import jakarta.persistence.criteria.Root;
 import lombok.Setter;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
 import net.krusher.datalinks.engineering.mapper.UploadMapper;
+import net.krusher.datalinks.engineering.model.domain.search.SearchService;
 import net.krusher.datalinks.engineering.model.domain.page.PageRepositoryBean;
 import net.krusher.datalinks.domain.exception.EngineException;
 import net.krusher.datalinks.domain.exception.ErrorType;
@@ -42,6 +43,7 @@ public class UploadService {
     private final PageRepositoryBean pageRepositoryBean;
     private final PageMapper pageMapper;
     private final EntityManager entityManager;
+    private final SearchService searchService;
 
     @Inject
     public UploadService(UploadMapper uploadMapper,
@@ -49,13 +51,15 @@ public class UploadService {
                          UploadUsageRepositoryBean uploadUsageRepositoryBean,
                          PageRepositoryBean pageRepositoryBean,
                          EntityManager entityManager,
-                         PageMapper pageMapper) {
+                         PageMapper pageMapper,
+                         SearchService searchService) {
         this.uploadMapper = uploadMapper;
         this.uploadRepositoryBean = uploadRepositoryBean;
         this.uploadUsageRepositoryBean = uploadUsageRepositoryBean;
         this.pageRepositoryBean = pageRepositoryBean;
         this.entityManager = entityManager;
         this.pageMapper = pageMapper;
+        this.searchService = searchService;
     }
 
     public void save(Upload upload) throws IOException {
@@ -73,11 +77,15 @@ public class UploadService {
             throw new EngineException(ErrorType.UPLOAD_ERROR, "Can't create directory");
         }
         Files.write(path, bytes);
-        uploadRepositoryBean.persist(uploadMapper.toEntity(upload));
+        UploadEntity entity = uploadMapper.toEntity(upload);
+        uploadRepositoryBean.persist(entity);
+        searchService.indexUpload(entity);
     }
 
     public void update(Upload upload) {
-        entityManager.merge(uploadMapper.toEntity(upload));
+        UploadEntity entity = uploadMapper.toEntity(upload);
+        entity = entityManager.merge(entity);
+        searchService.indexUpload(entity);
     }
 
     public Optional<Upload> findBySlug(String slug) {

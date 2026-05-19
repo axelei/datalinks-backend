@@ -12,6 +12,7 @@ import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.CategoryMapper;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
 import net.krusher.datalinks.engineering.mapper.UserMapper;
+import net.krusher.datalinks.engineering.model.domain.search.SearchService;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
 import net.krusher.datalinks.domain.model.page.Category;
 import net.krusher.datalinks.domain.model.page.PageShort;
@@ -28,18 +29,21 @@ public class CategoryService {
     private final PageMapper pageMapper;
     private final UserMapper userMapper;
     private final EntityManager entityManager;
+    private final SearchService searchService;
 
     @Inject
     public CategoryService(CategoryRepositoryBean categoryRepositoryBean,
                            CategoryMapper categoryMapper,
                            PageMapper pageMapper,
                            UserMapper userMapper,
-                           EntityManager entityManager) {
+                           EntityManager entityManager,
+                           SearchService searchService) {
         this.categoryRepositoryBean = categoryRepositoryBean;
         this.categoryMapper = categoryMapper;
         this.pageMapper = pageMapper;
         this.userMapper = userMapper;
         this.entityManager = entityManager;
+        this.searchService = searchService;
     }
 
     public List<Category> allCategories(int page, int pageSize) {
@@ -54,7 +58,9 @@ public class CategoryService {
     }
 
     public void create(Category category) {
-        categoryRepositoryBean.persist(categoryMapper.toEntity(category));
+        CategoryEntity entity = categoryMapper.toEntity(category);
+        categoryRepositoryBean.persist(entity);
+        searchService.indexCategory(entity);
     }
 
     public void deleteBySlug(String slug) {

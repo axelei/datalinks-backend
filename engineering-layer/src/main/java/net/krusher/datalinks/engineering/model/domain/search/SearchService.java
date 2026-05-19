@@ -9,10 +9,18 @@ import net.krusher.datalinks.engineering.mapper.CategoryMapper;
 import net.krusher.datalinks.engineering.model.domain.page.CategoryEntity;
 import net.krusher.datalinks.domain.model.page.Category;
 import net.krusher.datalinks.domain.model.search.Foundling;
+import net.krusher.datalinks.engineering.model.domain.page.PageEntity;
+import net.krusher.datalinks.engineering.model.domain.upload.UploadEntity;
+import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -44,6 +52,76 @@ public class SearchService {
         this.entityManager = entityManager;
         this.categoryMapper = categoryMapper;
         this.indexManager = indexManager;
+    }
+
+    public void indexPage(PageEntity e) {
+        try {
+            String content = StringUtils.defaultString(e.getContent());
+            Document doc = new Document();
+            doc.add(new StringField("doc_id", docId(Foundling.FoundlingType.PAGE, e.getId().toString()), Field.Store.NO));
+            doc.add(new StringField("type", Foundling.FoundlingType.PAGE.name(), Field.Store.YES));
+            doc.add(new StoredField("id", e.getId().toString()));
+            doc.add(new TextField("title", StringUtils.defaultString(e.getTitle()), Field.Store.NO));
+            doc.add(new TextField("content", content, Field.Store.NO));
+            doc.add(new StoredField("foundling_title", StringUtils.defaultString(e.getTitle())));
+            doc.add(new StoredField("foundling_content", e.summarize(content)));
+            indexManager.addOrUpdate(docId(Foundling.FoundlingType.PAGE, e.getId().toString()), doc);
+            indexManager.commit();
+        } catch (IOException ex) {
+            log.error("Failed to index page " + e.getId(), ex);
+        }
+    }
+
+    public void indexCategory(CategoryEntity e) {
+        try {
+            Document doc = new Document();
+            doc.add(new StringField("doc_id", docId(Foundling.FoundlingType.CATEGORY, e.getId().toString()), Field.Store.NO));
+            doc.add(new StringField("type", Foundling.FoundlingType.CATEGORY.name(), Field.Store.YES));
+            doc.add(new StoredField("id", e.getId().toString()));
+            doc.add(new TextField("name", StringUtils.defaultString(e.getName()), Field.Store.NO));
+            doc.add(new StoredField("foundling_title", StringUtils.defaultString(e.getName())));
+            indexManager.addOrUpdate(docId(Foundling.FoundlingType.CATEGORY, e.getId().toString()), doc);
+            indexManager.commit();
+        } catch (IOException ex) {
+            log.error("Failed to index category " + e.getId(), ex);
+        }
+    }
+
+    public void indexUser(UserEntity e) {
+        try {
+            Document doc = new Document();
+            doc.add(new StringField("doc_id", docId(Foundling.FoundlingType.USER, e.getId().toString()), Field.Store.NO));
+            doc.add(new StringField("type", Foundling.FoundlingType.USER.name(), Field.Store.YES));
+            doc.add(new StoredField("id", e.getId().toString()));
+            doc.add(new TextField("username", StringUtils.defaultString(e.getUsername()), Field.Store.NO));
+            doc.add(new TextField("name", StringUtils.defaultString(e.getName()), Field.Store.NO));
+            doc.add(new StoredField("foundling_title", StringUtils.defaultString(e.getUsername())));
+            indexManager.addOrUpdate(docId(Foundling.FoundlingType.USER, e.getId().toString()), doc);
+            indexManager.commit();
+        } catch (IOException ex) {
+            log.error("Failed to index user " + e.getId(), ex);
+        }
+    }
+
+    public void indexUpload(UploadEntity e) {
+        try {
+            Document doc = new Document();
+            doc.add(new StringField("doc_id", docId(Foundling.FoundlingType.UPLOAD, e.getId().toString()), Field.Store.NO));
+            doc.add(new StringField("type", Foundling.FoundlingType.UPLOAD.name(), Field.Store.YES));
+            doc.add(new StoredField("id", e.getId().toString()));
+            doc.add(new TextField("filename", StringUtils.defaultString(e.getFilename()), Field.Store.NO));
+            doc.add(new TextField("description", StringUtils.defaultString(e.getDescription()), Field.Store.NO));
+            doc.add(new StoredField("foundling_title", StringUtils.defaultString(e.getFilename())));
+            doc.add(new StoredField("foundling_content", StringUtils.defaultString(e.getDescription())));
+            indexManager.addOrUpdate(docId(Foundling.FoundlingType.UPLOAD, e.getId().toString()), doc);
+            indexManager.commit();
+        } catch (IOException ex) {
+            log.error("Failed to index upload " + e.getId(), ex);
+        }
+    }
+
+    private static String docId(Foundling.FoundlingType type, String id) {
+        return type.name() + ":" + id;
     }
 
     public List<Foundling> titleSearch(String query) {

@@ -9,6 +9,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.UserMapper;
+import net.krusher.datalinks.engineering.model.domain.search.SearchService;
 import net.krusher.datalinks.domain.model.user.User;
 
 import java.util.Optional;
@@ -20,12 +21,14 @@ public class UserService {
     private final EntityManager entityManager;
     private final UserRepositoryBean userRepositoryBean;
     private final UserMapper userMapper;
+    private final SearchService searchService;
 
     @Inject
-    public UserService(EntityManager entityManager, UserRepositoryBean userRepositoryBean, UserMapper userMapper) {
+    public UserService(EntityManager entityManager, UserRepositoryBean userRepositoryBean, UserMapper userMapper, SearchService searchService) {
         this.entityManager = entityManager;
         this.userRepositoryBean = userRepositoryBean;
         this.userMapper = userMapper;
+        this.searchService = searchService;
     }
 
     public Optional<User> getByUsername(String username) {
@@ -43,7 +46,8 @@ public class UserService {
 
     public void save(User user) {
         UserEntity userEntity = userMapper.toEntity(user);
-        entityManager.merge(userEntity);
+        userEntity = entityManager.merge(userEntity);
+        searchService.indexUser(userEntity);
     }
 
     public Optional<User> getById(UUID id) {

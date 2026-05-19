@@ -16,7 +16,6 @@ public final class LuceneAnalyzers {
                     .withTokenizer("whitespace")
                     .addTokenFilter("lowercase")
                     .addTokenFilter("stop")
-                    .addTokenFilter("limitTokenCount", "maxTokenCount", "3")
                     .addTokenFilter("edgeNGram", "minGramSize", "3", "maxGramSize", "15")
                     .build();
         } catch (IOException e) {

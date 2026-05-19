@@ -15,6 +15,7 @@ import net.krusher.datalinks.engineering.mapper.CategoryMapper;
 import net.krusher.datalinks.engineering.mapper.EditMapper;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
 import net.krusher.datalinks.engineering.mapper.UserMapper;
+import net.krusher.datalinks.engineering.model.domain.search.SearchService;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadService;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
@@ -43,6 +44,7 @@ public class PageService {
     private final CategoryMapper categoryMapper;
     private final EditRepositoryBean editRepositoryBean;
     private final UploadService uploadService;
+    private final SearchService searchService;
 
     private static final Pattern UPLOAD_USAGE_PATTERN = Pattern.compile("/file/get/([^\"]*)\"");
 
@@ -70,6 +72,7 @@ public class PageService {
         pageEntity = entityManager.merge(pageEntity);
         processEdit(pageEntity, userMapper.toEntity(user), ip);
         processUploadUsage(pageEntity);
+        searchService.indexPage(pageEntity);
     }
 
     public void updateOrCreate(Page page, User user, String ip) {
@@ -80,6 +83,7 @@ public class PageService {
             pageEntity = entityManager.merge(pageEntity);
             processEdit(pageEntity, userMapper.toEntity(user), ip);
             processUploadUsage(pageEntity);
+            searchService.indexPage(pageEntity);
         }, () -> save(page, user, ip));
     }
 
