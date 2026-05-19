@@ -17,8 +17,6 @@ public class EmailService {
 
     public static final String EMAILS_BUNDLE = "email.emails";
 
-    private final Mailer mailer;
-
     @Setter
     @ConfigProperty(name = "quarkus.mailer.from")
     String emailFrom;
@@ -29,10 +27,7 @@ public class EmailService {
     @ConfigProperty(name = "application.url")
     String applicationUrl;
 
-    @Inject
-    public EmailService(Mailer mailer) {
-        this.mailer = mailer;
-    }
+    @Inject Mailer mailer;
 
     public void sendSignupMessage(String to, Map<SignupParams, String> params, String language) {
         ResourceBundle labels = getResourceBundle(language);

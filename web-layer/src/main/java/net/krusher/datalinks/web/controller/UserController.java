@@ -126,7 +126,7 @@ public class UserController {
                         RequestResetUserCommand.builder()
                                 .username(passwordResetRequestModel.getUsername())
                                 .email(passwordResetRequestModel.getEmail()).build()))
-                .map(e -> Response.ok("OK").build())
+                .map(_ -> Response.ok("OK").build())
                 .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity(e.getErrorType().name()).build())
                 .get();
     }

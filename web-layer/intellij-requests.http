@@ -1,0 +1,246 @@
+# IntelliJ HTTP Client examples for datalinks-backend
+# Variables
+@baseUrl = http://localhost:8080
+@authHeader = Authorization: Bearer {{authToken}}
+@authToken = YOUR_TOKEN_HERE
+
+### Search - title search
+GET {{baseUrl}}/search/titleSearch/Java
+Accept: application/json
+
+### Search - full text with pagination
+GET {{baseUrl}}/search/full/"dependency injection"?page=0&pageSize=10
+Accept: application/json
+
+### User - get by username
+GET {{baseUrl}}/user/johndoe/get
+{{authHeader}}
+Accept: application/json
+
+### User - get by login token
+GET {{baseUrl}}/user/01234567-89ab-cdef-0123-456789abcdef/byLoginToken
+Accept: application/json
+
+### User - activate account
+GET {{baseUrl}}/user/01234567-89ab-cdef-0123-456789abcdef/activate
+Accept: text/plain
+
+### User - reset password (token)
+GET {{baseUrl}}/user/8dfa3f25-6c87-4506-a74f-ad83ff10d2d3/reset
+Accept: text/plain
+
+### User - change password (raw body)
+POST {{baseUrl}}/user/passwordChange
+{{authHeader}}
+Content-Type: text/plain
+
+new-strong-password-123
+
+### User - request password reset
+POST {{baseUrl}}/user/requestReset
+Content-Type: application/json
+
+{
+  "username": "johndoe",
+  "email": "johndoe@example.com",
+  "captcha": "captcha-token-from-client"
+}
+
+### User - login
+POST {{baseUrl}}/user/login
+Content-Type: application/json
+
+{
+  "username": "johndoe",
+  "password": "password123"
+}
+
+### User - signup
+POST {{baseUrl}}/user/signup
+Content-Type: application/json
+
+{
+  "username": "newuser",
+  "password": "secret",
+  "email": "newuser@example.com",
+  "name": "New User",
+  "captcha": "captcha-token",
+  "language": "en"
+}
+
+### User - change password (command model curl example)
+# The passwordChange endpoint expects raw body with the new password and Authorization header.
+# Example curl: curl -X POST -H "Authorization: Bearer $TOKEN" -d "new-strong-password-123" {{baseUrl}}/user/passwordChange
+
+### Category - list all (paginated)
+GET {{baseUrl}}/category/all?page=0&pageSize=20
+Accept: application/json
+
+### Category - delete
+DELETE {{baseUrl}}/category/delete/UnwantedCategory
+{{authHeader}}
+
+### Category - add (raw name)
+PUT {{baseUrl}}/category/add
+{{authHeader}}
+Content-Type: text/plain
+
+NewCategoryName
+
+### Category - get by name
+GET {{baseUrl}}/category/get/Programming
+Accept: application/json
+
+### Category - find
+GET {{baseUrl}}/category/find/java
+Accept: application/json
+
+### Category - find pages (paginated)
+GET {{baseUrl}}/category/findPages/java?page=0&pageSize=10
+Accept: application/json
+
+### File (upload) - lookAt (metadata)
+GET {{baseUrl}}/file/lookAt/example.png
+{{authHeader}}
+Accept: application/json
+
+### File - download
+GET {{baseUrl}}/file/get/example.png
+{{authHeader}}
+
+### File - delete
+DELETE {{baseUrl}}/file/delete/example.png
+{{authHeader}}
+
+### File - upload (multipart) - raw example
+POST {{baseUrl}}/file/upload
+{{authHeader}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="description"
+
+Example upload description
+------WebKitFormBoundary
+Content-Disposition: form-data; name="upload"; filename="example.png"
+Content-Type: image/png
+
+< ./example.png
+------WebKitFormBoundary--
+
+### File - upload (IntelliJ file variable)
+# Set @exampleFile to a path in IntelliJ variables or at top of file: @exampleFile = ./example.png
+@exampleFile = ./example.png
+
+POST {{baseUrl}}/file/upload
+{{authHeader}}
+Content-Type: multipart/form-data
+
+--boundary
+Content-Disposition: form-data; name="description"
+
+IntelliJ multipart upload example
+--boundary
+Content-Disposition: form-data; name="upload"; filename="{{exampleFile}}"
+Content-Type: image/png
+
+<{{exampleFile}}
+--boundary--
+
+# Note: IntelliJ HTTP client will attach the file from the workspace when using <{{exampleFile}}.
+
+### File - update metadata
+PUT {{baseUrl}}/file/update
+{{authHeader}}
+Content-Type: application/json
+
+{
+  "filename": "example.png",
+  "description": "Updated description",
+  "ip": "192.0.2.1"
+}
+
+### File - new uploads (paginated)
+POST {{baseUrl}}/file/newUploads
+Content-Type: application/json
+
+{
+  "page": 0,
+  "pageSize": 10
+}
+
+### File - usages
+GET {{baseUrl}}/file/usages/example.png
+Accept: application/json
+
+### Page - get full
+GET {{baseUrl}}/page/Introduction-to-Quarkus
+{{authHeader}}
+Accept: application/json
+
+### Page - get short
+GET {{baseUrl}}/page/-short/Introduction-to-Quarkus
+{{authHeader}}
+Accept: application/json
+
+### Page - edits (paginated)
+GET {{baseUrl}}/page/-edits/Introduction-to-Quarkus?page=0&pageSize=10
+Accept: application/json
+
+### Page - random
+GET {{baseUrl}}/page/-randomPage
+Accept: application/json
+
+### Page - contributions
+GET {{baseUrl}}/page/-contributions/johndoe?page=0&pageSize=10
+Accept: application/json
+
+### Page - delete
+DELETE {{baseUrl}}/page/OldPageTitle
+{{authHeader}}
+
+### Page - block
+POST {{baseUrl}}/page/block/ControversialPage?readBlock=1&writeBlock=1
+{{authHeader}}
+
+### Page - put (create/update content)
+PUT {{baseUrl}}/page/NewPageTitle
+{{authHeader}}
+Content-Type: application/json
+
+{
+  "content": "# New page content\nThis is an example.",
+  "categories": [
+    { "id": "00000000-0000-0000-0000-000000000000", "name": "Programming", "slug": "programming" }
+  ]
+}
+
+### Page - newPages (paginated)
+POST {{baseUrl}}/page/newPages
+Content-Type: application/json
+
+{
+  "page": 0,
+  "pageSize": 10
+}
+
+### Page - recentChanges (paginated)
+POST {{baseUrl}}/page/recentChanges
+Content-Type: application/json
+
+{
+  "page": 0,
+  "pageSize": 10
+}
+
+### Page - get edit by id
+GET {{baseUrl}}/page/-edit/01234567-89ab-cdef-0123-456789abcdef
+Accept: application/json
+
+### Config - get key
+GET {{baseUrl}}/config/key/some.config.key
+Accept: application/json
+
+### Config - get all
+GET {{baseUrl}}/config/all
+Accept: application/json
