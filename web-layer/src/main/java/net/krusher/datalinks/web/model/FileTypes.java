@@ -1,8 +1,6 @@
 package net.krusher.datalinks.web.model;
 
 import jakarta.ws.rs.core.MediaType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 @AllArgsConstructor
 @Getter

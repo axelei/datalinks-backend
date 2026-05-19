@@ -1,14 +1,21 @@
 package net.krusher.datalinks.domain.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.quarkus.runtime.annotations.RegisterForReflection;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+@RegisterForReflection
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class User {
 
