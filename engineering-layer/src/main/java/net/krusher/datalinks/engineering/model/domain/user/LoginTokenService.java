@@ -1,13 +1,13 @@
 package net.krusher.datalinks.engineering.model.domain.user;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.Root;
 import net.krusher.datalinks.engineering.mapper.TokenMapper;
-import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
-import net.krusher.datalinks.model.user.LoginToken;
-import org.springframework.stereotype.Service;
+import net.krusher.datalinks.domain.model.user.LoginToken;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -15,13 +15,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
+@ApplicationScoped
 public class LoginTokenService {
 
     private final EntityManager entityManager;
     private final TokenMapper tokenMapper;
     private final LoginTokenRepositoryBean loginTokenRepositoryBean;
 
+    @Inject
     public LoginTokenService(EntityManager entityManager, TokenMapper tokenMapper, LoginTokenRepositoryBean loginTokenRepositoryBean) {
         this.entityManager = entityManager;
         this.tokenMapper = tokenMapper;
@@ -36,12 +37,12 @@ public class LoginTokenService {
         if (Objects.isNull(token)) {
             return Optional.empty();
         }
-        return loginTokenRepositoryBean.findById(token).map(tokenMapper::toModel);
+        return loginTokenRepositoryBean.findByIdOptional(token).map(tokenMapper::toModel);
     }
 
     public void deleteExpired() {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaDelete<LoginTokenEntity> delete = cb. createCriteriaDelete(LoginTokenEntity.class);
+        CriteriaDelete<LoginTokenEntity> delete = cb.createCriteriaDelete(LoginTokenEntity.class);
         Root<LoginTokenEntity> e = delete.from(LoginTokenEntity.class);
         delete.where(cb.lessThan(e.get("creationDate"), Instant.now().minus(30, ChronoUnit.DAYS)));
         entityManager.createQuery(delete).executeUpdate();

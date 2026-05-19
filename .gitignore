@@ -26,3 +26,9 @@ replay_pid*
 
 # Idea
 .idea
+**/*.iml
+*.iml
+.run
+
+# Embedded Lucene index
+data/

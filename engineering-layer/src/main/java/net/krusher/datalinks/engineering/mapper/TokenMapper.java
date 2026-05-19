@@ -1,10 +1,10 @@
 package net.krusher.datalinks.engineering.mapper;
 
 import net.krusher.datalinks.engineering.model.domain.user.LoginTokenEntity;
-import net.krusher.datalinks.model.user.LoginToken;
+import net.krusher.datalinks.domain.model.user.LoginToken;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "jakarta-cdi")
 public interface TokenMapper {
     LoginToken toModel(LoginTokenEntity entity);
     LoginTokenEntity toEntity(LoginToken model);

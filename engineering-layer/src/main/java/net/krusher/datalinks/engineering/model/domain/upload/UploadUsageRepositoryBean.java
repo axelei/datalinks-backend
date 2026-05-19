@@ -1,7 +1,8 @@
 package net.krusher.datalinks.engineering.model.domain.upload;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import jakarta.enterprise.context.ApplicationScoped;
 
-public interface UploadUsageRepositoryBean extends JpaRepository<UploadUsageEntity, UploadUsageId> {
-
+@ApplicationScoped
+public class UploadUsageRepositoryBean implements PanacheRepositoryBase<UploadUsageEntity, UploadUsageId> {
 }

@@ -1,5 +1,8 @@
 package net.krusher.datalinks.engineering.model.domain.page;
 
+import io.quarkus.cache.CacheResult;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -12,18 +15,15 @@ import net.krusher.datalinks.engineering.mapper.CategoryMapper;
 import net.krusher.datalinks.engineering.mapper.EditMapper;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
 import net.krusher.datalinks.engineering.mapper.UserMapper;
+import net.krusher.datalinks.engineering.model.domain.search.SearchService;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadService;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
-import net.krusher.datalinks.model.page.Edit;
-import net.krusher.datalinks.model.page.Page;
-import net.krusher.datalinks.model.page.PageShort;
-import net.krusher.datalinks.model.user.User;
-import net.krusher.datalinks.model.user.UserLevel;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Example;
-import org.springframework.stereotype.Service;
+import net.krusher.datalinks.domain.model.page.Edit;
+import net.krusher.datalinks.domain.model.page.Page;
+import net.krusher.datalinks.domain.model.page.PageShort;
+import net.krusher.datalinks.domain.model.user.User;
+import net.krusher.datalinks.domain.model.user.UserLevel;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +32,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Service
+@ApplicationScoped
+@lombok.AllArgsConstructor(onConstructor_ = @Inject)
 public class PageService {
 
     private final EntityManager entityManager;
@@ -43,32 +44,14 @@ public class PageService {
     private final CategoryMapper categoryMapper;
     private final EditRepositoryBean editRepositoryBean;
     private final UploadService uploadService;
+    private final SearchService searchService;
 
     private static final Pattern UPLOAD_USAGE_PATTERN = Pattern.compile("/file/get/([^\"]*)\"");
 
-    @Autowired
-    public PageService(EntityManager entityManager,
-                       PageRepositoryBean pageRepositoryBean,
-                       PageMapper pageMapper,
-                       UserMapper userMapper,
-                       EditMapper editMapper,
-                       CategoryMapper categoryMapper,
-                       EditRepositoryBean editRepositoryBean,
-                       UploadService uploadService) {
-        this.entityManager = entityManager;
-        this.pageRepositoryBean = pageRepositoryBean;
-        this.pageMapper = pageMapper;
-        this.userMapper = userMapper;
-        this.editRepositoryBean = editRepositoryBean;
-        this.categoryMapper = categoryMapper;
-        this.editMapper = editMapper;
-        this.uploadService = uploadService;
-    }
 
     public Optional<Page> findBySlug(String slug) {
-        return pageRepositoryBean.findAll(Example.of(PageEntity.builder().slug(slug).build()))
-                .stream()
-                .findFirst()
+        return pageRepositoryBean.find("slug", slug)
+                .firstResultOptional()
                 .map(pageEntity -> {
                     Page page = pageMapper.toModel(pageEntity);
                     page.setCategories(pageEntity.getCategories().stream().map(categoryMapper::toModel).collect(Collectors.toSet()));
@@ -77,9 +60,8 @@ public class PageService {
     }
 
     public Optional<PageShort> findShortBySlug(String slug) {
-        return pageRepositoryBean.findAll(Example.of(PageEntity.builder().slug(slug).build()))
-                .stream()
-                .findFirst()
+        return pageRepositoryBean.find("slug", slug)
+                .firstResultOptional()
                 .map(pageMapper::toModelShort);
     }
 
@@ -90,6 +72,7 @@ public class PageService {
         pageEntity = entityManager.merge(pageEntity);
         processEdit(pageEntity, userMapper.toEntity(user), ip);
         processUploadUsage(pageEntity);
+        searchService.indexPage(pageEntity);
     }
 
     public void updateOrCreate(Page page, User user, String ip) {
@@ -100,6 +83,7 @@ public class PageService {
             pageEntity = entityManager.merge(pageEntity);
             processEdit(pageEntity, userMapper.toEntity(user), ip);
             processUploadUsage(pageEntity);
+            searchService.indexPage(pageEntity);
         }, () -> save(page, user, ip));
     }
 
@@ -187,7 +171,7 @@ public class PageService {
                 .getResultList().stream().map(pageMapper::toModelShort).toList();
     }
 
-    @Cacheable("pageCount")
+    @CacheResult(cacheName = "pageCount")
     public int count() {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
@@ -202,7 +186,7 @@ public class PageService {
                 .user(userEntity)
                 .ip(ip)
                 .build();
-        editRepositoryBean.save(editEntity);
+        editRepositoryBean.persist(editEntity);
     }
 
     private void processUploadUsage(PageEntity page) {
@@ -210,7 +194,7 @@ public class PageService {
         entityManager.flush();
         entityManager.clear();
         Matcher m = UPLOAD_USAGE_PATTERN.matcher(page.getContent());
-        while(m.find()) {
+        while (m.find()) {
             String slug = m.group(1);
             uploadService.findBySlug(slug).ifPresent(upload -> {
                 UploadUsageEntity usage = UploadUsageEntity.builder()
@@ -233,7 +217,7 @@ public class PageService {
                 .where(cb.and(
                         cb.equal(editRoot.get("page"), pageRoot),
                         cb.equal(editRoot.get("user"), userMapper.toEntity(user))
-                                ));
+                ));
 
         cq.orderBy(cb.desc(editRoot.get("date")));
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
@@ -276,14 +260,14 @@ public class PageService {
     }
 
     public Optional<Edit> findEditById(UUID id) {
-       Optional<EditEntity> editEntity = editRepositoryBean.findById(id);
-       if (editEntity.isEmpty()) {
-           return Optional.empty();
-       }
-       Edit edit = editMapper.toModel(editEntity.get());
-       edit.setUser(userMapper.toModel(editEntity.get().getUser()));
-       edit.setPage(pageMapper.toModelShort(editEntity.get().getPage()));
-       return Optional.of(edit);
+        Optional<EditEntity> editEntity = editRepositoryBean.findByIdOptional(id);
+        if (editEntity.isEmpty()) {
+            return Optional.empty();
+        }
+        Edit edit = editMapper.toModel(editEntity.get());
+        edit.setUser(userMapper.toModel(editEntity.get().getUser()));
+        edit.setPage(pageMapper.toModelShort(editEntity.get().getPage()));
+        return Optional.of(edit);
     }
 
     public List<String> findAllTitles() {

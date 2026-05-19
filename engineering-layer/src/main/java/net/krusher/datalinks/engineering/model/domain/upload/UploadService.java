@@ -1,6 +1,8 @@
 package net.krusher.datalinks.engineering.model.domain.upload;
 
 import io.vavr.control.Try;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -10,15 +12,14 @@ import jakarta.persistence.criteria.Root;
 import lombok.Setter;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
 import net.krusher.datalinks.engineering.mapper.UploadMapper;
+import net.krusher.datalinks.engineering.model.domain.search.SearchService;
 import net.krusher.datalinks.engineering.model.domain.page.PageRepositoryBean;
-import net.krusher.datalinks.exception.EngineException;
-import net.krusher.datalinks.exception.ErrorType;
-import net.krusher.datalinks.model.page.PageShort;
-import net.krusher.datalinks.model.upload.Upload;
+import net.krusher.datalinks.domain.exception.EngineException;
+import net.krusher.datalinks.domain.exception.ErrorType;
+import net.krusher.datalinks.domain.model.page.PageShort;
+import net.krusher.datalinks.domain.model.upload.Upload;
 import org.apache.commons.codec.binary.Hex;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Example;
-import org.springframework.stereotype.Service;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,12 +30,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
+@ApplicationScoped
 public class UploadService {
 
     @Setter
-    @Value("${application.upload.dir}")
-    private String uploadDir;
+    @ConfigProperty(name = "application.upload.dir")
+    String uploadDir;
 
     private final UploadMapper uploadMapper;
     private final UploadRepositoryBean uploadRepositoryBean;
@@ -42,19 +43,23 @@ public class UploadService {
     private final PageRepositoryBean pageRepositoryBean;
     private final PageMapper pageMapper;
     private final EntityManager entityManager;
+    private final SearchService searchService;
 
+    @Inject
     public UploadService(UploadMapper uploadMapper,
                          UploadRepositoryBean uploadRepositoryBean,
                          UploadUsageRepositoryBean uploadUsageRepositoryBean,
                          PageRepositoryBean pageRepositoryBean,
                          EntityManager entityManager,
-                         PageMapper pageMapper) {
+                         PageMapper pageMapper,
+                         SearchService searchService) {
         this.uploadMapper = uploadMapper;
         this.uploadRepositoryBean = uploadRepositoryBean;
         this.uploadUsageRepositoryBean = uploadUsageRepositoryBean;
         this.pageRepositoryBean = pageRepositoryBean;
         this.entityManager = entityManager;
         this.pageMapper = pageMapper;
+        this.searchService = searchService;
     }
 
     public void save(Upload upload) throws IOException {
@@ -72,17 +77,21 @@ public class UploadService {
             throw new EngineException(ErrorType.UPLOAD_ERROR, "Can't create directory");
         }
         Files.write(path, bytes);
-        uploadRepositoryBean.save(uploadMapper.toEntity(upload));
+        UploadEntity entity = uploadMapper.toEntity(upload);
+        uploadRepositoryBean.persist(entity);
+        searchService.indexUpload(entity);
     }
 
     public void update(Upload upload) {
-        uploadRepositoryBean.save(uploadMapper.toEntity(upload));
+        UploadEntity entity = uploadMapper.toEntity(upload);
+        entity = entityManager.merge(entity);
+        searchService.indexUpload(entity);
     }
 
     public Optional<Upload> findBySlug(String slug) {
-        Example<UploadEntity> example = Example.of(UploadEntity.builder().slug(slug).build());
-        List<UploadEntity> result = uploadRepositoryBean.findAll(example);
-        Optional<Upload> upload = result.stream().findFirst().map(uploadMapper::toModel);
+        Optional<Upload> upload = uploadRepositoryBean.find("slug", slug)
+                .firstResultOptional()
+                .map(uploadMapper::toModel);
         if (upload.isPresent()) {
             String uploadPath = getUploadPath(upload.get().getMd5(), upload.get().getSlug());
             upload.get().setInputStream(Try.of(() -> Files.newInputStream(Path.of(uploadDir + uploadPath)))
@@ -117,7 +126,7 @@ public class UploadService {
 
     public void deleteUsages(UUID pageId) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaDelete<UploadUsageEntity> delete = cb. createCriteriaDelete(UploadUsageEntity.class);
+        CriteriaDelete<UploadUsageEntity> delete = cb.createCriteriaDelete(UploadUsageEntity.class);
         Root<UploadUsageEntity> e = delete.from(UploadUsageEntity.class);
         delete.where(cb.equal(e.get("pageId"), pageId));
         entityManager.createQuery(delete).executeUpdate();
@@ -128,10 +137,9 @@ public class UploadService {
     }
 
     public List<PageShort> findUsages(UUID uploadId) {
-        Example<UploadUsageEntity> example = Example.of(UploadUsageEntity.builder().uploadId(uploadId).build());
-        List<UploadUsageEntity> result = uploadUsageRepositoryBean.findAll(example);
+        List<UploadUsageEntity> result = uploadUsageRepositoryBean.find("uploadId", uploadId).list();
         return result.stream()
-                .map(uploadUsageEntity -> pageRepositoryBean.findById(uploadUsageEntity.getPageId()).orElseThrow())
+                .map(uploadUsageEntity -> pageRepositoryBean.findByIdOptional(uploadUsageEntity.getPageId()).orElseThrow())
                 .map(pageMapper::toModelShort).toList();
     }
 }

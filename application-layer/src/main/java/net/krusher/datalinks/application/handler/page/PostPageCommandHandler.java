@@ -1,0 +1,74 @@
+package net.krusher.datalinks.application.handler.page;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import net.krusher.datalinks.application.common.UserHelper;
+import net.krusher.datalinks.engineering.model.domain.page.PageService;
+import net.krusher.datalinks.domain.exception.EngineException;
+import net.krusher.datalinks.domain.exception.ErrorType;
+import net.krusher.datalinks.domain.model.page.Category;
+import net.krusher.datalinks.domain.model.page.Page;
+import net.krusher.datalinks.domain.model.user.User;
+
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static net.krusher.datalinks.application.handler.common.SlugifyProvider.SLUGIFY;
+
+@ApplicationScoped
+public class PostPageCommandHandler {
+
+    private final PageService pageService;
+    private final UserHelper userHelper;
+
+    @Inject
+    public PostPageCommandHandler(PageService pageService, UserHelper userHelper) {
+        this.pageService = pageService;
+        this.userHelper = userHelper;
+    }
+
+    @Transactional
+    public void handler(PostPageCommand postPageCommand) {
+        pageService.findBySlug(SLUGIFY.slugify(postPageCommand.getTitle()))
+                .ifPresentOrElse(page -> updatePage(page, postPageCommand), () -> createPage(postPageCommand));
+    }
+
+    private void createPage(PostPageCommand postPageCommand) {
+        if (!userHelper.userCanCreate(postPageCommand.getLoginTokenId())) {
+            throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't create a page");
+        }
+
+        Optional<User> user = userHelper.getUserFromLoginToken(postPageCommand.getLoginTokenId());
+        Page page = Page.builder()
+                .title(postPageCommand.getTitle())
+                .content(postPageCommand.getContent())
+                .categories(processCategories(postPageCommand))
+                .slug(SLUGIFY.slugify(postPageCommand.getTitle()))
+                .creator(user.orElse(null))
+                .build();
+        pageService.updateOrCreate(page, user.orElse(null), postPageCommand.getIp());
+    }
+
+    private void updatePage(Page page, PostPageCommand postPageCommand) {
+        if (!userHelper.userCanEdit(page, postPageCommand.getLoginTokenId())) {
+            throw new EngineException(ErrorType.PERMISSIONS_ERROR, "User can't edit this page");
+        }
+        Optional<User> user = userHelper.getUserFromLoginToken(postPageCommand.getLoginTokenId());
+        page.setSlug(SLUGIFY.slugify(postPageCommand.getTitle()));
+        page.setContent(postPageCommand.getContent());
+        page.setCategories(processCategories(postPageCommand));
+        pageService.updateOrCreate(page, user.orElse(null), postPageCommand.getIp());
+    }
+
+    private Set<Category> processCategories(PostPageCommand postPageCommand) {
+        Set<Category> categoriesSet = Arrays.stream(postPageCommand.getCategories())
+                .collect(Collectors.toSet());
+        for (Category category : categoriesSet) {
+            category.setSlug(SLUGIFY.slugify(category.getName()));
+        }
+        return categoriesSet;
+    }
+}
