@@ -1,7 +1,5 @@
 package net.krusher.datalinks.domain.model.configlet;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import net.krusher.datalinks.domain.model.user.UserLevel;
 
 @Getter

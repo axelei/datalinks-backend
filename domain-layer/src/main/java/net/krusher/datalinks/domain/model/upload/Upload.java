@@ -1,8 +1,12 @@
 package net.krusher.datalinks.domain.model.upload;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.quarkus.runtime.annotations.RegisterForReflection;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import net.krusher.datalinks.domain.model.user.UserLevel;
 
 import java.io.InputStream;
@@ -11,6 +15,9 @@ import java.util.UUID;
 
 @Builder
 @Data
+@RegisterForReflection
+@AllArgsConstructor
+@NoArgsConstructor
 public class Upload {
     @JsonIgnore
     private UUID id;
