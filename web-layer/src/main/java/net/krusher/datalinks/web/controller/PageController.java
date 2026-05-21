@@ -19,8 +19,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import net.krusher.datalinks.domain.exception.EngineException;
-import net.krusher.datalinks.domain.exception.ErrorType;
 import net.krusher.datalinks.application.handler.common.PaginationCommand;
 import net.krusher.datalinks.application.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.application.handler.page.BlockPageCommand;
@@ -38,9 +36,11 @@ import net.krusher.datalinks.application.handler.page.PageEditsCommandHandler;
 import net.krusher.datalinks.application.handler.page.PostPageCommand;
 import net.krusher.datalinks.application.handler.page.PostPageCommandHandler;
 import net.krusher.datalinks.application.handler.page.RecentChangesCommandHandler;
+import net.krusher.datalinks.domain.exception.EngineException;
+import net.krusher.datalinks.domain.exception.ErrorType;
+import net.krusher.datalinks.domain.model.page.Edit;
 import net.krusher.datalinks.web.model.PaginationModel;
 import net.krusher.datalinks.web.model.PostPageModel;
-import net.krusher.datalinks.domain.model.page.Edit;
 
 import java.util.List;
 import java.util.UUID;
@@ -145,6 +145,7 @@ public class PageController {
     }
 
     @DELETE
+    @Consumes(MediaType.TEXT_PLAIN)
     @Path("{title}")
     public void delete(@PathParam("title") String title, @HeaderParam(AUTH_HEADER) String userToken) {
         deletePageCommandHandler.handler(DeletePageCommand.builder()
@@ -154,6 +155,7 @@ public class PageController {
     }
 
     @POST
+    @Consumes(MediaType.TEXT_PLAIN)
     @Path("block/{title}")
     public Response block(@PathParam("title") String title,
                           @QueryParam("readBlock") @DefaultValue("0") int readBlock,

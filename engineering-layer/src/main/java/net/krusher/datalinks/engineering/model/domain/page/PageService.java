@@ -11,6 +11,11 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
+import net.krusher.datalinks.domain.model.page.Edit;
+import net.krusher.datalinks.domain.model.page.Page;
+import net.krusher.datalinks.domain.model.page.PageShort;
+import net.krusher.datalinks.domain.model.user.User;
+import net.krusher.datalinks.domain.model.user.UserLevel;
 import net.krusher.datalinks.engineering.mapper.CategoryMapper;
 import net.krusher.datalinks.engineering.mapper.EditMapper;
 import net.krusher.datalinks.engineering.mapper.PageMapper;
@@ -19,11 +24,6 @@ import net.krusher.datalinks.engineering.model.domain.search.SearchService;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadService;
 import net.krusher.datalinks.engineering.model.domain.upload.UploadUsageEntity;
 import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
-import net.krusher.datalinks.domain.model.page.Edit;
-import net.krusher.datalinks.domain.model.page.Page;
-import net.krusher.datalinks.domain.model.page.PageShort;
-import net.krusher.datalinks.domain.model.user.User;
-import net.krusher.datalinks.domain.model.user.UserLevel;
 
 import java.util.List;
 import java.util.Optional;
@@ -97,7 +97,7 @@ public class PageService {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaDelete<EditEntity> criteriaDelete = criteriaBuilder.createCriteriaDelete(EditEntity.class);
         Root<EditEntity> root = criteriaDelete.from(EditEntity.class);
-        criteriaDelete.where(criteriaBuilder.equal(root.get("pageId"), pageId));
+        criteriaDelete.where(criteriaBuilder.equal(root.get("page").get("id"), pageId));
         entityManager.createQuery(criteriaDelete).executeUpdate();
     }
 
