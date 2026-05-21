@@ -25,7 +25,7 @@
         <quarkus-lucene.version>2.3.0</quarkus-lucene.version>
 
         <surefire-plugin.version>3.5.5</surefire-plugin.version>
-        <skipITs>true</skipITs>
+
     </properties>
 
     <modules>
@@ -77,12 +77,6 @@
                 <artifactId>web-layer</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>integration-tests</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <!-- external (no gestionados por el BOM de Quarkus) -->
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
@@ -256,15 +250,6 @@
             <id>native</id>
             <properties>
                 <quarkus.profile>native</quarkus.profile>
-            </properties>
-        </profile>
-        <profile>
-            <id>integration-tests</id>
-            <modules>
-                <module>integration-tests</module>
-            </modules>
-            <properties>
-                <skipITs>false</skipITs>
             </properties>
         </profile>
     </profiles>

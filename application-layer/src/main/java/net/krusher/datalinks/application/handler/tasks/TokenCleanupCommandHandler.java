@@ -14,7 +14,6 @@ public class TokenCleanupCommandHandler {
     private final LoginTokenService loginTokenService;
     private final ResetTokenService resetTokenService;
 
-
     @Transactional
     public void handler() {
         loginTokenService.deleteExpired();

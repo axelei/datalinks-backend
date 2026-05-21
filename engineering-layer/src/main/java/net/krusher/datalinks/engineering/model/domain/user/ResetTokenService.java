@@ -6,8 +6,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.Root;
-import net.krusher.datalinks.engineering.mapper.ResetTokenMapper;
 import net.krusher.datalinks.domain.model.user.ResetToken;
+import net.krusher.datalinks.engineering.mapper.ResetTokenMapper;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -50,7 +50,7 @@ public class ResetTokenService {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaDelete<ResetTokenEntity> delete = cb.createCriteriaDelete(ResetTokenEntity.class);
         Root<ResetTokenEntity> e = delete.from(ResetTokenEntity.class);
-        delete.where(cb.lessThan(e.get("creationDate"), Instant.now().minus(30, ChronoUnit.DAYS)));
+        delete.where(cb.lessThan(e.get("creationDate"), Instant.now().minus(5, ChronoUnit.DAYS)));
         entityManager.createQuery(delete).executeUpdate();
     }
 

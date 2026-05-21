@@ -29,6 +29,7 @@ public class Upload {
     private String ipCreator;
     @JsonIgnore
     private String ipModifier;
+    @JsonIgnore
     private UUID creatorId;
     private String md5;
     private UserLevel editBlock;
