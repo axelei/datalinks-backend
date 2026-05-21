@@ -8,8 +8,9 @@ import net.krusher.datalinks.domain.model.page.Edit;
 import java.util.Optional;
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class GetEditCommandHandler {
 
     private final PageService pageService;

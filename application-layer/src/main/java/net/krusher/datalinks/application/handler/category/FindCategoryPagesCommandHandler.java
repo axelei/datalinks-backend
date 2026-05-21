@@ -9,8 +9,9 @@ import net.krusher.datalinks.domain.model.page.PageShort;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class FindCategoryPagesCommandHandler {
 
     private final CategoryService categoryService;

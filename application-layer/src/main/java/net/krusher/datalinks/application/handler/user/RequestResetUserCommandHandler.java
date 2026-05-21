@@ -15,8 +15,9 @@ import net.krusher.datalinks.domain.model.user.User;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class RequestResetUserCommandHandler {
 
     private final UserService userService;

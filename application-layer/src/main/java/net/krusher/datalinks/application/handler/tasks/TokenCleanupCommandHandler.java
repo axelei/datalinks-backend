@@ -6,8 +6,9 @@ import jakarta.transaction.Transactional;
 import net.krusher.datalinks.engineering.model.domain.user.LoginTokenService;
 import net.krusher.datalinks.engineering.model.domain.user.ResetTokenService;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class TokenCleanupCommandHandler {
 
     private final LoginTokenService loginTokenService;

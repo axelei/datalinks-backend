@@ -8,8 +8,9 @@ import net.krusher.datalinks.domain.model.page.Category;
 
 import java.util.Optional;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class GetCategoryCommandHandler {
 
     private final CategoryService categoryService;

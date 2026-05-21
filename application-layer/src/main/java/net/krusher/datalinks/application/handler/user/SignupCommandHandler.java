@@ -22,8 +22,9 @@ import java.util.UUID;
 
 import static java.util.function.Predicate.not;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class SignupCommandHandler {
 
     private final UserHelper userHelper;

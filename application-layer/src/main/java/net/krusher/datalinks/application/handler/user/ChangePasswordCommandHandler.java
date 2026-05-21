@@ -16,8 +16,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class ChangePasswordCommandHandler {
 
     private final UserHelper userHelper;

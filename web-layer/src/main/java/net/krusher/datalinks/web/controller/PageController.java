@@ -50,10 +50,11 @@ import java.util.UUID;
 import static net.krusher.datalinks.web.common.ControllerUtil.AUTH_HEADER;
 import static net.krusher.datalinks.web.common.ControllerUtil.toLoginToken;
 
+import lombok.AllArgsConstructor;
 @Path("/page")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class PageController {
 
     private final GetPageCommandHandler getPageCommandHandler;

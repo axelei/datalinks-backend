@@ -12,8 +12,9 @@ import net.krusher.datalinks.domain.model.page.Category;
 
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class CreateCategoryCommandHandler {
 
     private final CategoryService categoryService;

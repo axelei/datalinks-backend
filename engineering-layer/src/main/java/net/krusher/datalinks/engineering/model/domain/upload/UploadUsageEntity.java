@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,8 +20,8 @@ import java.util.UUID;
 @Builder
 @IdClass(UploadUsageId.class)
 @Table(name = "UPLOAD_USAGE", indexes = {
-        @jakarta.persistence.Index(name = "IDX_UPLOAD_USAGE_UPLOAD_ID", columnList = "uploadId"),
-        @jakarta.persistence.Index(name = "IDX_UPLOAD_USAGE_PAGE_ID", columnList = "pageId"),
+        @Index(name = "IDX_UPLOAD_USAGE_UPLOAD_ID", columnList = "uploadId"),
+        @Index(name = "IDX_UPLOAD_USAGE_PAGE_ID", columnList = "pageId"),
 })
 public class UploadUsageEntity {
 

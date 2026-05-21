@@ -9,8 +9,9 @@ import net.krusher.datalinks.domain.model.user.User;
 
 import java.util.Optional;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class GetUserByLoginTokenCommandHandler {
 
     private final UserService userService;

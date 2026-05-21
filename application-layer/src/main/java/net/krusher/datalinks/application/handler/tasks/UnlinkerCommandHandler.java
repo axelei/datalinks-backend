@@ -11,9 +11,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import lombok.AllArgsConstructor;
 @JBossLog
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class UnlinkerCommandHandler {
 
     private final PageService pageService;

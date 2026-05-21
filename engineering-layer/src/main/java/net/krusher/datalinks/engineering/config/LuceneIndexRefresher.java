@@ -16,9 +16,10 @@ import net.krusher.datalinks.engineering.model.domain.search.SearchService;
 import java.io.IOException;
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
 @JBossLog
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class LuceneIndexRefresher {
 
     private final EntityManager entityManager;

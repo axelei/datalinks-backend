@@ -14,9 +14,10 @@ import net.krusher.datalinks.domain.model.configlet.Configlet;
 
 import java.util.Set;
 
+import lombok.AllArgsConstructor;
 @Path("/config")
 @Produces(MediaType.APPLICATION_JSON)
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class ConfigController {
 
     private final GetConfigletCommandHandler getConfigletCommandHandler;

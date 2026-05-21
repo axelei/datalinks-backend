@@ -8,8 +8,9 @@ import net.krusher.datalinks.domain.model.upload.Upload;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class NewUploadsCommandHandler {
 
     private final UploadService uploadService;

@@ -38,6 +38,7 @@ import net.krusher.datalinks.web.model.PaginationModel;
 import net.krusher.datalinks.web.model.UpdateUploadModel;
 import net.krusher.datalinks.web.model.UpdateUploadRequestModel;
 import net.krusher.datalinks.web.model.UploadResponse;
+import org.jboss.resteasy.reactive.PartType;
 import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
@@ -50,9 +51,10 @@ import java.util.List;
 import static net.krusher.datalinks.web.common.ControllerUtil.AUTH_HEADER;
 import static net.krusher.datalinks.web.common.ControllerUtil.toLoginToken;
 
+import lombok.AllArgsConstructor;
 @Path("/file")
 @Produces(MediaType.APPLICATION_JSON)
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class UploadController {
 
     private final ObjectMapper objectMapper;
@@ -141,7 +143,7 @@ public class UploadController {
     public Response put(
             @HeaderParam(AUTH_HEADER) String userToken,
             @RestForm("upload") FileUpload upload,
-            @RestForm("description") @org.jboss.resteasy.reactive.PartType(MediaType.TEXT_PLAIN) String description,
+            @RestForm("description") @PartType(MediaType.TEXT_PLAIN) String description,
             @Context RoutingContext routingContext) throws IOException {
         if (upload == null || upload.fileName() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();

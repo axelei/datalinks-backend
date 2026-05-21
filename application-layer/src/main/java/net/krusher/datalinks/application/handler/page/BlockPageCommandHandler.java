@@ -11,8 +11,9 @@ import net.krusher.datalinks.domain.model.user.UserLevel;
 
 import static net.krusher.datalinks.application.handler.common.SlugifyProvider.SLUGIFY;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class BlockPageCommandHandler {
 
     private final PageService pageService;

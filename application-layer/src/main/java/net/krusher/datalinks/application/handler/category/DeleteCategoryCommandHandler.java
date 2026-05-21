@@ -11,8 +11,9 @@ import net.krusher.datalinks.application.handler.common.SlugifyProvider;
 
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class DeleteCategoryCommandHandler {
 
     private final CategoryService categoryService;

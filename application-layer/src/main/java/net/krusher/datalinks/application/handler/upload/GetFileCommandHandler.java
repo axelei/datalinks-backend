@@ -12,8 +12,9 @@ import java.util.Optional;
 
 import static net.krusher.datalinks.application.handler.common.SlugifyProvider.SLUGIFY;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class GetFileCommandHandler {
 
     private final UploadService uploadService;

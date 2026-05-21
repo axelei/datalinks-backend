@@ -14,9 +14,10 @@ import net.krusher.datalinks.application.handler.search.TitleSearchCommandHandle
 import net.krusher.datalinks.web.mapper.SearchPaginationCommandMapper;
 import net.krusher.datalinks.web.model.SearchPaginationModel;
 
+import lombok.AllArgsConstructor;
 @Path("/search")
 @Produces(MediaType.APPLICATION_JSON)
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class SearchController {
 
     private final TitleSearchCommandHandler titleSearchCommandHandler;

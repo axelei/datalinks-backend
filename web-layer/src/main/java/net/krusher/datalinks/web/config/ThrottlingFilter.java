@@ -3,6 +3,7 @@ package net.krusher.datalinks.web.config;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.BlockingBucket;
 import io.github.bucket4j.Bucket;
+import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -35,7 +36,7 @@ public class ThrottlingFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         String clientIp = Optional.ofNullable(routingContext)
                 .map(rc -> rc.request().remoteAddress())
-                .map(addr -> addr.host())
+                .map(SocketAddress::host)
                 .orElse("unknown");
         Bucket bucket = buckets.computeIfAbsent(clientIp, k -> createNewBucket());
         BlockingBucket blockingBucket = bucket.asBlocking();

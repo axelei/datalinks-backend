@@ -16,8 +16,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Optional;
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
 @ApplicationScoped
-@lombok.AllArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class UserHelper {
 
     private final UserService userService;
