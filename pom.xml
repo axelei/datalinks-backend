@@ -50,6 +50,11 @@
                 <artifactId>quarkus-logging-json</artifactId>
                 <version>${quarkus.platform.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-jdbc-h2</artifactId>
+                <version>${quarkus.platform.version}</version>
+            </dependency>
 
             <!-- internal -->
             <dependency>
@@ -133,11 +138,6 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>1.22.0</version>
-            </dependency>
-            <dependency>
-                <groupId>io.quarkus</groupId>
-                <artifactId>quarkus-jdbc-h2</artifactId>
-                <version>${quarkus.platform.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

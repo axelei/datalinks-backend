@@ -55,6 +55,7 @@ public class PageService {
                 .firstResultOptional()
                 .map(pageEntity -> {
                     Page page = pageMapper.toModel(pageEntity);
+                    page.setCreator(userMapper.toModel(pageEntity.getCreator()));
                     page.setCategories(pageEntity.getCategories().stream().map(categoryMapper::toModel).collect(Collectors.toSet()));
                     return page;
                 });
@@ -68,10 +69,11 @@ public class PageService {
 
     public void save(Page page, User user, String ip) {
         PageEntity pageEntity = pageMapper.toEntity(page);
-        pageEntity.setCreator(userMapper.toEntity(user));
+        UserEntity userEntity = entityManager.merge(userMapper.toEntity(user));
+        pageEntity.setCreator(userEntity);
         pageEntity.setCategories(page.getCategories().stream().map(categoryMapper::toEntity).collect(Collectors.toSet()));
         pageEntity = entityManager.merge(pageEntity);
-        processEdit(pageEntity, userMapper.toEntity(user), ip);
+        processEdit(pageEntity, pageEntity.getCreator(), ip);
         processUploadUsage(pageEntity);
         searchService.indexPage(pageEntity);
     }
@@ -79,10 +81,12 @@ public class PageService {
     public void updateOrCreate(Page page, User user, String ip) {
         findBySlug(page.getSlug()).ifPresentOrElse(existing -> {
             PageEntity pageEntity = pageMapper.toEntity(existing);
+            pageEntity.setTitle(page.getTitle());
             pageEntity.setContent(page.getContent());
             pageEntity.setCategories(page.getCategories().stream().map(categoryMapper::toEntity).collect(Collectors.toSet()));
             pageEntity = entityManager.merge(pageEntity);
-            processEdit(pageEntity, userMapper.toEntity(user), ip);
+            UserEntity userEntity = user != null ? entityManager.merge(userMapper.toEntity(user)) : null;
+            processEdit(pageEntity, userEntity, ip);
             processUploadUsage(pageEntity);
             searchService.indexPage(pageEntity);
         }, () -> save(page, user, ip));
@@ -212,13 +216,10 @@ public class PageService {
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
 
         Root<EditEntity> editRoot = cq.from(EditEntity.class);
-        Root<PageEntity> pageRoot = cq.from(PageEntity.class);
+        Join<EditEntity, PageEntity> pageJoin = editRoot.join("page", JoinType.LEFT);
 
-        cq.select(cb.array(editRoot, pageRoot))
-                .where(cb.and(
-                        cb.equal(editRoot.get("page"), pageRoot),
-                        cb.equal(editRoot.get("user"), userMapper.toEntity(user))
-                ));
+        cq.select(cb.array(editRoot, pageJoin))
+                .where(cb.equal(editRoot.get("user").get("username"), user.getUsername()));
 
         cq.orderBy(cb.desc(editRoot.get("date")));
         TypedQuery<Object[]> query = entityManager.createQuery(cq);

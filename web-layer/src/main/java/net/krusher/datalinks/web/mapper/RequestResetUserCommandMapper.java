@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import net.krusher.datalinks.application.handler.user.RequestResetUserCommand;
 import net.krusher.datalinks.web.model.PasswordResetRequestModel;
 
-@Mapper(componentModel = "jsr330")
+@Mapper(componentModel = "jakarta-cdi")
 public interface RequestResetUserCommandMapper {
     RequestResetUserCommand toCommand(PasswordResetRequestModel model);
 }
