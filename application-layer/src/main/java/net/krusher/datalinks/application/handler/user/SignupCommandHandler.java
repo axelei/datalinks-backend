@@ -12,9 +12,8 @@ import net.krusher.datalinks.domain.exception.ErrorType;
 import net.krusher.datalinks.application.mapper.SignupMapper;
 import net.krusher.datalinks.domain.model.user.User;
 import net.krusher.datalinks.domain.model.user.UserLevel;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Map;
 import java.util.Optional;
@@ -39,9 +38,9 @@ public class SignupCommandHandler {
 
         User user = signupMapper.toModel(signupCommand);
         userHelper.sanitize(user);
-        String salt = RandomStringUtils.secure().nextAlphanumeric(8);
+        String salt = BCrypt.gensalt(12);
         user.setSalt(salt);
-        user.setPassword(DigestUtils.sha256Hex(salt + signupCommand.getPassword()));
+        user.setPassword(BCrypt.hashpw(signupCommand.getPassword(), salt));
         user.setLevel(UserLevel.USER);
         user.setActivationToken(UUID.randomUUID());
 

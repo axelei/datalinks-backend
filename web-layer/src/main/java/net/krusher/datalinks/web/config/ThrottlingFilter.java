@@ -68,9 +68,10 @@ public class ThrottlingFilter implements ContainerRequestFilter {
             blockingBucket.consume(1);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            requestContext.abortWith(Response.status(Response.Status.TOO_MANY_REQUESTS)
-                    .entity("Too many requests")
+            requestContext.abortWith(Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                    .entity("Service temporarily unavailable")
                     .build());
+            return;
         }
     }
 }

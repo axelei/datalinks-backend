@@ -73,7 +73,7 @@ public class UploadController {
     @Path("/lookAt/{filename}")
     public Response lookAt(@PathParam("filename") String filename, @HeaderParam(AUTH_HEADER) String userToken) {
         Upload upload = getFileCommandHandler.handler(GetFileCommand.builder()
-                .filename(filename)
+                .filename(sanitizeFilename(filename))
                 .loginTokenId(toLoginToken(userToken))
                 .build());
         upload.setInputStream(null);
@@ -86,7 +86,7 @@ public class UploadController {
 
         Upload upload = Try.of(() -> getFileCommandHandler.handler(
                         GetFileCommand.builder()
-                                .filename(filename)
+                                .filename(sanitizeFilename(filename))
                                 .loginTokenId(toLoginToken(userToken))
                                 .build()))
                 .recover(EngineException.class, e -> {
@@ -95,6 +95,7 @@ public class UploadController {
                     }
                     throw e;
                 })
+                .recover(Throwable.class, e -> null)
                 .get();
 
         if (upload == null) {
@@ -126,7 +127,7 @@ public class UploadController {
     @Path("/delete/{filename}")
     public Response delete(@PathParam("filename") String title, @HeaderParam(AUTH_HEADER) String userToken) {
         deleteUploadCommandHandler.handler(DeleteUploadCommand.builder()
-                .filename(title)
+                .filename(sanitizeFilename(title))
                 .loginToken(toLoginToken(userToken))
                 .build());
         return Response.ok("OK").build();
@@ -175,6 +176,13 @@ public class UploadController {
         }
     }
 
+    private String sanitizeFilename(String filename) {
+        if (filename == null) {
+            return null;
+        }
+        return java.nio.file.Path.of(filename).getFileName().toString();
+    }
+
     @PUT
     @Path("/update")
     @Consumes(MediaType.WILDCARD)
@@ -207,6 +215,6 @@ public class UploadController {
     @GET
     @Path("usages/{filename}")
     public Response usages(@PathParam("filename") String filename) {
-        return Response.ok(findUsagesCommandHandler.handler(filename)).build();
+        return Response.ok(findUsagesCommandHandler.handler(sanitizeFilename(filename))).build();
     }
 }

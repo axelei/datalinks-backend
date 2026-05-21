@@ -8,9 +8,10 @@ import net.krusher.datalinks.engineering.model.domain.user.UserService;
 import net.krusher.datalinks.domain.model.user.LoginToken;
 import net.krusher.datalinks.domain.model.user.User;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.mindrot.jbcrypt.BCrypt;
 
-import java.util.Objects;
 import java.util.Optional;
+import java.security.MessageDigest;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -25,14 +26,24 @@ public class LoginCommandHandler {
     @Transactional
     public Optional<LoginToken> handler(LoginCommand loginCommand) {
         Optional<User> user = userService.getByUsername(loginCommand.getUsername());
-        if (user.isPresent() && user.get().getPassword().equals(DigestUtils.sha256Hex(user.get().getSalt() + loginCommand.getPassword())) && Objects.isNull(user.get().getActivationToken())) {
-            LoginToken loginToken = LoginToken.builder()
-                    .userId(user.get().getId())
-                    .loginToken(UUID.randomUUID())
-                    .build();
-            loginTokenService.saveToken(loginToken);
-            return Optional.of(loginToken);
+        return user.filter(u -> u.getActivationToken() == null)
+                .filter(u -> isPasswordValid(u, loginCommand.getPassword()))
+                .map(u -> {
+                    LoginToken loginToken = LoginToken.builder()
+                            .userId(u.getId())
+                            .loginToken(UUID.randomUUID())
+                            .build();
+                    loginTokenService.saveToken(loginToken);
+                    return loginToken;
+                });
+    }
+
+    private boolean isPasswordValid(User user, String rawPassword) {
+        String stored = user.getPassword();
+        if (stored.startsWith("$2a$") || stored.startsWith("$2b$") || stored.startsWith("$2y$")) {
+            return BCrypt.checkpw(rawPassword, stored);
         }
-        return Optional.empty();
+        String shaHash = DigestUtils.sha256Hex(user.getSalt() + rawPassword);
+        return MessageDigest.isEqual(stored.getBytes(), shaHash.getBytes());
     }
 }

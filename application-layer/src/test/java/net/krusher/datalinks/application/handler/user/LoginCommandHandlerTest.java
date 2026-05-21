@@ -9,6 +9,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -26,7 +27,9 @@ class LoginCommandHandlerTest {
 
     @Test
     void successfulLoginReturnsToken() {
-        User user = User.builder().username("u").salt("s").password(DigestUtils.sha256Hex("s" + "pass")).level(UserLevel.USER).id(UUID.randomUUID()).build();
+        String salt = BCrypt.gensalt(12);
+        String hashedPassword = BCrypt.hashpw("pass", salt);
+        User user = User.builder().username("u").salt(salt).password(hashedPassword).level(UserLevel.USER).id(UUID.randomUUID()).build();
 
         UserService userService = Mockito.mock(UserService.class);
         when(userService.getByUsername("u")).thenReturn(Optional.of(user));
@@ -40,6 +43,25 @@ class LoginCommandHandlerTest {
         assertTrue(res.isPresent());
         verify(loginTokenService).saveToken(any());
         assertEquals(user.getId(), captor.getValue().getUserId());
+    }
+
+    @Test
+    void successfulLoginWithLegacySha256Password() {
+        String salt = "s";
+        String hashedPassword = DigestUtils.sha256Hex(salt + "pass");
+        User user = User.builder().username("u").salt(salt).password(hashedPassword).level(UserLevel.USER).id(UUID.randomUUID()).build();
+
+        UserService userService = Mockito.mock(UserService.class);
+        when(userService.getByUsername("u")).thenReturn(Optional.of(user));
+
+        LoginTokenService loginTokenService = Mockito.mock(LoginTokenService.class);
+        ArgumentCaptor<LoginToken> captor = ArgumentCaptor.forClass(LoginToken.class);
+        doNothing().when(loginTokenService).saveToken(captor.capture());
+
+        LoginCommandHandler handler = new LoginCommandHandler(userService, loginTokenService);
+        Optional<LoginToken> res = handler.handler(LoginCommand.builder().username("u").password("pass").build());
+        assertTrue(res.isPresent());
+        verify(loginTokenService).saveToken(any());
     }
 
     @Test

@@ -87,8 +87,9 @@ public class PageController {
                         .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build()))
                 .recover(EngineException.class, e ->
                         e.getErrorType().equals(ErrorType.PERMISSIONS_ERROR)
-                                ? Response.status(403).build()
-                                : Response.status(500).build())
+                                ? Response.status(Response.Status.FORBIDDEN).build()
+                                : Response.status(Response.Status.INTERNAL_SERVER_ERROR).build())
+                .recover(Throwable.class, e -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal error").build())
                 .get();
     }
 
@@ -105,8 +106,9 @@ public class PageController {
                         .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build()))
                 .recover(EngineException.class, e ->
                         e.getErrorType().equals(ErrorType.PERMISSIONS_ERROR)
-                                ? Response.status(403).build()
-                                : Response.status(500).build())
+                                ? Response.status(Response.Status.FORBIDDEN).build()
+                                : Response.status(Response.Status.INTERNAL_SERVER_ERROR).build())
+                .recover(Throwable.class, e -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal error").build())
                 .get();
     }
 

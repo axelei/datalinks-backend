@@ -46,9 +46,9 @@ public class UserEntity implements Foundable {
     @ColumnDefault("'en-GB'")
     private String language;
 
-    @Column(columnDefinition = "CHAR(64)")
+    @Column(columnDefinition = "VARCHAR(64)")
     private String password;
-    @Column(columnDefinition = "CHAR(8)")
+    @Column(columnDefinition = "VARCHAR(29)")
     private String salt;
     private UUID activationToken;
 

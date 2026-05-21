@@ -84,6 +84,7 @@ public class UserController {
         return Try.run(() -> activateUserCommandHandler.handler(UUID.fromString(token)))
                 .map(e -> Response.ok("OK").build())
                 .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity("Request failed").build())
+                .recover(Throwable.class, e -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal error").build())
                 .get();
     }
 
@@ -93,6 +94,7 @@ public class UserController {
         return Try.run(() -> resetPasswordCommandHandler.handler(UUID.fromString(token)))
                 .map(e -> Response.ok("OK").build())
                 .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity("Request failed").build())
+                .recover(Throwable.class, e -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal error").build())
                 .get();
     }
 
@@ -106,6 +108,7 @@ public class UserController {
                 .build()))
                 .map(e -> Response.ok("OK").build())
                 .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity("Request failed").build())
+                .recover(Throwable.class, e -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal error").build())
                 .get();
     }
 
@@ -120,6 +123,7 @@ public class UserController {
         return Try.run(() -> requestResetUserCommandHandler.handler(requestResetUserCommandMapper.toCommand(passwordResetRequestModel)))
                 .map(_ -> Response.ok("OK").build())
                 .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity("Request failed").build())
+                .recover(Throwable.class, e -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal error").build())
                 .get();
     }
 
@@ -144,6 +148,7 @@ public class UserController {
         return Try.run(() -> signupCommandHandler.handle(signupCommandMapper.toCommand(signupModel)))
                 .map(e -> Response.ok("OK").build())
                 .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity("Request failed").build())
+                .recover(Throwable.class, e -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal error").build())
                 .get();
     }
 }
