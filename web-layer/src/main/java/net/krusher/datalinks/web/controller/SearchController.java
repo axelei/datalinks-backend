@@ -9,9 +9,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import net.krusher.datalinks.application.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.application.handler.search.SearchCommandHandler;
 import net.krusher.datalinks.application.handler.search.TitleSearchCommandHandler;
+import net.krusher.datalinks.web.mapper.SearchPaginationCommandMapper;
+import net.krusher.datalinks.web.model.SearchPaginationModel;
 
 @Path("/search")
 @Produces(MediaType.APPLICATION_JSON)
@@ -20,6 +21,7 @@ public class SearchController {
 
     private final TitleSearchCommandHandler titleSearchCommandHandler;
     private final SearchCommandHandler searchCommandHandler;
+    private final SearchPaginationCommandMapper searchPaginationCommandMapper;
 
 
     @GET
@@ -33,10 +35,7 @@ public class SearchController {
     public Response search(@PathParam("query") String query,
                            @QueryParam("page") @DefaultValue("0") int page,
                            @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
-        return Response.ok(searchCommandHandler.handler(SearchPaginationCommand.builder()
-                .query(query)
-                .page(page)
-                .pageSize(pageSize)
-                .build())).build();
+        SearchPaginationModel spm = SearchPaginationModel.builder().query(query).page(page).pageSize(pageSize).build();
+        return Response.ok(searchCommandHandler.handler(searchPaginationCommandMapper.toCommand(spm))).build();
     }
 }

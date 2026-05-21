@@ -19,8 +19,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import net.krusher.datalinks.application.handler.common.PaginationCommand;
-import net.krusher.datalinks.application.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.application.handler.page.BlockPageCommand;
 import net.krusher.datalinks.application.handler.page.BlockPageCommandHandler;
 import net.krusher.datalinks.application.handler.page.DeletePageCommand;
@@ -33,14 +31,18 @@ import net.krusher.datalinks.application.handler.page.GetPageShortCommandHandler
 import net.krusher.datalinks.application.handler.page.GetRandomPageCommandHandler;
 import net.krusher.datalinks.application.handler.page.NewPagesCommandHandler;
 import net.krusher.datalinks.application.handler.page.PageEditsCommandHandler;
-import net.krusher.datalinks.application.handler.page.PostPageCommand;
 import net.krusher.datalinks.application.handler.page.PostPageCommandHandler;
 import net.krusher.datalinks.application.handler.page.RecentChangesCommandHandler;
 import net.krusher.datalinks.domain.exception.EngineException;
 import net.krusher.datalinks.domain.exception.ErrorType;
 import net.krusher.datalinks.domain.model.page.Edit;
+import net.krusher.datalinks.web.mapper.PaginationCommandMapper;
+import net.krusher.datalinks.web.mapper.PostPageCommandMapper;
+import net.krusher.datalinks.web.mapper.SearchPaginationCommandMapper;
 import net.krusher.datalinks.web.model.PaginationModel;
 import net.krusher.datalinks.web.model.PostPageModel;
+import net.krusher.datalinks.web.model.PostPageRequestModel;
+import net.krusher.datalinks.web.model.SearchPaginationModel;
 
 import java.util.List;
 import java.util.UUID;
@@ -57,12 +59,15 @@ public class PageController {
     private final GetPageCommandHandler getPageCommandHandler;
     private final GetPageShortCommandHandler getPageShortCommandHandler;
     private final PostPageCommandHandler postPageCommandHandler;
+    private final PostPageCommandMapper postPageCommandMapper;
     private final NewPagesCommandHandler newPagesCommandHandler;
     private final RecentChangesCommandHandler recentChangesCommandHandler;
     private final GetRandomPageCommandHandler getRandomPageCommandHandler;
     private final DeletePageCommandHandler deletePageCommandHandler;
     private final GetContributionsCommandHandler getContributionsCommandHandler;
     private final PageEditsCommandHandler pageEditsCommandHandler;
+    private final SearchPaginationCommandMapper searchPaginationCommandMapper;
+    private final PaginationCommandMapper paginationCommandMapper;
     private final GetEditCommandHandler getEditCommandHandler;
     private final BlockPageCommandHandler blockPageCommandHandler;
     private final ObjectMapper objectMapper;
@@ -116,11 +121,8 @@ public class PageController {
     public Response edits(@PathParam("title") String title,
                           @QueryParam("page") @DefaultValue("0") int page,
                           @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
-        List<Edit> result = pageEditsCommandHandler.handler(SearchPaginationCommand.builder()
-                .query(title)
-                .page(page)
-                .pageSize(pageSize)
-                .build());
+        SearchPaginationModel spm = SearchPaginationModel.builder().query(title).page(page).pageSize(pageSize).build();
+        List<Edit> result = pageEditsCommandHandler.handler(searchPaginationCommandMapper.toCommand(spm));
         return Response.ok(result).build();
     }
 
@@ -137,11 +139,8 @@ public class PageController {
     public Response contributions(@PathParam("username") String username,
                                   @QueryParam("page") @DefaultValue("0") int page,
                                   @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
-        return Response.ok(getContributionsCommandHandler.handler(SearchPaginationCommand.builder()
-                .query(username)
-                .page(page)
-                .pageSize(pageSize)
-                .build())).build();
+        SearchPaginationModel spm2 = SearchPaginationModel.builder().query(username).page(page).pageSize(pageSize).build();
+        return Response.ok(getContributionsCommandHandler.handler(searchPaginationCommandMapper.toCommand(spm2))).build();
     }
 
     @DELETE
@@ -178,13 +177,14 @@ public class PageController {
                     @HeaderParam(AUTH_HEADER) String userToken,
                     @Context RoutingContext routingContext) throws JsonProcessingException {
         PostPageModel postPageModel = objectMapper.readValue(body, PostPageModel.class);
-        postPageCommandHandler.handler(PostPageCommand.builder()
+        PostPageRequestModel req = PostPageRequestModel.builder()
                 .title(title)
                 .content(postPageModel.getContent())
                 .categories(postPageModel.getCategories())
                 .loginTokenId(toLoginToken(userToken))
                 .ip(remoteAddr(routingContext))
-                .build());
+                .build();
+        postPageCommandHandler.handler(postPageCommandMapper.toCommand(req));
     }
 
     @POST
@@ -192,10 +192,7 @@ public class PageController {
     @Consumes(MediaType.WILDCARD)
     public Response newPages(String body) throws JsonProcessingException {
         PaginationModel paginationModel = objectMapper.readValue(body, PaginationModel.class);
-        return Response.ok(newPagesCommandHandler.handler(PaginationCommand.builder()
-                .page(paginationModel.getPage())
-                .pageSize(paginationModel.getPageSize())
-                .build())).build();
+        return Response.ok(newPagesCommandHandler.handler(paginationCommandMapper.toCommand(paginationModel))).build();
     }
 
     @POST
@@ -203,10 +200,7 @@ public class PageController {
     @Consumes(MediaType.WILDCARD)
     public Response recentChanges(String body) throws JsonProcessingException {
         PaginationModel paginationModel = objectMapper.readValue(body, PaginationModel.class);
-        return Response.ok(recentChangesCommandHandler.handler(PaginationCommand.builder()
-                .page(paginationModel.getPage())
-                .pageSize(paginationModel.getPageSize())
-                .build())).build();
+        return Response.ok(recentChangesCommandHandler.handler(paginationCommandMapper.toCommand(paginationModel))).build();
     }
 
     @GET

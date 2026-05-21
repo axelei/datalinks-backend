@@ -16,8 +16,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.AllArgsConstructor;
-import net.krusher.datalinks.web.common.CaptchaHelper;
-import net.krusher.datalinks.domain.exception.EngineException;
 import net.krusher.datalinks.application.handler.user.ActivateUserCommandHandler;
 import net.krusher.datalinks.application.handler.user.ChangePasswordCommand;
 import net.krusher.datalinks.application.handler.user.ChangePasswordCommandHandler;
@@ -25,17 +23,19 @@ import net.krusher.datalinks.application.handler.user.GetUserByLoginTokenCommand
 import net.krusher.datalinks.application.handler.user.GetUserByLoginTokenCommandHandler;
 import net.krusher.datalinks.application.handler.user.GetUserCommand;
 import net.krusher.datalinks.application.handler.user.GetUserCommandHandler;
-import net.krusher.datalinks.application.handler.user.LoginCommand;
 import net.krusher.datalinks.application.handler.user.LoginCommandHandler;
-import net.krusher.datalinks.application.handler.user.RequestResetUserCommand;
 import net.krusher.datalinks.application.handler.user.RequestResetUserCommandHandler;
 import net.krusher.datalinks.application.handler.user.ResetPasswordCommandHandler;
 import net.krusher.datalinks.application.handler.user.SignupCommandHandler;
+import net.krusher.datalinks.domain.exception.EngineException;
+import net.krusher.datalinks.domain.model.user.LoginToken;
+import net.krusher.datalinks.web.common.CaptchaHelper;
+import net.krusher.datalinks.web.mapper.LoginCommandMapper;
+import net.krusher.datalinks.web.mapper.RequestResetUserCommandMapper;
 import net.krusher.datalinks.web.mapper.SignupCommandMapper;
 import net.krusher.datalinks.web.model.LoginModel;
 import net.krusher.datalinks.web.model.PasswordResetRequestModel;
 import net.krusher.datalinks.web.model.SignupModel;
-import net.krusher.datalinks.domain.model.user.LoginToken;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -53,6 +53,8 @@ public class UserController {
     private final LoginCommandHandler loginCommandHandler;
     private final SignupCommandHandler signupCommandHandler;
     private final SignupCommandMapper signupCommandMapper;
+    private final LoginCommandMapper loginCommandMapper;
+    private final RequestResetUserCommandMapper requestResetUserCommandMapper;
     private final ObjectMapper objectMapper;
     private final CaptchaHelper captchaHelper;
     private final ActivateUserCommandHandler activateUserCommandHandler;
@@ -122,10 +124,7 @@ public class UserController {
         if (!captchaHelper.checkCaptcha(passwordResetRequestModel.getCaptcha(), remoteAddr(routingContext))) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Captcha is invalid").build();
         }
-        return Try.run(() -> requestResetUserCommandHandler.handler(
-                        RequestResetUserCommand.builder()
-                                .username(passwordResetRequestModel.getUsername())
-                                .email(passwordResetRequestModel.getEmail()).build()))
+        return Try.run(() -> requestResetUserCommandHandler.handler(requestResetUserCommandMapper.toCommand(passwordResetRequestModel)))
                 .map(_ -> Response.ok("OK").build())
                 .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity(e.getErrorType().name()).build())
                 .get();
@@ -136,10 +135,7 @@ public class UserController {
     @Consumes(MediaType.WILDCARD)
     public Response login(String body) throws JsonProcessingException {
         LoginModel loginModel = objectMapper.readValue(body, LoginModel.class);
-        Optional<LoginToken> loginToken = loginCommandHandler.handler(LoginCommand.builder()
-                .username(loginModel.getUsername())
-                .password(loginModel.getPassword())
-                .build());
+        Optional<LoginToken> loginToken = loginCommandHandler.handler(loginCommandMapper.toCommand(loginModel));
         return loginToken.map(token -> Response.ok(token.getLoginToken()).build())
                 .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
     }

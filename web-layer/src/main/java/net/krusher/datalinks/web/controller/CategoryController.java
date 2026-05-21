@@ -19,10 +19,12 @@ import net.krusher.datalinks.application.handler.category.FindCategoriesCommandH
 import net.krusher.datalinks.application.handler.category.FindCategoryPagesCommandHandler;
 import net.krusher.datalinks.application.handler.category.GetCategoriesCommandHandler;
 import net.krusher.datalinks.application.handler.category.GetCategoryCommandHandler;
-import net.krusher.datalinks.application.handler.common.PaginationCommand;
-import net.krusher.datalinks.application.handler.common.SearchPaginationCommand;
 import net.krusher.datalinks.domain.model.page.Category;
 import net.krusher.datalinks.domain.model.page.PageShort;
+import net.krusher.datalinks.web.mapper.PaginationCommandMapper;
+import net.krusher.datalinks.web.mapper.SearchPaginationCommandMapper;
+import net.krusher.datalinks.web.model.PaginationModel;
+import net.krusher.datalinks.web.model.SearchPaginationModel;
 
 import java.util.List;
 
@@ -41,16 +43,18 @@ public class CategoryController {
     private final GetCategoryCommandHandler getCategoryCommandHandler;
     private final FindCategoriesCommandHandler findCategoriesCommandHandler;
     private final FindCategoryPagesCommandHandler findCategoryPagesCommandHandler;
+    private final PaginationCommandMapper paginationCommandMapper;
+    private final SearchPaginationCommandMapper searchPaginationCommandMapper;
 
 
     @GET
     @Path("all")
     public Response getAll(@QueryParam("page") @DefaultValue("0") int page,
                            @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
-        List<Category> categories = getCategoriesCommandHandler.handler(PaginationCommand.builder()
-                .page(page)
-                .pageSize(pageSize)
-                .build());
+        PaginationModel paginationModel = new PaginationModel();
+        paginationModel.setPage(page);
+        paginationModel.setPageSize(pageSize);
+        List<Category> categories = getCategoriesCommandHandler.handler(paginationCommandMapper.toCommand(paginationModel));
         return Response.ok(categories).build();
     }
 
@@ -90,11 +94,8 @@ public class CategoryController {
     public Response findPages(@PathParam("query") String query,
                               @QueryParam("page") @DefaultValue("0") int page,
                               @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
-        List<PageShort> pages = findCategoryPagesCommandHandler.handler(SearchPaginationCommand.builder()
-                .query(query)
-                .page(page)
-                .pageSize(pageSize)
-                .build());
+        SearchPaginationModel spm = SearchPaginationModel.builder().query(query).page(page).pageSize(pageSize).build();
+        List<PageShort> pages = findCategoryPagesCommandHandler.handler(searchPaginationCommandMapper.toCommand(spm));
         return Response.ok(pages).build();
     }
 }

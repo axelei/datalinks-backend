@@ -19,8 +19,6 @@ import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import net.krusher.datalinks.domain.exception.EngineException;
-import net.krusher.datalinks.domain.exception.ErrorType;
 import net.krusher.datalinks.application.handler.common.PaginationCommand;
 import net.krusher.datalinks.application.handler.upload.DeleteUploadCommand;
 import net.krusher.datalinks.application.handler.upload.DeleteUploadCommandHandler;
@@ -28,15 +26,18 @@ import net.krusher.datalinks.application.handler.upload.FindUsagesCommandHandler
 import net.krusher.datalinks.application.handler.upload.GetFileCommand;
 import net.krusher.datalinks.application.handler.upload.GetFileCommandHandler;
 import net.krusher.datalinks.application.handler.upload.NewUploadsCommandHandler;
-import net.krusher.datalinks.application.handler.upload.UpdateUploadCommand;
 import net.krusher.datalinks.application.handler.upload.UpdateUploadCommandHandler;
 import net.krusher.datalinks.application.handler.upload.UploadCommand;
 import net.krusher.datalinks.application.handler.upload.UploadCommandHandler;
+import net.krusher.datalinks.domain.exception.EngineException;
+import net.krusher.datalinks.domain.exception.ErrorType;
+import net.krusher.datalinks.domain.model.upload.Upload;
+import net.krusher.datalinks.web.mapper.UpdateUploadCommandMapper;
 import net.krusher.datalinks.web.model.FileTypes;
 import net.krusher.datalinks.web.model.PaginationModel;
 import net.krusher.datalinks.web.model.UpdateUploadModel;
+import net.krusher.datalinks.web.model.UpdateUploadRequestModel;
 import net.krusher.datalinks.web.model.UploadResponse;
-import net.krusher.datalinks.domain.model.upload.Upload;
 import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
@@ -61,6 +62,7 @@ public class UploadController {
     private final NewUploadsCommandHandler newUploadsCommandHandler;
     private final FindUsagesCommandHandler findUsagesCommandHandler;
     private final DeleteUploadCommandHandler deleteUploadCommandHandler;
+    private final UpdateUploadCommandMapper updateUploadCommandMapper;
 
 
     private static String remoteAddr(RoutingContext rc) {
@@ -105,7 +107,7 @@ public class UploadController {
         InputStream inputStream = Option.of(upload.getInputStream())
                 .getOrElse(() -> getClass().getResourceAsStream("/image-not-found-icon.svg"));
         MediaType mediaType = Option.of(upload.getInputStream())
-                .map(__ -> getMediaType(upload.getFilename()))
+                .map(_ -> getMediaType(upload.getFilename()))
                 .getOrElse(FileTypes.SVG.getMediaType());
 
         CacheControl cc = new CacheControl();
@@ -168,12 +170,13 @@ public class UploadController {
                            String body,
                            @Context RoutingContext routingContext) throws JsonProcessingException {
         UpdateUploadModel paginationModel = objectMapper.readValue(body, UpdateUploadModel.class);
-        updateUploadCommandHandler.handler(UpdateUploadCommand.builder()
-                .loginToken(toLoginToken(userToken))
-                .description(paginationModel.getDescription())
+        UpdateUploadRequestModel req = UpdateUploadRequestModel.builder()
                 .filename(paginationModel.getFilename())
+                .description(paginationModel.getDescription())
+                .loginToken(toLoginToken(userToken))
                 .ip(remoteAddr(routingContext))
-                .build());
+                .build();
+        updateUploadCommandHandler.handler(updateUploadCommandMapper.toCommand(req));
         return Response.ok("ok").build();
     }
 
