@@ -31,7 +31,7 @@ public class User {
     @JsonIgnore private String salt;
     @JsonIgnore private UUID activationToken;
 
-    public String useName() {
+    public String displayName() {
         return Optional.ofNullable(name).orElse(username);
     }
 

@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static net.krusher.datalinks.web.common.ControllerUtil.AUTH_HEADER;
+import static net.krusher.datalinks.web.common.ControllerUtil.remoteAddr;
 import static net.krusher.datalinks.web.common.ControllerUtil.toLoginToken;
 
 import lombok.AllArgsConstructor;
@@ -72,14 +73,6 @@ public class PageController {
     private final GetEditCommandHandler getEditCommandHandler;
     private final BlockPageCommandHandler blockPageCommandHandler;
     private final ObjectMapper objectMapper;
-
-
-    private static String remoteAddr(RoutingContext rc) {
-        if (rc == null || rc.request().remoteAddress() == null) {
-            return null;
-        }
-        return rc.request().remoteAddress().host();
-    }
 
     @GET
     @Path("{title}")
@@ -147,11 +140,12 @@ public class PageController {
     @DELETE
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("{title}")
-    public void delete(@PathParam("title") String title, @HeaderParam(AUTH_HEADER) String userToken) {
+    public Response delete(@PathParam("title") String title, @HeaderParam(AUTH_HEADER) String userToken) {
         deletePageCommandHandler.handler(DeletePageCommand.builder()
                 .title(title)
                 .loginTokenId(toLoginToken(userToken))
                 .build());
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     @POST
@@ -173,7 +167,7 @@ public class PageController {
     @PUT
     @Path("{title}")
     @Consumes(MediaType.WILDCARD)
-    public void put(@PathParam("title") String title,
+    public Response put(@PathParam("title") String title,
                     String body,
                     @HeaderParam(AUTH_HEADER) String userToken,
                     @Context RoutingContext routingContext) throws JsonProcessingException {
@@ -186,6 +180,7 @@ public class PageController {
                 .ip(remoteAddr(routingContext))
                 .build();
         postPageCommandHandler.handler(postPageCommandMapper.toCommand(req));
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     @POST

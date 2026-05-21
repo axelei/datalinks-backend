@@ -17,7 +17,7 @@ class UserTest {
                 .creationDate(Instant.now())
                 .build();
 
-        assertEquals("John", u.useName());
+        assertEquals("John", u.displayName());
     }
 
     @Test
@@ -25,6 +25,6 @@ class UserTest {
         User u = User.builder()
                 .username("jdoe")
                 .build();
-        assertEquals("jdoe", u.useName());
+        assertEquals("jdoe", u.displayName());
     }
 }

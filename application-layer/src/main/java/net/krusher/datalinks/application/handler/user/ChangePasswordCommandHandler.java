@@ -37,7 +37,7 @@ public class ChangePasswordCommandHandler {
         user.get().setPassword(DigestUtils.sha256Hex(salt + changePasswordCommand.getPassword()));
         userService.save(user.get());
         emailService.sendPasswordChanged(user.get().getEmail(),
-                Map.of(PasswordChangeParams.NAME, user.get().useName()),
+                Map.of(PasswordChangeParams.NAME, user.get().displayName()),
                 user.get().getLanguage());
     }
 }

@@ -1,5 +1,6 @@
 package net.krusher.datalinks.web.common;
 
+import io.vertx.ext.web.RoutingContext;
 import io.vavr.control.Try;
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,5 +15,12 @@ public class ControllerUtil {
         }
         String token = bearerToken.replaceFirst("^Bearer ", StringUtils.EMPTY);
         return Try.of(() -> UUID.fromString(token)).getOrElse(() -> null);
+    }
+
+    public static String remoteAddr(RoutingContext rc) {
+        if (rc == null || rc.request().remoteAddress() == null) {
+            return null;
+        }
+        return rc.request().remoteAddress().host();
     }
 }

@@ -1,5 +1,6 @@
 package net.krusher.datalinks.engineering.model.domain.page;
 
+import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -27,6 +28,7 @@ import net.krusher.datalinks.engineering.model.domain.user.UserEntity;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,6 +50,8 @@ public class PageService {
     private final SearchService searchService;
 
     private static final Pattern UPLOAD_USAGE_PATTERN = Pattern.compile("/file/get/([^\"]*)\"");
+    private static final Set<String> ALLOWED_PAGE_COLUMNS = Set.of("creationDate", "modifiedDate", "title", "slug");
+    private static final Set<String> ALLOWED_EDIT_COLUMNS = Set.of("date", "ip");
 
 
     public Optional<Page> findBySlug(String slug) {
@@ -67,6 +71,7 @@ public class PageService {
                 .map(pageMapper::toModelShort);
     }
 
+    @CacheInvalidate(cacheName = "pageCount")
     public void save(Page page, User user, String ip) {
         PageEntity pageEntity = pageMapper.toEntity(page);
         UserEntity userEntity = entityManager.merge(userMapper.toEntity(user));
@@ -92,6 +97,7 @@ public class PageService {
         }, () -> save(page, user, ip));
     }
 
+    @CacheInvalidate(cacheName = "pageCount")
     public void delete(UUID pageId) {
         deleteEditsForPage(pageId);
         uploadService.deleteUsages(pageId);
@@ -107,6 +113,7 @@ public class PageService {
     }
 
     public List<PageShort> pagesSortBy(String column, int page, int pageSize) {
+        String safeColumn = ALLOWED_PAGE_COLUMNS.contains(column) ? column : "creationDate";
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
 
@@ -118,7 +125,7 @@ public class PageService {
                         cb.equal(pageRoot.get("creator"), userRoot)
                 ));
 
-        cq.orderBy(cb.desc(pageRoot.get(column)));
+        cq.orderBy(cb.desc(pageRoot.get(safeColumn)));
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
         List<Object[]> results = query
                 .setFirstResult(page * pageSize)
@@ -141,6 +148,7 @@ public class PageService {
     }
 
     public List<Edit> editsSortBy(String column, int page, int pageSize) {
+        String safeColumn = ALLOWED_EDIT_COLUMNS.contains(column) ? column : "date";
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
 
@@ -150,7 +158,7 @@ public class PageService {
         Join<EditEntity, PageEntity> pageJoin = editRoot.join("page", JoinType.LEFT);
 
         cq.select(cb.array(editRoot, userJoin, pageJoin));
-        cq.orderBy(cb.desc(editRoot.get(column)));
+        cq.orderBy(cb.desc(editRoot.get(safeColumn)));
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
         List<Object[]> results = query
                 .setFirstResult(page * pageSize)

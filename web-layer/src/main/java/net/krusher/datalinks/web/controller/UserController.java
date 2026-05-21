@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static net.krusher.datalinks.web.common.ControllerUtil.AUTH_HEADER;
+import static net.krusher.datalinks.web.common.ControllerUtil.remoteAddr;
 import static net.krusher.datalinks.web.common.ControllerUtil.toLoginToken;
 
 @Path("/user")
@@ -61,14 +62,6 @@ public class UserController {
     private final ResetPasswordCommandHandler resetPasswordCommandHandler;
     private final RequestResetUserCommandHandler requestResetUserCommandHandler;
     private final ChangePasswordCommandHandler changePasswordCommandHandler;
-
-    private static String remoteAddr(RoutingContext rc) {
-        if (rc == null || rc.request().remoteAddress() == null) {
-            return null;
-        }
-        return rc.request().remoteAddress().host();
-    }
-
     @GET
     @Path("{name}/get")
     public Response get(@PathParam("name") String name, @HeaderParam(AUTH_HEADER) String userToken) {
@@ -90,7 +83,7 @@ public class UserController {
     public Response activate(@PathParam("token") String token) {
         return Try.run(() -> activateUserCommandHandler.handler(UUID.fromString(token)))
                 .map(e -> Response.ok("OK").build())
-                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity(e.getErrorType().name()).build())
+                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity("Request failed").build())
                 .get();
     }
 
@@ -99,7 +92,7 @@ public class UserController {
     public Response reset(@PathParam("token") String token) {
         return Try.run(() -> resetPasswordCommandHandler.handler(UUID.fromString(token)))
                 .map(e -> Response.ok("OK").build())
-                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity(e.getErrorType().name()).build())
+                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity("Request failed").build())
                 .get();
     }
 
@@ -112,7 +105,7 @@ public class UserController {
                 .loginToken(toLoginToken(userToken))
                 .build()))
                 .map(e -> Response.ok("OK").build())
-                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity(e.getErrorType().name()).build())
+                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity("Request failed").build())
                 .get();
     }
 
@@ -126,7 +119,7 @@ public class UserController {
         }
         return Try.run(() -> requestResetUserCommandHandler.handler(requestResetUserCommandMapper.toCommand(passwordResetRequestModel)))
                 .map(_ -> Response.ok("OK").build())
-                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity(e.getErrorType().name()).build())
+                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity("Request failed").build())
                 .get();
     }
 
@@ -150,7 +143,7 @@ public class UserController {
         }
         return Try.run(() -> signupCommandHandler.handle(signupCommandMapper.toCommand(signupModel)))
                 .map(e -> Response.ok("OK").build())
-                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity(e.getErrorType().name()).build())
+                .recover(EngineException.class, e -> Response.status(Response.Status.BAD_REQUEST).entity("Request failed").build())
                 .get();
     }
 }

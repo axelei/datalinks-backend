@@ -44,7 +44,7 @@ public class ResetPasswordCommandHandler {
         resetTokenService.deleteTokenById(resetTokenId);
 
         emailService.sendResetMessage(user.getEmail(), Map.of(
-                ResetParams.NAME, user.useName(),
+                ResetParams.NAME, user.displayName(),
                 ResetParams.NEW_PASSWORD, newPassword),
                 user.getLanguage());
 

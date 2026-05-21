@@ -32,6 +32,9 @@ import net.krusher.datalinks.application.handler.upload.UploadCommandHandler;
 import net.krusher.datalinks.domain.exception.EngineException;
 import net.krusher.datalinks.domain.exception.ErrorType;
 import net.krusher.datalinks.domain.model.upload.Upload;
+import net.krusher.datalinks.web.common.ControllerUtil;
+import net.krusher.datalinks.web.common.FileValidator;
+import net.krusher.datalinks.web.common.FileValidator.ValidationResult;
 import net.krusher.datalinks.web.mapper.UpdateUploadCommandMapper;
 import net.krusher.datalinks.web.model.FileTypes;
 import net.krusher.datalinks.web.model.PaginationModel;
@@ -45,10 +48,10 @@ import org.jboss.resteasy.reactive.multipart.FileUpload;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.List;
 
 import static net.krusher.datalinks.web.common.ControllerUtil.AUTH_HEADER;
+import static net.krusher.datalinks.web.common.ControllerUtil.remoteAddr;
 import static net.krusher.datalinks.web.common.ControllerUtil.toLoginToken;
 
 import lombok.AllArgsConstructor;
@@ -65,14 +68,6 @@ public class UploadController {
     private final FindUsagesCommandHandler findUsagesCommandHandler;
     private final DeleteUploadCommandHandler deleteUploadCommandHandler;
     private final UpdateUploadCommandMapper updateUploadCommandMapper;
-
-
-    private static String remoteAddr(RoutingContext rc) {
-        if (rc == null || rc.request().remoteAddress() == null) {
-            return null;
-        }
-        return rc.request().remoteAddress().host();
-    }
 
     @GET
     @Path("/lookAt/{filename}")
@@ -146,14 +141,20 @@ public class UploadController {
             @RestForm("description") @PartType(MediaType.TEXT_PLAIN) String description,
             @Context RoutingContext routingContext) throws IOException {
         if (upload == null || upload.fileName() == null) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("No file provided").build();
         }
         String fileName = upload.fileName();
         String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
-        if (Arrays.stream(FileTypes.values()).noneMatch(fileType -> fileType.name().equalsIgnoreCase(extension))) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+        if (!isValidExtension(extension)) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Unsupported file type").build();
         }
-        try (InputStream is = Files.newInputStream(upload.uploadedFile())) {
+
+        ValidationResult result = FileValidator.validateImage(upload.uploadedFile(), extension);
+        if (!result.valid()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(result.errorMessage()).build();
+        }
+
+        try (InputStream is = result.inputStream()) {
             String url = uploadCommandHandler.handler(UploadCommand.builder()
                     .inputStream(is)
                     .loginTokenId(toLoginToken(userToken))
@@ -162,6 +163,15 @@ public class UploadController {
                     .ip(remoteAddr(routingContext))
                     .build());
             return Response.ok(UploadResponse.builder().url(url).build()).build();
+        }
+    }
+
+    private boolean isValidExtension(String extension) {
+        try {
+            FileTypes.valueOf(extension.toUpperCase());
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 
