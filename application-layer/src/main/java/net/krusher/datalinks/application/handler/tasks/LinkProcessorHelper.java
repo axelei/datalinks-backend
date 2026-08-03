@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.Setter;
+import net.krusher.datalinks.application.handler.common.SlugifyProvider;
 import net.krusher.datalinks.domain.model.page.Page;
 import net.krusher.datalinks.engineering.model.domain.page.PageService;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -30,6 +31,22 @@ public class LinkProcessorHelper {
     @Inject
     public LinkProcessorHelper(PageService pageService) {
         this.pageService = pageService;
+    }
+
+    @Transactional
+    public void processLinkerForTitle(String title, List<String> titles) {
+        String slug = SlugifyProvider.SLUGIFY.slugify(title);
+        pageService.findBySlug(slug).ifPresent(page -> {
+            if (!page.getTitle().equals(title)) {
+                processLinkersPage(page, titles);
+            }
+        });
+    }
+
+    @Transactional
+    public void processUnlinkerForTitle(String title, List<String> titles) {
+        String slug = SlugifyProvider.SLUGIFY.slugify(title);
+        pageService.findBySlug(slug).ifPresent(page -> processUnlinkersPage(page, titles));
     }
 
     @Transactional
