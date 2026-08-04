@@ -74,8 +74,9 @@ public class PageService {
     @CacheInvalidate(cacheName = "pageCount")
     public void save(Page page, User user, String ip) {
         PageEntity pageEntity = pageMapper.toEntity(page);
-        UserEntity userEntity = entityManager.merge(userMapper.toEntity(user));
-        pageEntity.setCreator(userEntity);
+        if (user != null) {
+            pageEntity.setCreator(entityManager.merge(userMapper.toEntity(user)));
+        }
         pageEntity.setCategories(page.getCategories().stream().map(categoryMapper::toEntity).collect(Collectors.toSet()));
         pageEntity = entityManager.merge(pageEntity);
         processEdit(pageEntity, pageEntity.getCreator(), ip);
